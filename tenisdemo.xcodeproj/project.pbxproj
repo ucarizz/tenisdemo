@@ -1,0 +1,950 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		420CA223300D3B8600BCE5B3 /* tenisdemo Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		420CA20D300D3B8600BCE5B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 420CA1FE300D3B8500BCE5B3;
+			remoteInfo = tenisdemo;
+		};
+		420CA217300D3B8600BCE5B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 420CA1FE300D3B8500BCE5B3;
+			remoteInfo = tenisdemo;
+		};
+		420CA224300D3B8600BCE5B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 420CA221300D3B8600BCE5B3;
+			remoteInfo = "tenisdemo Watch App";
+		};
+		420CA232300D3B8700BCE5B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 420CA221300D3B8600BCE5B3;
+			remoteInfo = "tenisdemo Watch App";
+		};
+		420CA23C300D3B8700BCE5B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 420CA221300D3B8600BCE5B3;
+			remoteInfo = "tenisdemo Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		420CA248300D3B8700BCE5B3 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				420CA223300D3B8600BCE5B3 /* tenisdemo Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		420CA1FF300D3B8500BCE5B3 /* tenisdemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tenisdemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		420CA20C300D3B8600BCE5B3 /* tenisdemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tenisdemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		420CA216300D3B8600BCE5B3 /* tenisdemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tenisdemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "tenisdemo Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		420CA231300D3B8700BCE5B3 /* tenisdemo Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "tenisdemo Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		420CA23B300D3B8700BCE5B3 /* tenisdemo Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "tenisdemo Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		420CA201300D3B8500BCE5B3 /* tenisdemo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = tenisdemo;
+			sourceTree = "<group>";
+		};
+		420CA20F300D3B8600BCE5B3 /* tenisdemoTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = tenisdemoTests;
+			sourceTree = "<group>";
+		};
+		420CA219300D3B8600BCE5B3 /* tenisdemoUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = tenisdemoUITests;
+			sourceTree = "<group>";
+		};
+		420CA226300D3B8600BCE5B3 /* tenisdemo Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "tenisdemo Watch App";
+			sourceTree = "<group>";
+		};
+		420CA234300D3B8700BCE5B3 /* tenisdemo Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "tenisdemo Watch AppTests";
+			sourceTree = "<group>";
+		};
+		420CA23E300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "tenisdemo Watch AppUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		420CA1FC300D3B8500BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA209300D3B8600BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA213300D3B8600BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA21F300D3B8600BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA22E300D3B8700BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA238300D3B8700BCE5B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		420CA1F6300D3B8500BCE5B3 = {
+			isa = PBXGroup;
+			children = (
+				420CA201300D3B8500BCE5B3 /* tenisdemo */,
+				420CA20F300D3B8600BCE5B3 /* tenisdemoTests */,
+				420CA219300D3B8600BCE5B3 /* tenisdemoUITests */,
+				420CA226300D3B8600BCE5B3 /* tenisdemo Watch App */,
+				420CA234300D3B8700BCE5B3 /* tenisdemo Watch AppTests */,
+				420CA23E300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */,
+				420CA200300D3B8500BCE5B3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		420CA200300D3B8500BCE5B3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				420CA1FF300D3B8500BCE5B3 /* tenisdemo.app */,
+				420CA20C300D3B8600BCE5B3 /* tenisdemoTests.xctest */,
+				420CA216300D3B8600BCE5B3 /* tenisdemoUITests.xctest */,
+				420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */,
+				420CA231300D3B8700BCE5B3 /* tenisdemo Watch AppTests.xctest */,
+				420CA23B300D3B8700BCE5B3 /* tenisdemo Watch AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		420CA1FE300D3B8500BCE5B3 /* tenisdemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA249300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo" */;
+			buildPhases = (
+				420CA1FB300D3B8500BCE5B3 /* Sources */,
+				420CA1FC300D3B8500BCE5B3 /* Frameworks */,
+				420CA1FD300D3B8500BCE5B3 /* Resources */,
+				420CA248300D3B8700BCE5B3 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420CA225300D3B8600BCE5B3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				420CA201300D3B8500BCE5B3 /* tenisdemo */,
+			);
+			name = tenisdemo;
+			packageProductDependencies = (
+			);
+			productName = tenisdemo;
+			productReference = 420CA1FF300D3B8500BCE5B3 /* tenisdemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		420CA20B300D3B8600BCE5B3 /* tenisdemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA24C300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemoTests" */;
+			buildPhases = (
+				420CA208300D3B8600BCE5B3 /* Sources */,
+				420CA209300D3B8600BCE5B3 /* Frameworks */,
+				420CA20A300D3B8600BCE5B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420CA20E300D3B8600BCE5B3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				420CA20F300D3B8600BCE5B3 /* tenisdemoTests */,
+			);
+			name = tenisdemoTests;
+			packageProductDependencies = (
+			);
+			productName = tenisdemoTests;
+			productReference = 420CA20C300D3B8600BCE5B3 /* tenisdemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		420CA215300D3B8600BCE5B3 /* tenisdemoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA24F300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemoUITests" */;
+			buildPhases = (
+				420CA212300D3B8600BCE5B3 /* Sources */,
+				420CA213300D3B8600BCE5B3 /* Frameworks */,
+				420CA214300D3B8600BCE5B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420CA218300D3B8600BCE5B3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				420CA219300D3B8600BCE5B3 /* tenisdemoUITests */,
+			);
+			name = tenisdemoUITests;
+			packageProductDependencies = (
+			);
+			productName = tenisdemoUITests;
+			productReference = 420CA216300D3B8600BCE5B3 /* tenisdemoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		420CA221300D3B8600BCE5B3 /* tenisdemo Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA245300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch App" */;
+			buildPhases = (
+				420CA21E300D3B8600BCE5B3 /* Sources */,
+				420CA21F300D3B8600BCE5B3 /* Frameworks */,
+				420CA220300D3B8600BCE5B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				420CA226300D3B8600BCE5B3 /* tenisdemo Watch App */,
+			);
+			name = "tenisdemo Watch App";
+			packageProductDependencies = (
+			);
+			productName = "tenisdemo Watch App";
+			productReference = 420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		420CA230300D3B8700BCE5B3 /* tenisdemo Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA252300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch AppTests" */;
+			buildPhases = (
+				420CA22D300D3B8700BCE5B3 /* Sources */,
+				420CA22E300D3B8700BCE5B3 /* Frameworks */,
+				420CA22F300D3B8700BCE5B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420CA233300D3B8700BCE5B3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				420CA234300D3B8700BCE5B3 /* tenisdemo Watch AppTests */,
+			);
+			name = "tenisdemo Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "tenisdemo Watch AppTests";
+			productReference = 420CA231300D3B8700BCE5B3 /* tenisdemo Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		420CA23A300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 420CA255300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch AppUITests" */;
+			buildPhases = (
+				420CA237300D3B8700BCE5B3 /* Sources */,
+				420CA238300D3B8700BCE5B3 /* Frameworks */,
+				420CA239300D3B8700BCE5B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420CA23D300D3B8700BCE5B3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				420CA23E300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */,
+			);
+			name = "tenisdemo Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "tenisdemo Watch AppUITests";
+			productReference = 420CA23B300D3B8700BCE5B3 /* tenisdemo Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		420CA1F7300D3B8500BCE5B3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					420CA1FE300D3B8500BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					420CA20B300D3B8600BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 420CA1FE300D3B8500BCE5B3;
+					};
+					420CA215300D3B8600BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 420CA1FE300D3B8500BCE5B3;
+					};
+					420CA221300D3B8600BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					420CA230300D3B8700BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 420CA221300D3B8600BCE5B3;
+					};
+					420CA23A300D3B8700BCE5B3 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 420CA221300D3B8600BCE5B3;
+					};
+				};
+			};
+			buildConfigurationList = 420CA1FA300D3B8500BCE5B3 /* Build configuration list for PBXProject "tenisdemo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 420CA1F6300D3B8500BCE5B3;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 420CA200300D3B8500BCE5B3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				420CA1FE300D3B8500BCE5B3 /* tenisdemo */,
+				420CA20B300D3B8600BCE5B3 /* tenisdemoTests */,
+				420CA215300D3B8600BCE5B3 /* tenisdemoUITests */,
+				420CA221300D3B8600BCE5B3 /* tenisdemo Watch App */,
+				420CA230300D3B8700BCE5B3 /* tenisdemo Watch AppTests */,
+				420CA23A300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		420CA1FD300D3B8500BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA20A300D3B8600BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA214300D3B8600BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA220300D3B8600BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA22F300D3B8700BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA239300D3B8700BCE5B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		420CA1FB300D3B8500BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA208300D3B8600BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA212300D3B8600BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA21E300D3B8600BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA22D300D3B8700BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		420CA237300D3B8700BCE5B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		420CA20E300D3B8600BCE5B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 420CA1FE300D3B8500BCE5B3 /* tenisdemo */;
+			targetProxy = 420CA20D300D3B8600BCE5B3 /* PBXContainerItemProxy */;
+		};
+		420CA218300D3B8600BCE5B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 420CA1FE300D3B8500BCE5B3 /* tenisdemo */;
+			targetProxy = 420CA217300D3B8600BCE5B3 /* PBXContainerItemProxy */;
+		};
+		420CA225300D3B8600BCE5B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 420CA221300D3B8600BCE5B3 /* tenisdemo Watch App */;
+			targetProxy = 420CA224300D3B8600BCE5B3 /* PBXContainerItemProxy */;
+		};
+		420CA233300D3B8700BCE5B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 420CA221300D3B8600BCE5B3 /* tenisdemo Watch App */;
+			targetProxy = 420CA232300D3B8700BCE5B3 /* PBXContainerItemProxy */;
+		};
+		420CA23D300D3B8700BCE5B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 420CA221300D3B8600BCE5B3 /* tenisdemo Watch App */;
+			targetProxy = 420CA23C300D3B8700BCE5B3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		420CA243300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		420CA244300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		420CA246300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = tenisdemo;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = disip.tenisdemo;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemo.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Debug;
+		};
+		420CA247300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = tenisdemo;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = disip.tenisdemo;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemo.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Release;
+		};
+		420CA24A300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = tenisdemo;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		420CA24B300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = tenisdemo;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		420CA24D300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo";
+			};
+			name = Debug;
+		};
+		420CA24E300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		420CA250300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = tenisdemo;
+			};
+			name = Debug;
+		};
+		420CA251300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = disip.tenisdemoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = tenisdemo;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		420CA253300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "disip.tenisdemo-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Debug;
+		};
+		420CA254300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "disip.tenisdemo-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Release;
+		};
+		420CA256300D3B8700BCE5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "disip.tenisdemo-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "tenisdemo Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Debug;
+		};
+		420CA257300D3B8700BCE5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "disip.tenisdemo-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "tenisdemo Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		420CA1FA300D3B8500BCE5B3 /* Build configuration list for PBXProject "tenisdemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA243300D3B8700BCE5B3 /* Debug */,
+				420CA244300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA245300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA246300D3B8700BCE5B3 /* Debug */,
+				420CA247300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA249300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA24A300D3B8700BCE5B3 /* Debug */,
+				420CA24B300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA24C300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA24D300D3B8700BCE5B3 /* Debug */,
+				420CA24E300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA24F300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA250300D3B8700BCE5B3 /* Debug */,
+				420CA251300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA252300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA253300D3B8700BCE5B3 /* Debug */,
+				420CA254300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		420CA255300D3B8700BCE5B3 /* Build configuration list for PBXNativeTarget "tenisdemo Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				420CA256300D3B8700BCE5B3 /* Debug */,
+				420CA257300D3B8700BCE5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 420CA1F7300D3B8500BCE5B3 /* Project object */;
+}
