@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct tenisdemoApp: App {
+    @StateObject private var authManager = AuthManager.shared
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if authManager.isAuthenticated {
+                ContentView()
+            } else {
+                LoginView()
+            }
         }
     }
 }
