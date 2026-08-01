@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		420CA223300D3B8600BCE5B3 /* tenisdemo Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		42F25CE0301919A300AFD6C8 /* SignalRClient in Frameworks */ = {isa = PBXBuildFile; productRef = 42F25CDF301919A300AFD6C8 /* SignalRClient */; };
+		42F25CE2301919AA00AFD6C8 /* SignalRClient in Frameworks */ = {isa = PBXBuildFile; productRef = 42F25CE1301919AA00AFD6C8 /* SignalRClient */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42F25CE0301919A300AFD6C8 /* SignalRClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +146,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42F25CE2301919AA00AFD6C8 /* SignalRClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,6 +176,7 @@
 				420CA226300D3B8600BCE5B3 /* tenisdemo Watch App */,
 				420CA234300D3B8700BCE5B3 /* tenisdemo Watch AppTests */,
 				420CA23E300D3B8700BCE5B3 /* tenisdemo Watch AppUITests */,
+				42F25CDE3019195E00AFD6C8 /* Frameworks */,
 				420CA200300D3B8500BCE5B3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -187,6 +192,13 @@
 				420CA23B300D3B8700BCE5B3 /* tenisdemo Watch AppUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		42F25CDE3019195E00AFD6C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -211,6 +223,7 @@
 			);
 			name = tenisdemo;
 			packageProductDependencies = (
+				42F25CDF301919A300AFD6C8 /* SignalRClient */,
 			);
 			productName = tenisdemo;
 			productReference = 420CA1FF300D3B8500BCE5B3 /* tenisdemo.app */;
@@ -279,6 +292,7 @@
 			);
 			name = "tenisdemo Watch App";
 			packageProductDependencies = (
+				42F25CE1301919AA00AFD6C8 /* SignalRClient */,
 			);
 			productName = "tenisdemo Watch App";
 			productReference = 420CA222300D3B8600BCE5B3 /* tenisdemo Watch App.app */;
@@ -373,6 +387,9 @@
 			);
 			mainGroup = 420CA1F6300D3B8500BCE5B3;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				42F25CDD3019151C00AFD6C8 /* XCRemoteSwiftPackageReference "SignalR-Client-Swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 420CA200300D3B8500BCE5B3 /* Products */;
 			projectDirPath = "";
@@ -646,7 +663,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.7;
 			};
 			name = Debug;
 		};
@@ -676,7 +693,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.7;
 			};
 			name = Release;
 		};
@@ -836,7 +853,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -856,7 +873,7 @@
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenisdemo Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tenisdemo Watch App";
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -874,7 +891,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_TARGET_NAME = "tenisdemo Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -893,7 +910,7 @@
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_TARGET_NAME = "tenisdemo Watch App";
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -964,6 +981,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		42F25CDD3019151C00AFD6C8 /* XCRemoteSwiftPackageReference "SignalR-Client-Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/moozzyk/SignalR-Client-Swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		42F25CDF301919A300AFD6C8 /* SignalRClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42F25CDD3019151C00AFD6C8 /* XCRemoteSwiftPackageReference "SignalR-Client-Swift" */;
+			productName = SignalRClient;
+		};
+		42F25CE1301919AA00AFD6C8 /* SignalRClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42F25CDD3019151C00AFD6C8 /* XCRemoteSwiftPackageReference "SignalR-Client-Swift" */;
+			productName = SignalRClient;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 420CA1F7300D3B8500BCE5B3 /* Project object */;
 }

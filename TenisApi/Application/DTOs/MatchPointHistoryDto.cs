@@ -5,10 +5,10 @@ namespace TenisApi.Application.DTOs
     public class MatchPointHistoryDto
     {
         [JsonPropertyName("p1_points")]
-        public int P1Points { get; set; }
+        public string P1Points { get; set; } = string.Empty;
 
         [JsonPropertyName("p2_points")]
-        public int P2Points { get; set; }
+        public string P2Points { get; set; } = string.Empty;
         
         [JsonPropertyName("p1_games")]
         public int P1Games { get; set; }
@@ -27,5 +27,8 @@ namespace TenisApi.Application.DTOs
 
         [JsonPropertyName("sequence_number")]
         public int SequenceNumber { get; set; }
+
+        [JsonPropertyName("created_time")]
+        public System.DateTime CreatedTime { get; set; } = System.DateTime.UtcNow;
     }
 }

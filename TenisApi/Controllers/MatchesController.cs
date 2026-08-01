@@ -78,6 +78,32 @@ namespace TenisApi.Controllers
             
             return CreatedAtAction(nameof(GetMatchDetails), new { id = match.Id }, match);
         }
+
+        [HttpPut("{id}/live-progress")]
+        public async Task<IActionResult> UpdateLiveProgress(int id, [FromBody] UpdateLiveProgressRequest request)
+        {
+            try
+            {
+                await _leagueService.UpdateMatchLiveStateAsync(id, request.Score, request.History, request.IsCompleted);
+                return Ok(new { message = "Maç gelişimi güncellendi." });
+            }
+            catch (System.Collections.Generic.KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+    }
+
+    public class UpdateLiveProgressRequest
+    {
+        [JsonPropertyName("score")]
+        public string Score { get; set; } = string.Empty;
+
+        [JsonPropertyName("is_completed")]
+        public bool IsCompleted { get; set; }
+
+        [JsonPropertyName("history")]
+        public List<MatchPointHistoryDto> History { get; set; } = new();
     }
 
     public class CreateMatchRequest

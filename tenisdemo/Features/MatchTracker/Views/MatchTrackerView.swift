@@ -10,6 +10,7 @@ import SwiftUI
 struct MatchTrackerView: View {
     @StateObject private var viewModel = TennisMatchViewModel()
     @State private var showSettings = false
+    @StateObject private var signalRService = SignalRService.shared
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
@@ -200,6 +201,57 @@ struct MatchTrackerView: View {
                 }
                 .sheet(isPresented: $showSettings) {
                     SettingsView(viewModel: viewModel, showSettings: $showSettings)
+                }
+            }
+        }
+        .onAppear {
+            WatchConnectivityManager.shared.setup(viewModel: viewModel)
+        }
+        .onChange(of: viewModel.hasMatchStarted) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.gamesPerSet) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.setsToWin) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.useMatchTiebreak) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.isDouble) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.player1Name) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.player2Name) { _ in
+            WatchConnectivityManager.shared.syncWithWatch()
+        }
+        .onChange(of: viewModel.state) { newState in
+            // Saate anlık skoru gönder
+            WatchConnectivityManager.shared.syncWithWatch()
+            
+            if let lobby = signalRService.lobbyState {
+                let liveState = viewModel.makeLiveMatchState()
+                if let remote = signalRService.remoteMatchState,
+                   remote.p1Points == liveState.p1Points &&
+                   remote.p2Points == liveState.p2Points &&
+                   remote.p1Games == liveState.p1Games &&
+                   remote.p2Games == liveState.p2Games &&
+                   remote.p1Sets == liveState.p1Sets &&
+                   remote.p2Sets == liveState.p2Sets &&
+                   remote.server == liveState.server &&
+                   remote.isMatchOver == liveState.isMatchOver {
+                    return
+                }
+                signalRService.sendScoreUpdate(code: lobby.code, state: liveState)
+            }
+        }
+        .onChange(of: signalRService.remoteMatchState) { remoteState in
+            if let remote = remoteState {
+                withAnimation(.spring()) {
+                    viewModel.applyLiveMatchState(remote)
                 }
             }
         }

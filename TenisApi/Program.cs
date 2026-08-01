@@ -7,8 +7,25 @@ using TenisApi.Domain.Entities;
 using TenisApi.Domain.Repositories;
 using TenisApi.Infrastructure.Persistence;
 using TenisApi.Infrastructure.Persistence.Repositories;
+using TenisApi.Hubs;
+using Serilog;
+using Serilog.Sinks.Graylog;
+using TenisApi.Infrastructure.Middlewares;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Graylog(new GraylogSinkOptions
+    {
+        HostnameOrAddress = "127.0.0.1",
+        Port = 12201,
+        TransportType = Serilog.Sinks.Graylog.Core.Transport.TransportType.Udp
+    })
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // DbContext configuration using PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -19,6 +36,7 @@ builder.Services.AddDbContext<TenisDbContext>(options =>
 builder.Services.AddScoped<ILeagueMatchRepository, LeagueMatchRepository>();
 builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<LobbyManager>();
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -44,6 +62,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSignalR();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -59,9 +79,38 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+
+app.UseSerilogRequestLogging(options =>
+{
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        if (httpContext.Request.QueryString.HasValue)
+        {
+            diagnosticContext.Set("QueryString", httpContext.Request.QueryString.Value);
+        }
+        
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString();
+        if (!string.IsNullOrEmpty(ip))
+        {
+            diagnosticContext.Set("ClientIp", ip);
+        }
+
+        var userIdClaim = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userIdClaim))
+        {
+            diagnosticContext.Set("UserId", userIdClaim);
+        }
+    };
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<TennisHub>("/hubs/tennis");
 
 // Automatic database migration and seed data on startup
 using (var scope = app.Services.CreateScope())
@@ -77,6 +126,14 @@ using (var scope = app.Services.CreateScope())
             var adminPasswordHash = PasswordHasher.HashPassword("admin123");
             var adminUser = new User("admin@tennis.com", adminPasswordHash, "Admin User");
             await context.Users.AddAsync(adminUser);
+            await context.SaveChangesAsync();
+        }
+
+        if (!await context.Users.AnyAsync(u => u.Email == "user@tennis.com"))
+        {
+            var userPasswordHash = PasswordHasher.HashPassword("user123");
+            var testUser = new User("user@tennis.com", userPasswordHash, "Test Oyuncusu");
+            await context.Users.AddAsync(testUser);
             await context.SaveChangesAsync();
         }
         

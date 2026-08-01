@@ -27,5 +27,11 @@ namespace TenisApi.Application.Services
             bool isDouble = false,
             string? player1Partner = null,
             string? player2Partner = null);
+
+        Task UpdateMatchLiveStateAsync(
+            int matchId, 
+            string score, 
+            IEnumerable<MatchPointHistoryDto> history,
+            bool isCompleted);
     }
 }

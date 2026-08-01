@@ -8,15 +8,16 @@
 import Foundation
 
 // Sayı geçmişi detayı veri transfer modeli
-struct PointHistoryItem: Encodable {
-    let p1Points: Int
-    let p2Points: Int
-    let p1Games: Int
-    let p2Games: Int
-    let p1Sets: Int
-    let p2Sets: Int
-    let server: String
-    let sequenceNumber: Int
+struct PointHistoryItem: Codable, Equatable {
+    var p1Points: String
+    var p2Points: String
+    var p1Games: Int
+    var p2Games: Int
+    var p1Sets: Int
+    var p2Sets: Int
+    var server: String
+    var sequenceNumber: Int
+    var createdTime: String? = nil
     
     enum CodingKeys: String, CodingKey {
         case p1Points = "p1_points"
@@ -27,6 +28,7 @@ struct PointHistoryItem: Encodable {
         case p2Sets = "p2_sets"
         case server
         case sequenceNumber = "sequence_number"
+        case createdTime = "created_time"
     }
 }
 
