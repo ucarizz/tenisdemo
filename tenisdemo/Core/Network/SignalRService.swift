@@ -96,7 +96,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     
     private func setupConnection() {
         // APIEndpoint IP adresimizle aynı
-        let urlString = "http://192.168.1.4:5200/hubs/tennis"
+        let urlString = AppEnvironment.current.signalRBaseURL
         guard let url = URL(string: urlString) else { return }
         
         connection = HubConnectionBuilder(url: url)

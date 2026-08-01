@@ -12,14 +12,18 @@ using Serilog;
 using Serilog.Sinks.Graylog;
 using TenisApi.Infrastructure.Middlewares;
 
+var graylogHost = Environment.GetEnvironmentVariable("GRAYLOG_HOST") ?? "127.0.0.1";
+var graylogPortString = Environment.GetEnvironmentVariable("GRAYLOG_PORT");
+int graylogPort = int.TryParse(graylogPortString, out var p) ? p : 12201;
+
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.Graylog(new GraylogSinkOptions
     {
-        HostnameOrAddress = "127.0.0.1",
-        Port = 12201,
+        HostnameOrAddress = graylogHost,
+        Port = graylogPort,
         TransportType = Serilog.Sinks.Graylog.Core.Transport.TransportType.Udp
     })
     .CreateLogger();
@@ -116,10 +120,28 @@ app.MapHub<TennisHub>("/hubs/tennis");
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<TenisDbContext>();
-        await context.Database.MigrateAsync();
+        
+        // Retry policy for database migration on startup (max 6 retries, 5s delay)
+        int retryCount = 0;
+        int maxRetries = 6;
+        while (retryCount < maxRetries)
+        {
+            try
+            {
+                await context.Database.MigrateAsync();
+                break;
+            }
+            catch (Exception ex) when (retryCount < maxRetries - 1)
+            {
+                retryCount++;
+                logger.LogWarning(ex, "Veritabanına bağlanılamadı. Yeniden deneniyor... ({RetryCount}/{MaxRetries})", retryCount, maxRetries);
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
+        }
         
         if (!await context.Users.AnyAsync(u => u.Email == "admin@tennis.com"))
         {
@@ -151,7 +173,6 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Veritabanı göçü veya veri ekleme sırasında bir hata oluştu.");
     }
 }

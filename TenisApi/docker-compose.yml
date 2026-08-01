@@ -58,6 +58,22 @@ services:
     volumes:
       - graylog_data:/usr/share/graylog/data
 
+  tenis_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tenis_api
+    ports:
+      - "5200:5200"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=tenis_db;Port=5432;Database=tenisdb;Username=postgres;Password=password
+      - GRAYLOG_HOST=graylog
+      - GRAYLOG_PORT=12201
+    depends_on:
+      - tenis_db
+      - graylog
+
 volumes:
   postgres_data:
   opensearch_data:
