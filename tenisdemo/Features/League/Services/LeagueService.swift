@@ -8,15 +8,16 @@
 import Foundation
 
 // Sayı geçmişi detayı veri transfer modeli
-struct PointHistoryItem: Encodable {
-    let p1Points: Int
-    let p2Points: Int
-    let p1Games: Int
-    let p2Games: Int
-    let p1Sets: Int
-    let p2Sets: Int
-    let server: String
-    let sequenceNumber: Int
+struct PointHistoryItem: Codable, Equatable {
+    var p1Points: String
+    var p2Points: String
+    var p1Games: Int
+    var p2Games: Int
+    var p1Sets: Int
+    var p2Sets: Int
+    var server: String
+    var sequenceNumber: Int
+    var createdTime: String? = nil
     
     enum CodingKeys: String, CodingKey {
         case p1Points = "p1_points"
@@ -27,6 +28,7 @@ struct PointHistoryItem: Encodable {
         case p2Sets = "p2_sets"
         case server
         case sequenceNumber = "sequence_number"
+        case createdTime = "created_time"
     }
 }
 
@@ -67,15 +69,31 @@ enum LeagueEndpoint: APIEndpoint {
         player2Partner: String?, 
         history: [PointHistoryItem]
     )
+    case updateLiveProgress(
+        id: Int,
+        score: String,
+        isCompleted: Bool,
+        history: [PointHistoryItem]
+    )
+    case createMatch(
+        player1: String,
+        player2: String,
+        date: String,
+        isDouble: Bool,
+        player1Partner: String?,
+        player2Partner: String?
+    )
     
     var path: String {
         switch self {
-        case .getMatches:
+        case .getMatches, .createMatch:
             return "/matches"
         case .getMatchDetails(let id):
             return "/matches/\(id)"
         case .saveCompleted:
             return "/matches/completed"
+        case .updateLiveProgress(let id, _, _, _):
+            return "/matches/\(id)/live-progress"
         }
     }
     
@@ -85,6 +103,10 @@ enum LeagueEndpoint: APIEndpoint {
             return .get
         case .saveCompleted:
             return .post
+        case .createMatch:
+            return .post
+        case .updateLiveProgress:
+            return .put
         }
     }
     
@@ -102,6 +124,47 @@ enum LeagueEndpoint: APIEndpoint {
                 history: history
             )
             return try? JSONEncoder().encode(request)
+        case .createMatch(let p1, let p2, let date, let isDouble, let p1Partner, let p2Partner):
+            struct CreateRequest: Encodable {
+                let player1Name: String
+                let player2Name: String
+                let matchDate: String
+                let isDouble: Bool
+                let player1PartnerName: String?
+                let player2PartnerName: String?
+                
+                enum CodingKeys: String, CodingKey {
+                    case player1Name = "player_1_name"
+                    case player2Name = "player_2_name"
+                    case matchDate = "match_date"
+                    case isDouble = "is_double"
+                    case player1PartnerName = "player_1_partner_name"
+                    case player2PartnerName = "player_2_partner_name"
+                }
+            }
+            let request = CreateRequest(
+                player1Name: p1,
+                player2Name: p2,
+                matchDate: date,
+                isDouble: isDouble,
+                player1PartnerName: p1Partner,
+                player2PartnerName: p2Partner
+            )
+            return try? JSONEncoder().encode(request)
+        case .updateLiveProgress(_, let score, let isCompleted, let history):
+            struct UpdateProgressRequest: Encodable {
+                let score: String
+                let isCompleted: Bool
+                let history: [PointHistoryItem]
+                
+                enum CodingKeys: String, CodingKey {
+                    case score
+                    case isCompleted = "is_completed"
+                    case history
+                }
+            }
+            let request = UpdateProgressRequest(score: score, isCompleted: isCompleted, history: history)
+            return try? JSONEncoder().encode(request)
         default:
             return nil
         }
@@ -110,6 +173,14 @@ enum LeagueEndpoint: APIEndpoint {
 
 protocol LeagueServiceProtocol {
     func fetchMatches() async throws -> [LeagueMatch]
+    func createMatch(
+        player1: String,
+        player2: String,
+        date: String,
+        isDouble: Bool,
+        player1Partner: String?,
+        player2Partner: String?
+    ) async throws -> LeagueMatch
     func saveCompletedMatch(
         player1: String, 
         player2: String, 
@@ -120,6 +191,17 @@ protocol LeagueServiceProtocol {
         player2Partner: String?, 
         history: [PointHistoryItem]
     ) async throws -> LeagueMatch
+    
+    func updateLiveProgress(
+        id: Int,
+        score: String,
+        isCompleted: Bool,
+        history: [PointHistoryItem]
+    ) async throws
+}
+
+struct UpdateLiveProgressResponse: Decodable {
+    let message: String
 }
 
 class LeagueService: LeagueServiceProtocol {
@@ -131,6 +213,24 @@ class LeagueService: LeagueServiceProtocol {
     
     func fetchMatches() async throws -> [LeagueMatch] {
         return try await apiClient.request(LeagueEndpoint.getMatches)
+    }
+    
+    func createMatch(
+        player1: String,
+        player2: String,
+        date: String,
+        isDouble: Bool,
+        player1Partner: String?,
+        player2Partner: String?
+    ) async throws -> LeagueMatch {
+        return try await apiClient.request(LeagueEndpoint.createMatch(
+            player1: player1,
+            player2: player2,
+            date: date,
+            isDouble: isDouble,
+            player1Partner: player1Partner,
+            player2Partner: player2Partner
+        ))
     }
     
     func saveCompletedMatch(
@@ -151,6 +251,20 @@ class LeagueService: LeagueServiceProtocol {
             isDouble: isDouble,
             player1Partner: player1Partner,
             player2Partner: player2Partner,
+            history: history
+        ))
+    }
+    
+    func updateLiveProgress(
+        id: Int,
+        score: String,
+        isCompleted: Bool,
+        history: [PointHistoryItem]
+    ) async throws {
+        let _: UpdateLiveProgressResponse = try await apiClient.request(LeagueEndpoint.updateLiveProgress(
+            id: id,
+            score: score,
+            isCompleted: isCompleted,
             history: history
         ))
     }

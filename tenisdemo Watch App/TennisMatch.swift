@@ -60,6 +60,10 @@ class TennisMatchViewModel: ObservableObject {
     func startMatch() {
         reset()
         hasMatchStarted = true
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        ClientLogger.shared.info("Match started: \(p1) vs \(p2) (Double: \(isDouble))")
     }
     
     func newMatch() {
@@ -151,11 +155,17 @@ class TennisMatchViewModel: ObservableObject {
         state.p2Points = 0
         toggleServer()
         
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        
         if player == .player1 {
             state.p1Games += 1
         } else {
             state.p2Games += 1
         }
+        
+        ClientLogger.shared.info("Game won by \(winnerName). Score now: Sets \(state.p1Sets)-\(state.p2Sets), Games \(state.p1Games)-\(state.p2Games)")
         
         checkSetWin()
     }
@@ -164,6 +174,11 @@ class TennisMatchViewModel: ObservableObject {
         state.p1Points = 0
         state.p2Points = 0
         state.isTiebreak = false
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        ClientLogger.shared.info("Tiebreak won by \(winnerName)")
         
         if player == .player1 {
             state.p1Games = gamesPerSet + 1
@@ -188,6 +203,15 @@ class TennisMatchViewModel: ObservableObject {
     
     private func winSet(for player: Player) {
         state.setScores.append(SetScore(p1Games: state.p1Games, p2Games: state.p2Games))
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        let currentP1Sets = state.p1Sets + (player == .player1 ? 1 : 0)
+        let currentP2Sets = state.p2Sets + (player == .player2 ? 1 : 0)
+        
+        ClientLogger.shared.info("Set won by \(winnerName). Score: \(state.p1Games)-\(state.p2Games). Set count now: \(currentP1Sets)-\(currentP2Sets)")
+        
         state.p1Games = 0
         state.p2Games = 0
         
@@ -200,14 +224,18 @@ class TennisMatchViewModel: ObservableObject {
         if state.p1Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player1
+            ClientLogger.shared.info("Match finished! Winner: \(p1)")
         } else if state.p2Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player2
+            ClientLogger.shared.info("Match finished! Winner: \(p2)")
         } else {
-            // Set skorları berabere ve karar setine giriliyorsa (Örn: 1-1 set skoru ve setsToWin = 2)
             if useMatchTiebreak && state.p1Sets == state.p2Sets && state.p1Sets == (setsToWin - 1) {
                 state.isTiebreak = true
                 state.isMatchTiebreak = true
+                ClientLogger.shared.info("Super Tiebreak starting (Match Tiebreak to 10)")
+            } else {
+                ClientLogger.shared.info("Set \(state.p1Sets + state.p2Sets + 1) starting")
             }
         }
     }
@@ -284,6 +312,13 @@ class TennisMatchViewModel: ObservableObject {
         }
     }
     
+    private func getDatabaseHistory() -> [MatchState] {
+        if history.isEmpty { return [] }
+        var outcomes = Array(history.dropFirst())
+        outcomes.append(state)
+        return outcomes
+    }
+    
     // Maçı API'ye gönderme / Senkronizasyon (Option 2)
     private func syncMatchResult() {
         let p1 = player1Name.isEmpty ? "SİZ" : player1Name
@@ -297,10 +332,11 @@ class TennisMatchViewModel: ObservableObject {
         
         let scoreString = state.setScores.map { "\($0.p1Games)-\($0.p2Games)" }.joined(separator: ", ")
         
-        let historyItems = history.enumerated().map { (index, s) in
+        let dbHistory = getDatabaseHistory()
+        let historyItems = dbHistory.enumerated().map { (index, s) in
             return PointHistoryItem(
-                p1Points: s.p1Points,
-                p2Points: s.p2Points,
+                p1Points: formatPoints(s.p1Points, isTiebreak: s.isTiebreak),
+                p2Points: formatPoints(s.p2Points, isTiebreak: s.isTiebreak),
                 p1Games: s.p1Games,
                 p2Games: s.p2Games,
                 p1Sets: s.p1Sets,

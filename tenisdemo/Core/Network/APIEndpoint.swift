@@ -19,7 +19,7 @@ protocol APIEndpoint {
 extension APIEndpoint {
     var baseURL: URL {
         // Varsayılan API adresi (Projeye göre güncellenebilir)
-       return URL(string: "http://172.20.10.11:5200/v1")!
+       return URL(string: "http://192.168.1.4:5200/v1")!
     }
     
     var headers: [String: String]? {

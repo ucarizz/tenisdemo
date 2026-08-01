@@ -73,6 +73,19 @@ namespace TenisApi.Domain.Entities
             }
         }
 
+        // Maçın anlık skor ve sayı geçmişini günceller (Maç henüz bitmemişken)
+        public void UpdateMatchProgress(string score, IEnumerable<MatchPointHistory> pointHistories)
+        {
+            Score = score;
+            IsCompleted = false;
+
+            _pointHistories.Clear();
+            if (pointHistories != null)
+            {
+                _pointHistories.AddRange(pointHistories);
+            }
+        }
+
         // Maç tarihini güncelleme iş kuralı (Domain Behavior)
         public void RescheduleMatch(string newDate)
         {

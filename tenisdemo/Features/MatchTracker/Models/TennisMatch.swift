@@ -56,10 +56,48 @@ class TennisMatchViewModel: ObservableObject {
     @Published var setsToWin: Int = 2               // Maçı kazanmak için gereken set sayısı (Örn: 1 veya 2)
     @Published var useMatchTiebreak: Bool = true     // 1-1 (veya berabere) set durumunda 3. set yerine 10 puanlık Tiebreak
     @Published var hasMatchStarted: Bool = false    // Maç başladı mı? (Kurulum ekranı kontrolü)
+    @Published var activeMatchId: Int? = nil
     
     func startMatch() {
         reset()
         hasMatchStarted = true
+        activeMatchId = nil
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        ClientLogger.shared.info("Match started: \(p1) vs \(p2) (Double: \(isDouble))")
+        
+        // Eğer canlı lobide değilsek (Yerel maç ise), veri tabanında kaydı başlat
+        if SignalRService.shared.lobbyState == nil {
+            let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+            let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+            let p1Partner = isDouble ? (player1PartnerName.isEmpty ? "ORTAK 1" : player1PartnerName) : nil
+            let p2Partner = isDouble ? (player2PartnerName.isEmpty ? "ORTAK 2" : player2PartnerName) : nil
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd.MM.yyyy - HH:mm"
+            let dateString = formatter.string(from: Date())
+            
+            Task {
+                do {
+                    let service = LeagueService()
+                    let match = try await service.createMatch(
+                        player1: p1,
+                        player2: p2,
+                        date: dateString,
+                        isDouble: isDouble,
+                        player1Partner: p1Partner,
+                        player2Partner: p2Partner
+                    )
+                    DispatchQueue.main.async {
+                        self.activeMatchId = match.id
+                        print("Yerel maç veri tabanında başlatıldı. ID: \(match.id)")
+                    }
+                } catch {
+                    print("Yerel maç veri tabanında başlatılamadı: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     func newMatch() {
@@ -80,6 +118,9 @@ class TennisMatchViewModel: ObservableObject {
         }
         
         playHapticFeedback()
+        
+        // Veri tabanını anlık güncelle (Yerel maç ise)
+        syncLiveProgressToDatabase()
         
         // Maç bittiyse otomatik olarak sunucuya kaydet
         if state.isMatchOver {
@@ -148,11 +189,17 @@ class TennisMatchViewModel: ObservableObject {
         state.p2Points = 0
         toggleServer()
         
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        
         if player == .player1 {
             state.p1Games += 1
         } else {
             state.p2Games += 1
         }
+        
+        ClientLogger.shared.info("Game won by \(winnerName). Score now: Sets \(state.p1Sets)-\(state.p2Sets), Games \(state.p1Games)-\(state.p2Games)")
         
         checkSetWin()
     }
@@ -161,6 +208,11 @@ class TennisMatchViewModel: ObservableObject {
         state.p1Points = 0
         state.p2Points = 0
         state.isTiebreak = false
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        ClientLogger.shared.info("Tiebreak won by \(winnerName)")
         
         if player == .player1 {
             state.p1Games = gamesPerSet + 1
@@ -185,6 +237,15 @@ class TennisMatchViewModel: ObservableObject {
     
     private func winSet(for player: Player) {
         state.setScores.append(SetScore(p1Games: state.p1Games, p2Games: state.p2Games))
+        
+        let p1 = player1Name.isEmpty ? "SİZ" : player1Name
+        let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
+        let winnerName = player == .player1 ? p1 : p2
+        let currentP1Sets = state.p1Sets + (player == .player1 ? 1 : 0)
+        let currentP2Sets = state.p2Sets + (player == .player2 ? 1 : 0)
+        
+        ClientLogger.shared.info("Set won by \(winnerName). Score: \(state.p1Games)-\(state.p2Games). Set count now: \(currentP1Sets)-\(currentP2Sets)")
+        
         state.p1Games = 0
         state.p2Games = 0
         
@@ -197,13 +258,18 @@ class TennisMatchViewModel: ObservableObject {
         if state.p1Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player1
+            ClientLogger.shared.info("Match finished! Winner: \(p1)")
         } else if state.p2Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player2
+            ClientLogger.shared.info("Match finished! Winner: \(p2)")
         } else {
             if useMatchTiebreak && state.p1Sets == state.p2Sets && state.p1Sets == (setsToWin - 1) {
                 state.isTiebreak = true
                 state.isMatchTiebreak = true
+                ClientLogger.shared.info("Super Tiebreak starting (Match Tiebreak to 10)")
+            } else {
+                ClientLogger.shared.info("Set \(state.p1Sets + state.p2Sets + 1) starting")
             }
         }
     }
@@ -250,6 +316,44 @@ class TennisMatchViewModel: ObservableObject {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
+        
+        // Veri tabanını anlık güncelle (Yerel maç ise)
+        syncLiveProgressToDatabase()
+    }
+    
+    private func syncLiveProgressToDatabase() {
+        guard SignalRService.shared.lobbyState == nil, let matchId = activeMatchId else { return }
+        
+        let scoreString = state.setScores.map { "\($0.p1Games)-\($0.p2Games)" }.joined(separator: ", ")
+        let dbHistory = getDatabaseHistory()
+        let historyItems = dbHistory.enumerated().map { (index, s) in
+            return PointHistoryItem(
+                p1Points: formatPoints(s.p1Points, isTiebreak: s.isTiebreak),
+                p2Points: formatPoints(s.p2Points, isTiebreak: s.isTiebreak),
+                p1Games: s.p1Games,
+                p2Games: s.p2Games,
+                p1Sets: s.p1Sets,
+                p2Sets: s.p2Sets,
+                server: s.server.rawValue,
+                sequenceNumber: index,
+                createdTime: nil
+            )
+        }
+        
+        Task {
+            do {
+                let service = LeagueService()
+                try await service.updateLiveProgress(
+                    id: matchId,
+                    score: scoreString.isEmpty ? "0-0" : scoreString,
+                    isCompleted: state.isMatchOver,
+                    history: historyItems
+                )
+                print("DEBUG: Live progress synced to DB. Match ID: \(matchId)")
+            } catch {
+                print("DEBUG: Failed to sync live progress to DB: \(error.localizedDescription)")
+            }
+        }
     }
     
     func reset() {
@@ -296,6 +400,13 @@ class TennisMatchViewModel: ObservableObject {
         }
     }
     
+    private func getDatabaseHistory() -> [MatchState] {
+        if history.isEmpty { return [] }
+        var outcomes = Array(history.dropFirst())
+        outcomes.append(state)
+        return outcomes
+    }
+    
     // Maçı API'ye gönderme / Senkronizasyon (Option 2)
     private func syncMatchResult() {
         let p1 = player1Name.isEmpty ? "SİZ" : player1Name
@@ -312,10 +423,11 @@ class TennisMatchViewModel: ObservableObject {
         let scoreString = state.setScores.map { "\($0.p1Games)-\($0.p2Games)" }.joined(separator: ", ")
         
         // Cihazdaki geçmiş listesini API'nin beklediği DTO formatına eşliyoruz
-        let historyItems = history.enumerated().map { (index, s) in
+        let dbHistory = getDatabaseHistory()
+        let historyItems = dbHistory.enumerated().map { (index, s) in
             return PointHistoryItem(
-                p1Points: s.p1Points,
-                p2Points: s.p2Points,
+                p1Points: formatPoints(s.p1Points, isTiebreak: s.isTiebreak),
+                p2Points: formatPoints(s.p2Points, isTiebreak: s.isTiebreak),
                 p1Games: s.p1Games,
                 p2Games: s.p2Games,
                 p1Sets: s.p1Sets,
@@ -342,6 +454,63 @@ class TennisMatchViewModel: ObservableObject {
             } catch {
                 print("Maç sunucuya kaydedilemedi: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    func makeLiveMatchState() -> LiveMatchState {
+        let scores = state.setScores.map { SetScoreState(p1Games: $0.p1Games, p2Games: $0.p2Games) }
+        let dbHistory = getDatabaseHistory()
+        let historyItems = dbHistory.enumerated().map { (index, s) in
+            return PointHistoryItem(
+                p1Points: formatPoints(s.p1Points, isTiebreak: s.isTiebreak),
+                p2Points: formatPoints(s.p2Points, isTiebreak: s.isTiebreak),
+                p1Games: s.p1Games,
+                p2Games: s.p2Games,
+                p1Sets: s.p1Sets,
+                p2Sets: s.p2Sets,
+                server: s.server.rawValue,
+                sequenceNumber: index,
+                createdTime: nil
+            )
+        }
+        return LiveMatchState(
+            p1Points: state.p1Points,
+            p2Points: state.p2Points,
+            p1Games: state.p1Games,
+            p2Games: state.p2Games,
+            p1Sets: state.p1Sets,
+            p2Sets: state.p2Sets,
+            setScores: scores,
+            isTiebreak: state.isTiebreak,
+            isMatchTiebreak: state.isMatchTiebreak,
+            server: state.server.rawValue,
+            isMatchOver: state.isMatchOver,
+            winner: state.winner?.rawValue,
+            history: historyItems
+        )
+    }
+    
+    func applyLiveMatchState(_ remote: LiveMatchState) {
+        let localScores = remote.setScores.map { SetScore(p1Games: $0.p1Games, p2Games: $0.p2Games) }
+        let newWinner = remote.winner == "SİZ" ? Player.player1 : (remote.winner == "RAKİP" ? Player.player2 : nil)
+        let newServer = remote.server == "SİZ" ? Player.player1 : Player.player2
+        
+        var newState = MatchState()
+        newState.p1Points = remote.p1Points
+        newState.p2Points = remote.p2Points
+        newState.p1Games = remote.p1Games
+        newState.p2Games = remote.p2Games
+        newState.p1Sets = remote.p1Sets
+        newState.p2Sets = remote.p2Sets
+        newState.setScores = localScores
+        newState.isTiebreak = remote.isTiebreak
+        newState.isMatchTiebreak = remote.isMatchTiebreak
+        newState.server = newServer
+        newState.isMatchOver = remote.isMatchOver
+        newState.winner = newWinner
+        
+        if self.state != newState {
+            self.state = newState
         }
     }
 }
