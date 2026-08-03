@@ -20,14 +20,14 @@ enum AppEnvironment {
     case development
     case testServer
     
-    static var current: AppEnvironment = .development
+    static var current: AppEnvironment = .testServer
     
     var apiBaseURL: URL {
         switch self {
         case .development:
             return URL(string: "http://192.168.1.4:5200/v1")!
         case .testServer:
-            return URL(string: "http://YOUR_SERVER_IP:5200/v1")!
+            return URL(string: "http://207.154.234.58:5200/v1")!
         }
     }
     
@@ -36,7 +36,7 @@ enum AppEnvironment {
         case .development:
             return "http://192.168.1.4:5200/hubs/tennis"
         case .testServer:
-            return "http://YOUR_SERVER_IP:5200/hubs/tennis"
+            return "http://207.154.234.58:5200/hubs/tennis"
         }
     }
     
@@ -45,7 +45,7 @@ enum AppEnvironment {
         case .development:
             return URL(string: "http://192.168.1.4:5200/v1/logs/client-diagnostics")!
         case .testServer:
-            return URL(string: "http://YOUR_SERVER_IP:5200/v1/logs/client-diagnostics")!
+            return URL(string: "http://207.154.234.58:5200/v1/logs/client-diagnostics")!
         }
     }
 }
