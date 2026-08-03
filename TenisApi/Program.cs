@@ -11,6 +11,7 @@ using TenisApi.Hubs;
 using Serilog;
 using Serilog.Sinks.Graylog;
 using TenisApi.Infrastructure.Middlewares;
+using Scalar.AspNetCore;
 
 var graylogHost = Environment.GetEnvironmentVariable("GRAYLOG_HOST") ?? "127.0.0.1";
 var graylogPortString = Environment.GetEnvironmentVariable("GRAYLOG_PORT");
@@ -78,10 +79,12 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-}
+    options.WithTitle("Tenis API Reference")
+           .WithTheme(ScalarTheme.DeepSpace);
+});
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
