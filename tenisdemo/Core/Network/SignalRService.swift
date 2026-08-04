@@ -18,8 +18,10 @@ struct LobbyState: Codable, Equatable {
     var code: String
     var hostName: String
     var hostPartnerName: String?
+    var hostProfileImageUrl: String?
     var guestName: String?
     var guestPartnerName: String?
+    var guestProfileImageUrl: String?
     var isDouble: Bool
     var settings: LobbySettings
     var isMatchStarted: Bool
@@ -28,8 +30,10 @@ struct LobbyState: Codable, Equatable {
         case code
         case hostName = "host_name"
         case hostPartnerName = "host_partner_name"
+        case hostProfileImageUrl = "host_profile_image_url"
         case guestName = "guest_name"
         case guestPartnerName = "guest_partner_name"
+        case guestProfileImageUrl = "guest_profile_image_url"
         case isDouble = "is_double"
         case settings
         case isMatchStarted = "is_match_started"
@@ -148,6 +152,8 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
             DispatchQueue.main.async {
                 self.errorMessage = "Rakip lobiden/maçtan ayrıldı."
                 self.lobbyState = nil
+                self.isMatchStarted = false
+                self.remoteMatchState = nil
             }
         })
         
@@ -196,13 +202,13 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     }
     
     // Sunucu Metodları (Invocations)
-    func createLobby(hostName: String, isDouble: Bool, hostPartnerName: String?) {
+    func createLobby(hostName: String, isDouble: Bool, hostPartnerName: String?, hostProfileImageUrl: String?) {
         errorMessage = nil
         isMatchStarted = false
         remoteMatchState = nil
         lobbyState = nil
         
-        connection?.invoke(method: "createLobby", arguments: [hostName, isDouble, hostPartnerName ?? ""]) { error in
+        connection?.invoke(method: "createLobby", arguments: [hostName, isDouble, hostPartnerName ?? "", hostProfileImageUrl ?? ""]) { error in
             if let error = error {
                 DispatchQueue.main.async {
                     self.errorMessage = "Lobi oluşturulamadı: \(error.localizedDescription)"
@@ -211,13 +217,13 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         }
     }
     
-    func joinLobby(code: String, guestName: String, guestPartnerName: String?) {
+    func joinLobby(code: String, guestName: String, guestPartnerName: String?, guestProfileImageUrl: String?) {
         errorMessage = nil
         isMatchStarted = false
         remoteMatchState = nil
         lobbyState = nil
         
-        connection?.invoke(method: "joinLobby", arguments: [code, guestName, guestPartnerName ?? ""]) { error in
+        connection?.invoke(method: "joinLobby", arguments: [code, guestName, guestPartnerName ?? "", guestProfileImageUrl ?? ""]) { error in
             if let error = error {
                 DispatchQueue.main.async {
                     self.errorMessage = "Lobiye katılamadı: \(error.localizedDescription)"

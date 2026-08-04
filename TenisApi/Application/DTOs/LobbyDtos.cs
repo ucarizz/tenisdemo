@@ -23,6 +23,12 @@ namespace TenisApi.Application.DTOs
         [JsonPropertyName("host_name")]
         public string HostName { get; set; } = string.Empty;
 
+        [JsonPropertyName("host_profile_image_url")]
+        public string? HostProfileImageUrl { get; set; }
+
+        [JsonPropertyName("guest_profile_image_url")]
+        public string? GuestProfileImageUrl { get; set; }
+
         [JsonPropertyName("host_partner_name")]
         public string? HostPartnerName { get; set; }
 

@@ -18,18 +18,19 @@ namespace TenisApi.Hubs
         }
 
         // Yeni bir lobi kurar ve kurucu istemciyi SignalR odasına ekler
-        public async Task CreateLobby(string hostName, bool isDouble, string? hostPartnerName)
+        public async Task CreateLobby(string hostName, bool isDouble, string? hostPartnerName, string? hostProfileImageUrl)
         {
-            var lobby = _lobbyManager.CreateLobby(hostName, isDouble, hostPartnerName);
+            var lobby = _lobbyManager.CreateLobby(hostName, isDouble, hostPartnerName, hostProfileImageUrl);
+            _lobbyManager.AssociateConnection(Context.ConnectionId, lobby.Code);
             await Groups.AddToGroupAsync(Context.ConnectionId, lobby.Code);
             await Clients.Caller.SendAsync("LobbyCreated", lobby);
         }
 
         // Kod ile eşleşen lobi odasına katılır ve gruptaki herkese haber verir
-        public async Task JoinLobby(string code, string guestName, string? guestPartnerName)
+        public async Task JoinLobby(string code, string guestName, string? guestPartnerName, string? guestProfileImageUrl)
         {
             code = code.ToUpperInvariant().Trim();
-            var lobby = _lobbyManager.JoinLobby(code, guestName, guestPartnerName);
+            var lobby = _lobbyManager.JoinLobby(code, guestName, guestPartnerName, guestProfileImageUrl);
             
             if (lobby == null)
             {
@@ -37,6 +38,7 @@ namespace TenisApi.Hubs
                 return;
             }
 
+            _lobbyManager.AssociateConnection(Context.ConnectionId, code);
             await Groups.AddToGroupAsync(Context.ConnectionId, code);
             await Clients.Group(code).SendAsync("LobbyUpdated", lobby);
         }
@@ -115,8 +117,22 @@ namespace TenisApi.Hubs
         public async Task LeaveLobby(string code)
         {
             code = code.ToUpperInvariant().Trim();
+            _lobbyManager.RemoveConnection(Context.ConnectionId);
+            _lobbyManager.RemoveLobby(code);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, code);
             await Clients.OthersInGroup(code).SendAsync("PlayerLeft");
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var code = _lobbyManager.GetLobbyCodeByConnection(Context.ConnectionId);
+            if (!string.IsNullOrEmpty(code))
+            {
+                await Clients.OthersInGroup(code).SendAsync("PlayerLeft");
+                _lobbyManager.RemoveConnection(Context.ConnectionId);
+                _lobbyManager.RemoveLobby(code);
+            }
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }
