@@ -73,9 +73,12 @@ services:
     depends_on:
       - tenis_db
       - graylog
+    volumes:
+      - uploads_data:/app/uploads
 
 volumes:
   postgres_data:
   opensearch_data:
   mongodb_data:
   graylog_data:
+  uploads_data:

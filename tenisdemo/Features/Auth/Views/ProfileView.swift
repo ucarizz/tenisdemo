@@ -1,7 +1,10 @@
 import SwiftUI
+import PhotosUI
 
 struct ProfileView: View {
     @StateObject private var authManager = AuthManager.shared
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var uploadError: String? = nil
     
     var body: some View {
         ZStack {
@@ -34,9 +37,48 @@ struct ProfileView: View {
                 
                 // Profil Bilgileri
                 VStack(spacing: 16) {
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                    PhotosPicker(selection: $selectedItem, matching: .images) {
+                        if let user = authManager.currentUser,
+                           let urlStr = user.profileImageUrl,
+                           let url = URL(string: urlStr) {
+                            AsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 90, height: 90)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color(red: 0.86, green: 0.98, blue: 0.22), lineWidth: 2))
+                            } placeholder: {
+                                ProgressView()
+                                    .frame(width: 90, height: 90)
+                            }
+                        } else {
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                .overlay(
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 14))
+                                        .padding(6)
+                                        .background(Color.black)
+                                        .clipShape(Circle())
+                                        .foregroundColor(.white)
+                                        .offset(x: 28, y: 28)
+                                )
+                        }
+                    }
+                    .onChange(of: selectedItem) { newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                do {
+                                    try await authManager.uploadProfileImage(imageData: data)
+                                    uploadError = nil
+                                } catch {
+                                    uploadError = error.localizedDescription
+                                }
+                            }
+                        }
+                    }
                     
                     if let user = authManager.currentUser {
                         Text(user.fullName)
@@ -47,6 +89,12 @@ struct ProfileView: View {
                         Text(user.email)
                             .font(.system(.subheadline, design: .rounded))
                             .foregroundColor(.gray)
+                    }
+                    
+                    if let uploadError = uploadError {
+                        Text(uploadError)
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundColor(.red)
                     }
                 }
                 .padding(.vertical, 16)

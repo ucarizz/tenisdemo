@@ -12,5 +12,8 @@ namespace TenisApi.Application.DTOs
 
         [JsonPropertyName("full_name")]
         public string FullName { get; set; } = string.Empty;
+
+        [JsonPropertyName("profile_image_url")]
+        public string? ProfileImageUrl { get; set; }
     }
 }

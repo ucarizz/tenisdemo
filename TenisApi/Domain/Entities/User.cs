@@ -9,6 +9,7 @@ namespace TenisApi.Domain.Entities
         public string PasswordHash { get; private set; }
         public string FullName { get; private set; }
         public DateTime CreateDate { get; private set; }
+        public string? ProfileImageUrl { get; private set; }
 
         #pragma warning disable CS8618 // EF Core için gerekli boş kurucu metot
         private User() { }
@@ -35,6 +36,11 @@ namespace TenisApi.Domain.Entities
                 throw new ArgumentException("Ad soyad boş olamaz.", nameof(fullName));
 
             FullName = fullName.Trim();
+        }
+
+        public void UpdateProfileImageUrl(string? profileImageUrl)
+        {
+            ProfileImageUrl = profileImageUrl;
         }
     }
 }
