@@ -127,12 +127,13 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 if let speedKmh = message["speedKmh"] as? Double,
                    let accelerationG = message["accelerationG"] as? Double,
                    let swingType = message["swingType"] as? String {
+                    let matchId = self.viewModel?.activeMatchId
                     Task {
                         do {
                             let client = URLSessionAPIClient()
                             struct SwingResponse: Decodable { let id: Int }
-                            let _: SwingResponse = try await client.request(SwingEndpoint.recordSwing(speedKmh: speedKmh, accelerationG: accelerationG, swingType: swingType))
-                            print("DEBUG [WatchConnectivity]: Swing speed recorded successfully in DB.")
+                            let _: SwingResponse = try await client.request(SwingEndpoint.recordSwing(speedKmh: speedKmh, accelerationG: accelerationG, swingType: swingType, matchId: matchId))
+                            print("DEBUG [WatchConnectivity]: Swing speed recorded successfully in DB (MatchId: \(String(describing: matchId))).")
                         } catch {
                             print("DEBUG [WatchConnectivity]: Failed to upload swing: \(error.localizedDescription)")
                         }

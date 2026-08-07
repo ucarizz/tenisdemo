@@ -66,7 +66,10 @@ struct LeagueListView: View {
                                     .padding(.top, 40)
                             } else {
                                 ForEach(viewModel.matches) { match in
-                                    LeagueMatchRow(match: match)
+                                    NavigationLink(destination: LeagueMatchDetailView(match: match)) {
+                                        LeagueMatchRow(match: match)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }

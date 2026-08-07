@@ -10,15 +10,17 @@ namespace TenisApi.Domain.Entities
         public double AccelerationG { get; private set; }
         public string SwingType { get; private set; }
         public DateTime RecordedAt { get; private set; }
+        public int? MatchId { get; private set; }
 
-        // Navigation property for EF Core
+        // Navigation properties for EF Core
         public User User { get; private set; } = null!;
+        public LeagueMatch? Match { get; private set; } = null;
 
         #pragma warning disable CS8618 // EF Core için gerekli boş kurucu metot
         private SwingRecord() { }
         #pragma warning restore CS8618
 
-        public SwingRecord(int userId, double speedKmh, double accelerationG, string swingType, DateTime recordedAt)
+        public SwingRecord(int userId, double speedKmh, double accelerationG, string swingType, DateTime recordedAt, int? matchId = null)
         {
             if (speedKmh <= 0)
                 throw new ArgumentException("Hız sıfırdan büyük olmalıdır.", nameof(speedKmh));
@@ -30,6 +32,7 @@ namespace TenisApi.Domain.Entities
             AccelerationG = accelerationG;
             SwingType = swingType.Trim();
             RecordedAt = recordedAt;
+            MatchId = matchId;
         }
     }
 }

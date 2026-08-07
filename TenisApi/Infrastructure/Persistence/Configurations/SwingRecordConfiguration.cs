@@ -17,12 +17,19 @@ namespace TenisApi.Infrastructure.Persistence.Configurations
             builder.Property(x => x.AccelerationG).HasColumnName("acceleration_g").IsRequired();
             builder.Property(x => x.SwingType).HasColumnName("swing_type").HasMaxLength(50).IsRequired();
             builder.Property(x => x.RecordedAt).HasColumnName("recorded_at").IsRequired();
+            builder.Property(x => x.MatchId).HasColumnName("match_id").IsRequired(false);
 
             // İlişkiler: Bir kullanıcının birden fazla vuruş kaydı olabilir
             builder.HasOne(x => x.User)
                    .WithMany()
                    .HasForeignKey(x => x.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            // İlişkiler: Bir maçın birden fazla vuruş kaydı olabilir
+            builder.HasOne(x => x.Match)
+                   .WithMany()
+                   .HasForeignKey(x => x.MatchId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

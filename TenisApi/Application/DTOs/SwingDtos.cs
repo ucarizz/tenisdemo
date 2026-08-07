@@ -8,6 +8,7 @@ namespace TenisApi.Application.DTOs
         public double AccelerationG { get; set; }
         public string SwingType { get; set; } = "Unknown";
         public DateTime RecordedAt { get; set; } = DateTime.UtcNow;
+        public int? MatchId { get; set; }
     }
 
     public class SwingRecordResponse
@@ -18,5 +19,6 @@ namespace TenisApi.Application.DTOs
         public double AccelerationG { get; set; }
         public string SwingType { get; set; } = null!;
         public DateTime RecordedAt { get; set; }
+        public int? MatchId { get; set; }
     }
 }

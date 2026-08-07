@@ -38,12 +38,23 @@ namespace TenisApi.Controllers
                 return NotFound(new { message = "Kullanıcı bulunamadı." });
             }
 
+            // Eğer bir maç ID'si gönderildiyse ve bu maç veritabanında yoksa kontrol edelim
+            if (request.MatchId.HasValue)
+            {
+                var matchExists = await _context.Matches.AnyAsync(m => m.Id == request.MatchId.Value);
+                if (!matchExists)
+                {
+                    return NotFound(new { message = "Eşleşen lig maçı bulunamadı." });
+                }
+            }
+
             var record = new SwingRecord(
                 userId,
                 request.SpeedKmh,
                 request.AccelerationG,
                 request.SwingType,
-                request.RecordedAt
+                request.RecordedAt,
+                request.MatchId
             );
 
             _context.SwingRecords.Add(record);
@@ -56,7 +67,8 @@ namespace TenisApi.Controllers
                 SpeedKmh = record.SpeedKmh,
                 AccelerationG = record.AccelerationG,
                 SwingType = record.SwingType,
-                RecordedAt = record.RecordedAt
+                RecordedAt = record.RecordedAt,
+                MatchId = record.MatchId
             });
         }
 
@@ -80,7 +92,35 @@ namespace TenisApi.Controllers
                     SpeedKmh = r.SpeedKmh,
                     AccelerationG = r.AccelerationG,
                     SwingType = r.SwingType,
-                    RecordedAt = r.RecordedAt
+                    RecordedAt = r.RecordedAt,
+                    MatchId = r.MatchId
+                })
+                .ToListAsync();
+
+            return Ok(records);
+        }
+
+        [HttpGet("match/{matchId}")]
+        public async Task<IActionResult> GetSwingsByMatch(int matchId)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
+            {
+                return Unauthorized(new { message = "Geçersiz kullanıcı oturumu." });
+            }
+
+            var records = await _context.SwingRecords
+                .Where(r => r.MatchId == matchId && r.UserId == userId)
+                .OrderByDescending(r => r.RecordedAt)
+                .Select(r => new SwingRecordResponse
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    SpeedKmh = r.SpeedKmh,
+                    AccelerationG = r.AccelerationG,
+                    SwingType = r.SwingType,
+                    RecordedAt = r.RecordedAt,
+                    MatchId = r.MatchId
                 })
                 .ToListAsync();
 
