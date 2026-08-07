@@ -90,25 +90,13 @@ struct LeagueMatchDetailView: View {
                             }
                             .frame(maxWidth: .infinity)
                             
-                            // Skor / VS
-                            VStack(spacing: 4) {
-                                if let score = match.score {
-                                    Text(score)
-                                        .font(.system(size: 24, weight: .bold, design: .monospaced))
-                                        .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white.opacity(0.06))
-                                        .cornerRadius(8)
-                                } else {
-                                    Text("VS")
-                                        .font(.system(size: 14, weight: .black, design: .rounded))
-                                        .foregroundColor(.black)
-                                        .frame(width: 36, height: 36)
-                                        .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                        .clipShape(Circle())
-                                }
-                            }
+                            // VS Ortadaki Rozet
+                            Text("VS")
+                                .font(.system(size: 13, weight: .black, design: .rounded))
+                                .foregroundColor(.black)
+                                .frame(width: 32, height: 32)
+                                .background(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                .clipShape(Circle())
                             
                             // Oyuncu 2
                             VStack(spacing: 6) {
@@ -125,6 +113,18 @@ struct LeagueMatchDetailView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .padding(.vertical, 8)
+                        
+                        // Detaylı Set Skorları (Scoreboard)
+                        if let score = match.score, !score.isEmpty {
+                            Divider()
+                                .background(Color.white.opacity(0.08))
+                            
+                            TennisScoreboardView(
+                                player1Name: match.player1Name,
+                                player2Name: match.player2Name,
+                                scoreString: score
+                            )
+                        }
                     }
                     .padding()
                     .background(Color.white.opacity(0.03))
@@ -268,5 +268,89 @@ struct LeagueMatchDetailView: View {
         }
         
         return dateStr
+    }
+}
+
+struct TennisScoreboardView: View {
+    let player1Name: String
+    let player2Name: String
+    let scoreString: String
+    
+    var body: some View {
+        let sets = parseScore(scoreString)
+        
+        VStack(spacing: 8) {
+            // Sütun Başlıkları (S1, S2, S3...)
+            HStack(spacing: 0) {
+                Text("Set Dağılımı")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 8) {
+                    ForEach(0..<sets.count, id: \.self) { idx in
+                        Text("S\(idx + 1)")
+                            .font(.system(size: 10, weight: .black, design: .rounded))
+                            .foregroundColor(.gray)
+                            .frame(width: 30, alignment: .center)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+            
+            // Oyuncu 1 Satırı
+            HStack(spacing: 0) {
+                Text(player1Name)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 8) {
+                    ForEach(0..<sets.count, id: \.self) { idx in
+                        Text(sets[idx].0)
+                            .font(.system(size: 14, weight: .bold, design: .monospaced))
+                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                            .frame(width: 30, height: 30)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+            
+            // Oyuncu 2 Satırı
+            HStack(spacing: 0) {
+                Text(player2Name)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 8) {
+                    ForEach(0..<sets.count, id: \.self) { idx in
+                        Text(sets[idx].1)
+                            .font(.system(size: 14, weight: .bold, design: .monospaced))
+                            .foregroundColor(.white)
+                            .frame(width: 30, height: 30)
+                            .background(Color.white.opacity(0.03))
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+        }
+        .padding(.vertical, 8)
+    }
+    
+    private func parseScore(_ score: String) -> [(String, String)] {
+        let setStrings = score.components(separatedBy: ", ")
+        return setStrings.map { setStr in
+            let parts = setStr.components(separatedBy: "-")
+            if parts.count == 2 {
+                return (parts[0], parts[1])
+            }
+            return ("-", "-")
+        }
     }
 }
