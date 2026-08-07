@@ -47,7 +47,8 @@ namespace TenisApi.Application.Services
                 {
                     Id = user.Id,
                     Email = user.Email,
-                    FullName = user.FullName
+                    FullName = user.FullName,
+                    ProfileImageUrl = user.ProfileImageUrl
                 }
             };
         }
@@ -72,7 +73,8 @@ namespace TenisApi.Application.Services
                 {
                     Id = user.Id,
                     Email = user.Email,
-                    FullName = user.FullName
+                    FullName = user.FullName,
+                    ProfileImageUrl = user.ProfileImageUrl
                 }
             };
         }

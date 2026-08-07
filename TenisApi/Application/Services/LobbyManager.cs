@@ -8,10 +8,27 @@ namespace TenisApi.Application.Services
     public class LobbyManager
     {
         private readonly ConcurrentDictionary<string, LobbyStateDto> _lobbies = new();
+        private readonly ConcurrentDictionary<string, string> _connectionToLobby = new();
         private static readonly Random _random = new();
 
+        public void AssociateConnection(string connectionId, string lobbyCode)
+        {
+            _connectionToLobby[connectionId] = lobbyCode.ToUpperInvariant().Trim();
+        }
+
+        public string? GetLobbyCodeByConnection(string connectionId)
+        {
+            _connectionToLobby.TryGetValue(connectionId, out var lobbyCode);
+            return lobbyCode;
+        }
+
+        public void RemoveConnection(string connectionId)
+        {
+            _connectionToLobby.TryRemove(connectionId, out _);
+        }
+
         // Yeni bir lobi odası oluşturur
-        public LobbyStateDto CreateLobby(string hostName, bool isDouble, string? hostPartnerName)
+        public LobbyStateDto CreateLobby(string hostName, bool isDouble, string? hostPartnerName, string? hostProfileImageUrl)
         {
             string code;
             do
@@ -24,6 +41,7 @@ namespace TenisApi.Application.Services
                 Code = code,
                 HostName = hostName,
                 HostPartnerName = hostPartnerName,
+                HostProfileImageUrl = hostProfileImageUrl,
                 IsDouble = isDouble,
                 IsMatchStarted = false,
                 Settings = new LobbySettingsDto()
@@ -34,7 +52,7 @@ namespace TenisApi.Application.Services
         }
 
         // Lobiye rakip/misafir olarak katılır
-        public LobbyStateDto? JoinLobby(string code, string guestName, string? guestPartnerName)
+        public LobbyStateDto? JoinLobby(string code, string guestName, string? guestPartnerName, string? guestProfileImageUrl)
         {
             code = code.ToUpperInvariant().Trim();
             if (!_lobbies.TryGetValue(code, out var lobby))
@@ -44,6 +62,7 @@ namespace TenisApi.Application.Services
 
             lobby.GuestName = guestName;
             lobby.GuestPartnerName = guestPartnerName;
+            lobby.GuestProfileImageUrl = guestProfileImageUrl;
             
             return lobby;
         }

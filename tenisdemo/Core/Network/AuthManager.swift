@@ -58,6 +58,23 @@ class AuthManager: ObservableObject {
         saveAuthSession(response)
     }
     
+    // Profil fotoğrafı yükleme fonksiyonu
+    func uploadProfileImage(imageData: Data) async throws {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let response: AuthUser = try await apiClient.request(UserEndpoint.uploadProfileImage(imageData))
+        
+        // Önbellekteki kullanıcı bilgisini güncelle
+        if var user = self.currentUser {
+            user = AuthUser(id: user.id, email: user.email, fullName: user.fullName, profileImageUrl: response.profileImageUrl)
+            self.currentUser = user
+            if let userData = try? JSONEncoder().encode(user) {
+                UserDefaults.standard.set(userData, forKey: userKey)
+            }
+        }
+    }
+    
     // Çıkış yapma fonksiyonu
     func logout() {
         KeychainHelper.shared.delete(service: tokenService, account: tokenAccount)

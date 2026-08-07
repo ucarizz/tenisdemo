@@ -16,10 +16,43 @@ protocol APIEndpoint {
     var body: Data? { get }
 }
 
+enum AppEnvironment {
+    case development
+    case testServer
+    
+    static var current: AppEnvironment = .testServer
+    
+    var apiBaseURL: URL {
+        switch self {
+        case .development:
+            return URL(string: "http://192.168.1.4:5200/v1")!
+        case .testServer:
+            return URL(string: "http://207.154.234.58:5200/v1")!
+        }
+    }
+    
+    var signalRBaseURL: String {
+        switch self {
+        case .development:
+            return "http://192.168.1.4:5200/hubs/tennis"
+        case .testServer:
+            return "http://207.154.234.58:5200/hubs/tennis"
+        }
+    }
+    
+    var loggingBaseURL: URL {
+        switch self {
+        case .development:
+            return URL(string: "http://192.168.1.4:5200/v1/logs/client-diagnostics")!
+        case .testServer:
+            return URL(string: "http://207.154.234.58:5200/v1/logs/client-diagnostics")!
+        }
+    }
+}
+
 extension APIEndpoint {
     var baseURL: URL {
-        // Varsayılan API adresi (Projeye göre güncellenebilir)
-        return URL(string: "http://192.168.1.4:5200/v1")!
+        return AppEnvironment.current.apiBaseURL
     }
     
     var headers: [String: String]? {

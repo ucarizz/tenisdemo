@@ -321,6 +321,25 @@ struct SetupMatchView: View {
                                 .bold()
                                 .foregroundColor(.emerald)
                             
+                            if let urlStr = lobby.hostProfileImageUrl,
+                               let url = URL(string: urlStr) {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(Color.emerald.opacity(0.6), lineWidth: 1.5))
+                                } placeholder: {
+                                    ProgressView()
+                                        .frame(width: 50, height: 50)
+                                }
+                            } else {
+                                Image(systemName: "person.crop.circle.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.emerald)
+                            }
+                            
                             Text(lobby.hostName)
                                 .font(.system(.body, design: .rounded))
                                 .bold()
@@ -349,6 +368,25 @@ struct SetupMatchView: View {
                                 .foregroundColor(Color(red: 0.95, green: 0.45, blue: 0.15))
                             
                             if let guest = lobby.guestName {
+                                if let urlStr = lobby.guestProfileImageUrl,
+                                   let url = URL(string: urlStr) {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 50, height: 50)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color(red: 0.95, green: 0.45, blue: 0.15).opacity(0.6), lineWidth: 1.5))
+                                    } placeholder: {
+                                        ProgressView()
+                                            .frame(width: 50, height: 50)
+                                    }
+                                } else {
+                                    Image(systemName: "person.crop.circle.fill")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(Color(red: 0.95, green: 0.45, blue: 0.15))
+                                }
+                                
                                 Text(guest)
                                     .font(.system(.body, design: .rounded))
                                     .bold()
@@ -485,7 +523,7 @@ struct SetupMatchView: View {
                 if lobbyRole == 0 {
                     Button(action: {
                         let name = authManager.currentUser?.fullName ?? "OYUNCU 1"
-                        signalRService.createLobby(hostName: name, isDouble: viewModel.isDouble, hostPartnerName: viewModel.isDouble ? viewModel.player1PartnerName : nil)
+                        signalRService.createLobby(hostName: name, isDouble: viewModel.isDouble, hostPartnerName: viewModel.isDouble ? viewModel.player1PartnerName : nil, hostProfileImageUrl: authManager.currentUser?.profileImageUrl)
                     }) {
                         buttonContent(title: "Lobi Oluştur", icon: "plus.circle.fill", color: Color(red: 0.86, green: 0.98, blue: 0.22))
                     }
@@ -493,7 +531,7 @@ struct SetupMatchView: View {
                     Button(action: {
                         guard !lobbyCodeInput.isEmpty else { return }
                         let name = authManager.currentUser?.fullName ?? "OYUNCU 2"
-                        signalRService.joinLobby(code: lobbyCodeInput, guestName: name, guestPartnerName: viewModel.isDouble ? viewModel.player2PartnerName : nil)
+                        signalRService.joinLobby(code: lobbyCodeInput, guestName: name, guestPartnerName: viewModel.isDouble ? viewModel.player2PartnerName : nil, guestProfileImageUrl: authManager.currentUser?.profileImageUrl)
                     }) {
                         buttonContent(title: "Lobiye Bağlan", icon: "link", color: Color.emerald)
                     }

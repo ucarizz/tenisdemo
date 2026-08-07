@@ -12,160 +12,172 @@ struct ContentView: View {
     @StateObject private var connectivityManager = WatchConnectivityManager.shared
     @State private var showSettings = false
     
+    @State private var selectedTab = 0
+    
     var body: some View {
-        if !viewModel.hasMatchStarted && !connectivityManager.isCompanionActive {
-            SetupMatchView(viewModel: viewModel)
-        } else if viewModel.state.isMatchOver {
-            MatchSummaryView(viewModel: viewModel)
-        } else {
-            VStack(spacing: 6) {
-                // Üst Bar: Başlık ve Set Skorları
-                HStack {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(connectivityManager.isCompanionActive ? "CANLI" : "YEREL")
-                            .font(.system(size: 10, weight: .black, design: .rounded))
-                            .foregroundColor(connectivityManager.isCompanionActive ? Color(red: 0.1, green: 0.8, blue: 0.5) : .gray)
-                        
-                        Text("MAÇI")
-                            .font(.system(size: 8, weight: .bold, design: .rounded))
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Spacer()
-                    
-                    // Set Skorları
-                    if !viewModel.state.setScores.isEmpty {
-                        HStack(spacing: 3) {
-                            ForEach(viewModel.state.setScores) { setScore in
-                                Text("\(setScore.p1Games)-\(setScore.p2Games)")
+        TabView(selection: $selectedTab) {
+            // Tab 1: Skor Takibi
+            VStack {
+                if !viewModel.hasMatchStarted && !connectivityManager.isCompanionActive {
+                    SetupMatchView(viewModel: viewModel)
+                } else if viewModel.state.isMatchOver {
+                    MatchSummaryView(viewModel: viewModel)
+                } else {
+                    VStack(spacing: 6) {
+                        // Üst Bar: Başlık ve Set Skorları
+                        HStack {
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(connectivityManager.isCompanionActive ? "CANLI" : "YEREL")
+                                    .font(.system(size: 10, weight: .black, design: .rounded))
+                                    .foregroundColor(connectivityManager.isCompanionActive ? Color(red: 0.1, green: 0.8, blue: 0.5) : .gray)
+                                
+                                Text("MAÇI")
+                                    .font(.system(size: 8, weight: .bold, design: .rounded))
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            Spacer()
+                            
+                            // Set Skorları
+                            if !viewModel.state.setScores.isEmpty {
+                                HStack(spacing: 3) {
+                                    ForEach(viewModel.state.setScores) { setScore in
+                                        Text("\(setScore.p1Games)-\(setScore.p2Games)")
+                                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color.white.opacity(0.12))
+                                            .cornerRadius(4)
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            } else {
+                                Text("0-0")
                                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(Color.white.opacity(0.12))
+                                    .background(Color.white.opacity(0.08))
                                     .cornerRadius(4)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            if viewModel.state.isMatchTiebreak || viewModel.state.isTiebreak {
+                                Text("TB")
+                                    .font(.system(size: 9, weight: .black, design: .rounded))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                    .cornerRadius(4)
                             }
                         }
-                    } else {
-                        Text("0-0")
-                            .font(.system(size: 10, weight: .bold, design: .monospaced))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                        .padding(.horizontal, 6)
+                        .frame(height: 24)
+                        
+                        // Oyuncu Kartları (Tıklanabilir Alanlar)
+                        VStack(spacing: 5) {
+                            PlayerCard(
+                                player: .player1,
+                                name: viewModel.isDouble 
+                                    ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
+                                    : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
+                                points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
+                                games: "\(viewModel.state.p1Games)",
+                                sets: "\(viewModel.state.p1Sets)",
+                                isServing: viewModel.state.server == .player1,
+                                color: Color(red: 0.1, green: 0.8, blue: 0.5), // Emerald
+                                isMatchOver: viewModel.state.isMatchOver,
+                                onTap: {
+                                    if connectivityManager.isCompanionActive {
+                                        connectivityManager.sendScoreAction(for: .player1)
+                                    } else {
+                                        viewModel.scorePoint(for: .player1)
+                                    }
+                                },
+                                onLongPressServer: { viewModel.toggleStartingServer() }
+                            )
+                            
+                            PlayerCard(
+                                player: .player2,
+                                name: viewModel.isDouble 
+                                    ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
+                                    : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
+                                points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
+                                games: "\(viewModel.state.p2Games)",
+                                sets: "\(viewModel.state.p2Sets)",
+                                isServing: viewModel.state.server == .player2,
+                                color: Color(red: 0.95, green: 0.45, blue: 0.15), // Orange
+                                isMatchOver: viewModel.state.isMatchOver,
+                                onTap: {
+                                    if connectivityManager.isCompanionActive {
+                                        connectivityManager.sendScoreAction(for: .player2)
+                                    } else {
+                                        viewModel.scorePoint(for: .player2)
+                                    }
+                                },
+                                onLongPressServer: { viewModel.toggleStartingServer() }
+                            )
+                        }
+                        
+                        // Alt Kontrol Paneli (Geri Al / Ayarlar)
+                        HStack {
+                            // Geri Al (Undo) Butonu
+                            Button(action: {
+                                if connectivityManager.isCompanionActive {
+                                    connectivityManager.sendUndoAction()
+                                } else {
+                                    viewModel.undo()
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "arrow.uturn.backward")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text("Geri")
+                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                }
+                                .foregroundColor(.white)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.white.opacity(0.12))
+                            .cornerRadius(8)
+                            .disabled(connectivityManager.isCompanionActive ? !connectivityManager.canUndo : viewModel.history.isEmpty)
+                            
+                            Spacer()
+                            
+                            // Ayarlar Butonu
+                            Button(action: {
+                                showSettings = true
+                            }) {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
                             .background(Color.white.opacity(0.08))
-                            .cornerRadius(4)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    if viewModel.state.isMatchTiebreak || viewModel.state.isTiebreak {
-                        Text("TB")
-                            .font(.system(size: 9, weight: .black, design: .rounded))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                            .cornerRadius(4)
-                    }
-                }
-                .padding(.horizontal, 6)
-                .frame(height: 24)
-                
-                // Oyuncu Kartları (Tıklanabilir Alanlar)
-                VStack(spacing: 5) {
-                    PlayerCard(
-                        player: .player1,
-                        name: viewModel.isDouble 
-                            ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                            : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                        points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                        games: "\(viewModel.state.p1Games)",
-                        sets: "\(viewModel.state.p1Sets)",
-                        isServing: viewModel.state.server == .player1,
-                        color: Color(red: 0.1, green: 0.8, blue: 0.5), // Emerald
-                        isMatchOver: viewModel.state.isMatchOver,
-                        onTap: {
-                            if connectivityManager.isCompanionActive {
-                                connectivityManager.sendScoreAction(for: .player1)
-                            } else {
-                                viewModel.scorePoint(for: .player1)
-                            }
-                        },
-                        onLongPressServer: { viewModel.toggleStartingServer() }
-                    )
-                    
-                    PlayerCard(
-                        player: .player2,
-                        name: viewModel.isDouble 
-                            ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                            : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                        points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                        games: "\(viewModel.state.p2Games)",
-                        sets: "\(viewModel.state.p2Sets)",
-                        isServing: viewModel.state.server == .player2,
-                        color: Color(red: 0.95, green: 0.45, blue: 0.15), // Orange
-                        isMatchOver: viewModel.state.isMatchOver,
-                        onTap: {
-                            if connectivityManager.isCompanionActive {
-                                connectivityManager.sendScoreAction(for: .player2)
-                            } else {
-                                viewModel.scorePoint(for: .player2)
-                            }
-                        },
-                        onLongPressServer: { viewModel.toggleStartingServer() }
-                    )
-                }
-                
-                // Alt Kontrol Paneli (Geri Al / Ayarlar)
-                HStack {
-                    // Geri Al (Undo) Butonu
-                    Button(action: {
-                        if connectivityManager.isCompanionActive {
-                            connectivityManager.sendUndoAction()
-                        } else {
-                            viewModel.undo()
+                            .cornerRadius(8)
                         }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.system(size: 11, weight: .bold))
-                            Text("Geri")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                        }
-                        .foregroundColor(.white)
+                        .padding(.horizontal, 4)
+                        .frame(height: 24)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.12))
-                    .cornerRadius(8)
-                    .disabled(connectivityManager.isCompanionActive ? !connectivityManager.canUndo : viewModel.history.isEmpty)
-                    
-                    Spacer()
-                    
-                    // Ayarlar Butonu
-                    Button(action: {
-                        showSettings = true
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.08))
-                    .cornerRadius(8)
+                    .padding(.horizontal, 4)
+                    .padding(.bottom, 2)
                 }
-                .padding(.horizontal, 4)
-                .frame(height: 24)
             }
-            .padding(.horizontal, 4)
-            .padding(.bottom, 2)
-            .sheet(isPresented: $showSettings) {
-                SettingsView(viewModel: viewModel, showSettings: $showSettings)
-            }
-            .onAppear {
-                connectivityManager.setup(viewModel: viewModel)
-            }
+            .tag(0)
+            
+            // Tab 2: Vuruş Hızı Takibi
+            SwingTrackerView()
+                .tag(1)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(viewModel: viewModel, showSettings: $showSettings)
+        }
+        .onAppear {
+            connectivityManager.setup(viewModel: viewModel)
         }
     }
 }

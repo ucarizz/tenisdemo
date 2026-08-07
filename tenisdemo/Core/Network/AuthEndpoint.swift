@@ -4,6 +4,7 @@ struct AuthUser: Codable {
     let id: Int
     let email: String
     let fullName: String
+    let profileImageUrl: String?
 }
 
 struct AuthResponse: Codable {

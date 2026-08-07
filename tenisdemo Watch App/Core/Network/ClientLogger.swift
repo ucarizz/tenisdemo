@@ -4,7 +4,9 @@ import WatchKit
 class ClientLogger {
     static let shared = ClientLogger()
     
-    private let baseURL = URL(string: "http://192.168.1.4:5200/v1/logs/client-diagnostics")!
+    private var baseURL: URL {
+        return AppEnvironment.current.loggingBaseURL
+    }
     
     private init() {}
     

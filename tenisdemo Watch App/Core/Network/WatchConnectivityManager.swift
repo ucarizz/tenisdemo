@@ -129,6 +129,15 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         self.isCompanionActive = false
     }
     
+    func sendSwingRecord(speedKmh: Double, accelerationG: Double, swingType: String) {
+        sendMessageToCompanion([
+            "action": "recordSwing",
+            "speedKmh": speedKmh,
+            "accelerationG": accelerationG,
+            "swingType": swingType
+        ])
+    }
+    
     private func sendMessageToCompanion(_ message: [String: Any]) {
         guard session.activationState == .activated else { return }
         

@@ -11,6 +11,7 @@ struct MatchTrackerView: View {
     @StateObject private var viewModel = TennisMatchViewModel()
     @State private var showSettings = false
     @StateObject private var signalRService = SignalRService.shared
+    @State private var showOpponentLeftAlert = false
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
@@ -254,6 +255,19 @@ struct MatchTrackerView: View {
                     viewModel.applyLiveMatchState(remote)
                 }
             }
+        }
+        .onChange(of: signalRService.lobbyState) { newLobbyState in
+            if viewModel.hasMatchStarted && newLobbyState == nil && !viewModel.state.isMatchOver {
+                showOpponentLeftAlert = true
+                viewModel.newMatch()
+            }
+        }
+        .alert(isPresented: $showOpponentLeftAlert) {
+            Alert(
+                title: Text("Maç İptal Edildi"),
+                message: Text("Rakip oyuncu maçtan veya lobiden ayrıldı."),
+                dismissButton: .default(Text("Tamam"))
+            )
         }
     }
 }

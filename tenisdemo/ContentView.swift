@@ -42,12 +42,19 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            // Tab 3: Profilim (User Profile & Settings)
+            // Tab 3: Vuruş Analizi (Swing Analysis)
+            SwingAnalysisView()
+                .tabItem {
+                    Label("Vuruş Analizi", systemImage: "gauge.with.needle.fill")
+                }
+                .tag(2)
+            
+            // Tab 4: Profilim (User Profile & Settings)
             ProfileView()
                 .tabItem {
                     Label("Profilim", systemImage: "person.fill")
                 }
-                .tag(2)
+                .tag(3)
         }
         .tint(Color(red: 0.86, green: 0.98, blue: 0.22)) // Aktif sekme rengi
     }

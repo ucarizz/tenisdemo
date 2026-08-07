@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TenisApi.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using TenisApi.Infrastructure.Persistence;
 namespace TenisApi.Migrations
 {
     [DbContext(typeof(TenisDbContext))]
-    partial class TenisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260804164235_AddProfileImageUrl")]
+    partial class AddProfileImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,44 +137,6 @@ namespace TenisApi.Migrations
                     b.ToTable("match_point_histories", (string)null);
                 });
 
-            modelBuilder.Entity("TenisApi.Domain.Entities.SwingRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("AccelerationG")
-                        .HasColumnType("double precision")
-                        .HasColumnName("acceleration_g");
-
-                    b.Property<DateTime>("RecordedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_at");
-
-                    b.Property<double>("SpeedKmh")
-                        .HasColumnType("double precision")
-                        .HasColumnName("speed_kmh");
-
-                    b.Property<string>("SwingType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("swing_type");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("swing_records", (string)null);
-                });
-
             modelBuilder.Entity("TenisApi.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -231,17 +196,6 @@ namespace TenisApi.Migrations
                         .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("TenisApi.Domain.Entities.SwingRecord", b =>
-                {
-                    b.HasOne("TenisApi.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TenisApi.Domain.Entities.LeagueMatch", b =>
