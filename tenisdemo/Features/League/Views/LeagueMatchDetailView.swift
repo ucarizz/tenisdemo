@@ -134,6 +134,68 @@ struct LeagueMatchDetailView: View {
                             .stroke(Color.white.opacity(0.06), lineWidth: 1)
                     )
                     
+                    // 1.5. Sayı Geçmişi (Puan Akışı)
+                    if let history = match.pointHistories, !history.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("MAÇ SAYI GEÇMİŞİ")
+                                .font(.system(.subheadline, design: .rounded))
+                                .bold()
+                                .foregroundColor(.gray)
+                                .tracking(1)
+                            
+                            ScrollView {
+                                LazyVStack(spacing: 8) {
+                                    ForEach(history.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })) { pt in
+                                        HStack {
+                                            Text("#\(pt.sequenceNumber)")
+                                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                                .foregroundColor(.gray)
+                                                .frame(width: 28, alignment: .leading)
+                                            
+                                            // Servis atan ikonu
+                                            Image(systemName: "tennisball.fill")
+                                                .font(.system(size: 8))
+                                                .foregroundColor(pt.server.lowercased() == "p1" ? Color(red: 0.86, green: 0.98, blue: 0.22) : .orange)
+                                            
+                                            Text(pt.server.lowercased() == "p1" ? "\(match.player1Name)" : "\(match.player2Name)")
+                                                .font(.system(size: 11, design: .rounded))
+                                                .foregroundColor(.white.opacity(0.8))
+                                                .lineLimit(1)
+                                            
+                                            Spacer()
+                                            
+                                            // Sayı Skoru (Örn: 40 - 15)
+                                            Text("\(pt.p1Points) - \(pt.p2Points)")
+                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.white.opacity(0.06))
+                                                .cornerRadius(4)
+                                            
+                                            // Oyun durum bilgisi (Örn: Oyun: 2-1)
+                                            Text("Set: \(pt.p1Sets)-\(pt.p2Sets) (Oyun: \(pt.p1Games)-\(pt.p2Games))")
+                                                .font(.system(size: 9, design: .rounded))
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 8)
+                                        .background(Color.white.opacity(0.02))
+                                        .cornerRadius(8)
+                                    }
+                                }
+                            }
+                            .frame(maxHeight: 180)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.03))
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                        )
+                    }
+                    
                     // 2. Vuruş Analizi Bölümü
                     VStack(alignment: .leading, spacing: 16) {
                         Text("MAÇ VURUŞ ANALİZİ")
