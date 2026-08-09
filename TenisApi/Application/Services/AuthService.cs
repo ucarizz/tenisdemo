@@ -168,10 +168,6 @@ namespace TenisApi.Application.Services
                 throw new UnauthorizedAccessException("Girdiğiniz doğrulama kodu geçersiz veya süresi dolmuş.");
             }
 
-            // Kodu kullanıldı olarak işaretle
-            otp.MarkAsUsed();
-            await _context.SaveChangesAsync();
-
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
             if (user == null)
@@ -179,6 +175,7 @@ namespace TenisApi.Application.Services
                 // Kullanıcı bulunamadı, kayıt olmalı
                 if (string.IsNullOrWhiteSpace(request.FullName))
                 {
+                    // Kod doğru ama kayıt tamamlanmadı, bu yüzden henüz "IsUsed" yapmıyoruz.
                     return new VerifyOtpResponse
                     {
                         RequiresFullName = true,
@@ -194,8 +191,11 @@ namespace TenisApi.Application.Services
                 user = new User(normalizedEmail, passwordHash, request.FullName);
 
                 await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
             }
+
+            // Kodu sadece giriş/kayıt başarıyla tamamlandığında kullanıldı olarak işaretle
+            otp.MarkAsUsed();
+            await _context.SaveChangesAsync();
 
             // JWT token üret
             var token = GenerateJwtToken(user);
