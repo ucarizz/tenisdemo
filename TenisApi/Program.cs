@@ -11,6 +11,7 @@ using TenisApi.Hubs;
 using Serilog;
 using Serilog.Sinks.Graylog;
 using TenisApi.Infrastructure.Middlewares;
+using TenisApi.Infrastructure.Services;
 using Scalar.AspNetCore;
 
 var graylogHost = Environment.GetEnvironmentVariable("GRAYLOG_HOST") ?? "127.0.0.1";
@@ -38,9 +39,11 @@ builder.Services.AddDbContext<TenisDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Register Repositories and Services (Dependency Injection)
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ILeagueMatchRepository, LeagueMatchRepository>();
 builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<LobbyManager>();
 
 // Configure JWT Authentication

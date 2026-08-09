@@ -97,5 +97,18 @@ namespace TenisApi.Domain.Entities
 
             MatchDate = newDate;
         }
+
+        // Kullanıcı hesabını sildiğinde lig maçındaki ilişkisini koparan iş kuralı
+        public void RemoveUserAssociation(int userId)
+        {
+            if (HostUserId == userId)
+            {
+                HostUserId = null;
+            }
+            if (GuestUserId == userId)
+            {
+                GuestUserId = null;
+            }
+        }
     }
 }

@@ -5,6 +5,8 @@ struct ProfileView: View {
     @StateObject private var authManager = AuthManager.shared
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var uploadError: String? = nil
+    @State private var showDeleteConfirmation = false
+    @State private var deleteError: String? = nil
     
     var body: some View {
         ZStack {
@@ -126,29 +128,79 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                // Çıkış Yap Butonu
-                Button(action: {
-                    authManager.logout()
-                }) {
-                    HStack {
-                        Image(systemName: "power")
-                            .font(.system(size: 16, weight: .bold))
-                        Text("Oturumu Kapat")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
+                if let deleteError = deleteError {
+                    Text(deleteError)
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundColor(.red)
+                        .padding(.horizontal, 24)
+                }
+                
+                // Oturum ve Hesap Yönetimi Butonları
+                VStack(spacing: 12) {
+                    // Çıkış Yap Butonu
+                    Button(action: {
+                        authManager.logout()
+                    }) {
+                        HStack {
+                            Image(systemName: "power")
+                                .font(.system(size: 16, weight: .bold))
+                            Text("Oturumu Kapat")
+                                .font(.system(.body, design: .rounded))
+                                .bold()
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.red.opacity(0.15))
-                    .cornerRadius(14)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.red.opacity(0.3), lineWidth: 1)
-                    )
+                    
+                    // Hesabı Sil Butonu
+                    Button(action: {
+                        showDeleteConfirmation = true
+                    }) {
+                        HStack {
+                            Image(systemName: "trash")
+                                .font(.system(size: 16, weight: .bold))
+                            Text("Hesabımı Sil")
+                                .font(.system(.body, design: .rounded))
+                                .bold()
+                        }
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color.red.opacity(0.12))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.red.opacity(0.25), lineWidth: 1)
+                        )
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
+            }
+            .alert("Hesabımı Sil", isPresented: $showDeleteConfirmation) {
+                Button("İptal", role: .cancel) { }
+                Button("Sil", role: .destructive) {
+                    deleteUserAccount()
+                }
+            } message: {
+                Text("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm maç/vuruş geçmişiniz kalıcı olarak silinir.")
+            }
+        }
+    }
+    
+    private func deleteUserAccount() {
+        Task {
+            do {
+                try await authManager.deleteAccount()
+            } catch {
+                deleteError = error.localizedDescription
             }
         }
     }

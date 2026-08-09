@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -105,6 +106,39 @@ namespace TenisApi.Controllers
                 FullName = user.FullName,
                 ProfileImageUrl = user.ProfileImageUrl
             });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            // Kullanıcı kimliğini JWT'den alıyoruz
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
+            {
+                return Unauthorized(new { message = "Geçersiz kullanıcı oturumu." });
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "Kullanıcı bulunamadı." });
+            }
+
+            // Lig maçlarındaki ev sahibi/misafir ilişkilerini koparıyoruz (veri bütünlüğü için)
+            var matches = await _context.Matches
+                .Where(m => m.HostUserId == userId || m.GuestUserId == userId)
+                .ToListAsync();
+
+            foreach (var match in matches)
+            {
+                match.RemoveUserAssociation(userId);
+            }
+
+            // Kullanıcıyı siliyoruz (SwingRecord kayıtları cascade delete ile otomatik silinir)
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Hesabınız başarıyla silindi." });
         }
     }
 }

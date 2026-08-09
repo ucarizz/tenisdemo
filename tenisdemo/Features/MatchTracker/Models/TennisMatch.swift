@@ -39,6 +39,14 @@ struct MatchState: Codable, Equatable {
     var server: Player = .player1
     var isMatchOver: Bool = false
     var winner: Player? = nil
+    
+    // Story paylaşım kartı için yeni istatistik alanları
+    var p1Aces: Int = 0
+    var p2Aces: Int = 0
+    var p1Winners: Int = 0
+    var p2Winners: Int = 0
+    var startTime: Date? = nil
+    var endTime: Date? = nil
 }
 
 class TennisMatchViewModel: ObservableObject {
@@ -60,6 +68,7 @@ class TennisMatchViewModel: ObservableObject {
     
     func startMatch() {
         reset()
+        state.startTime = Date()
         hasMatchStarted = true
         activeMatchId = nil
         
@@ -258,10 +267,12 @@ class TennisMatchViewModel: ObservableObject {
         if state.p1Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player1
+            state.endTime = Date()
             ClientLogger.shared.info("Match finished! Winner: \(p1)")
         } else if state.p2Sets >= setsToWin {
             state.isMatchOver = true
             state.winner = .player2
+            state.endTime = Date()
             ClientLogger.shared.info("Match finished! Winner: \(p2)")
         } else {
             if useMatchTiebreak && state.p1Sets == state.p2Sets && state.p1Sets == (setsToWin - 1) {
@@ -292,6 +303,7 @@ class TennisMatchViewModel: ObservableObject {
         state.isMatchTiebreak = false
         state.isMatchOver = true
         state.winner = player
+        state.endTime = Date()
     }
     
     private func toggleServer() {

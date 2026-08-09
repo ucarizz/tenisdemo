@@ -7,5 +7,7 @@ namespace TenisApi.Application.Services
     {
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> LoginAsync(LoginRequest request);
+        Task SendOtpAsync(SendOtpRequest request);
+        Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request);
     }
 }
