@@ -48,11 +48,11 @@ class AuthManager: ObservableObject {
     }
     
     // Kayıt olma fonksiyonu
-    func register(email: String, password: String, fullName: String) async throws {
+    func register(email: String, password: String, fullName: String, isKvkkAccepted: Bool) async throws {
         isLoading = true
         defer { isLoading = false }
         
-        let request = RegisterRequest(email: email, password: password, fullName: fullName)
+        let request = RegisterRequest(email: email, password: password, fullName: fullName, isKvkkAccepted: isKvkkAccepted)
         let response: AuthResponse = try await apiClient.request(AuthEndpoint.register(request))
         
         saveAuthSession(response)

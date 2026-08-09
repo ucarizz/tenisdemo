@@ -252,7 +252,7 @@ struct RegisterView: View {
         
         Task {
             do {
-                try await authManager.register(email: email, password: password, fullName: fullName)
+                try await authManager.register(email: email, password: password, fullName: fullName, isKvkkAccepted: isKvkkAccepted)
             } catch {
                 errorMessage = error.localizedDescription
             }

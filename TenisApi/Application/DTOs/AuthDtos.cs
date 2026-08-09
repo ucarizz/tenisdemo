@@ -18,6 +18,10 @@ namespace TenisApi.Application.DTOs
         [Required]
         [JsonPropertyName("full_name")]
         public string FullName { get; set; } = string.Empty;
+
+        [Required]
+        [JsonPropertyName("is_kvkk_accepted")]
+        public bool IsKvkkAccepted { get; set; }
     }
 
     public class LoginRequest

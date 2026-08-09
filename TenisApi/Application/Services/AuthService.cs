@@ -36,7 +36,7 @@ namespace TenisApi.Application.Services
             }
 
             var passwordHash = PasswordHasher.HashPassword(request.Password);
-            var user = new User(normalizedEmail, passwordHash, request.FullName);
+            var user = new User(normalizedEmail, passwordHash, request.FullName, request.IsKvkkAccepted);
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();

@@ -16,6 +16,7 @@ struct RegisterRequest: Encodable {
     let email: String
     let password: String
     let fullName: String
+    let isKvkkAccepted: Bool
 }
 
 struct LoginRequest: Encodable {
