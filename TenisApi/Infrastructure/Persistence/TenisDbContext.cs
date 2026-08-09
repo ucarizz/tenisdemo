@@ -9,6 +9,7 @@ namespace TenisApi.Infrastructure.Persistence
         public DbSet<User> Users => Set<User>();
         public DbSet<SwingRecord> SwingRecords => Set<SwingRecord>();
         public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
+        public DbSet<MatchLocation> MatchLocations => Set<MatchLocation>();
 
         public TenisDbContext(DbContextOptions<TenisDbContext> options) : base(options)
         {

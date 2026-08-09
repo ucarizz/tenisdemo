@@ -14,5 +14,13 @@
 	</array>
 	<key>NSMotionUsageDescription</key>
 	<string>Tenis vuruş hızınızı ve ivmesini ölçmek için hareket sensörlerine erişim gerekir.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Maç sırasında ısı haritanızı çıkarabilmek için konumunuza erişim gerekir.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Telefonunuz cebinizdeyken veya ekran kapalıyken konum takibini sürdürebilmek için her zaman konum izni gerekir.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 </dict>
 </plist>

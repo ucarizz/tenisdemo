@@ -92,6 +92,32 @@ namespace TenisApi.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [HttpPost("{id}/locations")]
+        public async Task<IActionResult> SaveMatchLocations(int id, [FromBody] SaveMatchLocationsRequest request)
+        {
+            var match = await _leagueService.GetMatchByIdAsync(id);
+            if (match == null)
+            {
+                return NotFound(new { message = "Maç bulunamadı." });
+            }
+
+            await _leagueService.SaveMatchLocationsAsync(id, request.Locations);
+            return Ok(new { message = "Konum verileri başarıyla kaydedildi." });
+        }
+
+        [HttpGet("{id}/locations")]
+        public async Task<ActionResult<IEnumerable<MatchLocationDto>>> GetMatchLocations(int id)
+        {
+            var match = await _leagueService.GetMatchByIdAsync(id);
+            if (match == null)
+            {
+                return NotFound(new { message = "Maç bulunamadı." });
+            }
+
+            var locations = await _leagueService.GetMatchLocationsAsync(id);
+            return Ok(locations);
+        }
     }
 
     public class UpdateLiveProgressRequest
@@ -157,5 +183,11 @@ namespace TenisApi.Controllers
 
         [JsonPropertyName("history")]
         public List<MatchPointHistoryDto> History { get; set; } = new();
+    }
+
+    public class SaveMatchLocationsRequest
+    {
+        [JsonPropertyName("locations")]
+        public List<MatchLocationDto> Locations { get; set; } = new();
     }
 }

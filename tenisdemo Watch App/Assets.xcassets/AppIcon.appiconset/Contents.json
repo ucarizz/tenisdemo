@@ -2,8 +2,56 @@
   "images" : [
     {
       "filename" : "appicon_universal.png",
-      "idiom" : "universal",
-      "platform" : "watchos",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "24x24"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "3x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "33x33"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "40x40"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "44x44"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "46x46"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "size" : "50x50"
+    },
+    {
+      "filename" : "appicon_universal.png",
+      "idiom" : "watch",
+      "scale" : "1x",
       "size" : "1024x1024"
     }
   ],

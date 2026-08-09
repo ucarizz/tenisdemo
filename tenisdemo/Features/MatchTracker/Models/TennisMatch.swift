@@ -71,6 +71,8 @@ class TennisMatchViewModel: ObservableObject {
         state.startTime = Date()
         hasMatchStarted = true
         activeMatchId = nil
+        MatchLocationManager.shared.startTracking()
+        UIApplication.shared.isIdleTimerDisabled = true
         
         let p1 = player1Name.isEmpty ? "SİZ" : player1Name
         let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
@@ -112,6 +114,8 @@ class TennisMatchViewModel: ObservableObject {
     func newMatch() {
         reset()
         hasMatchStarted = false
+        MatchLocationManager.shared.reset()
+        UIApplication.shared.isIdleTimerDisabled = false
     }
     
     func scorePoint(for player: Player) {
@@ -133,7 +137,12 @@ class TennisMatchViewModel: ObservableObject {
         
         // Maç bittiyse otomatik olarak sunucuya kaydet
         if state.isMatchOver {
+            let _ = MatchLocationManager.shared.stopTracking()
             syncMatchResult()
+            if let matchId = activeMatchId {
+                uploadLocations(for: matchId)
+            }
+            UIApplication.shared.isIdleTimerDisabled = false
         }
     }
     
@@ -372,6 +381,10 @@ class TennisMatchViewModel: ObservableObject {
         history.removeAll()
         state = MatchState()
         state.server = startingServer
+        MatchLocationManager.shared.reset()
+        if hasMatchStarted {
+            MatchLocationManager.shared.startTracking()
+        }
         
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
@@ -463,8 +476,26 @@ class TennisMatchViewModel: ObservableObject {
                     history: historyItems
                 )
                 print("Maç sunucuya başarıyla kaydedildi. Veritabanı ID: \(savedMatch.id)")
+                if self.activeMatchId == nil {
+                    self.uploadLocations(for: savedMatch.id)
+                }
             } catch {
                 print("Maç sunucuya kaydedilemedi: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func uploadLocations(for matchId: Int) {
+        let locations = MatchLocationManager.shared.locations
+        guard !locations.isEmpty else { return }
+        
+        Task {
+            do {
+                let service = LeagueService()
+                try await service.uploadMatchLocations(matchId: matchId, locations: locations)
+                print("DEBUG: Locations successfully uploaded to match \(matchId)")
+            } catch {
+                print("DEBUG: Failed to upload locations to match \(matchId): \(error.localizedDescription)")
             }
         }
     }

@@ -15,10 +15,12 @@ struct MatchSummaryView: View {
     @State private var isRendering = false
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            // Başarı Görseli
+        VStack(spacing: 0) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 24) {
+                    Spacer()
+                    
+                    // Başarı Görseli
             VStack(spacing: 12) {
                 ZStack {
                     Circle()
@@ -98,29 +100,62 @@ struct MatchSummaryView: View {
                 let totalGamesP1 = viewModel.state.setScores.reduce(0) { $0 + $1.p1Games }
                 let totalGamesP2 = viewModel.state.setScores.reduce(0) { $0 + $1.p2Games }
                 
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Toplam Alınan Game")
-                            .font(.system(.subheadline, design: .rounded))
-                            .foregroundColor(.gray)
-                        Text("Siz: \(totalGamesP1)  /  Rakip: \(totalGamesP2)")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(.white)
+                VStack(spacing: 12) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Toplam Alınan Game")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundColor(.gray)
+                            Text("Siz: \(totalGamesP1)  /  Rakip: \(totalGamesP2)")
+                                .font(.system(.body, design: .rounded))
+                                .bold()
+                                .foregroundColor(.white)
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .padding()
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
+                    
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Toplam Koşu Mesafesi")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundColor(.gray)
+                            Text(formatDistance(MatchLocationManager.shared.calculateTotalDistance()))
+                                .font(.system(.body, design: .rounded))
+                                .bold()
+                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                        }
+                        Spacer()
+                        
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
                 }
-                .padding()
-                .background(Color.white.opacity(0.03))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                )
             }
             .padding(.horizontal)
             
-            Spacer()
+            // Isı Haritası Kartı
+            VStack(alignment: .leading, spacing: 12) {
+                MatchHeatmapView(locations: MatchLocationManager.shared.locations)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 24)
+                }
+            }
             
             // Aksiyon Butonları
             VStack(spacing: 12) {
@@ -328,6 +363,14 @@ struct MatchSummaryView: View {
             // Instagram yüklü değilse standart paylaşım sayfasını göster
             self.shareImage = image
             self.showShareSheet = true
+        }
+    }
+    
+    private func formatDistance(_ meters: Double) -> String {
+        if meters < 1000.0 {
+            return String(format: "%.0f m", meters)
+        } else {
+            return String(format: "%.2f km", meters / 1000.0)
         }
     }
 }

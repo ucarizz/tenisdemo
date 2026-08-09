@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 class MatchSwingViewModel: ObservableObject {
     @Published var records: [SwingRecordItem] = []
@@ -41,6 +42,10 @@ class MatchSwingViewModel: ObservableObject {
 struct LeagueMatchDetailView: View {
     let match: LeagueMatch
     @StateObject private var viewModel = MatchSwingViewModel()
+    
+    @State private var locations: [TrackedLocation] = []
+    @State private var isLoadingLocations = false
+    @State private var locationsError: String? = nil
     
     var body: some View {
         ZStack {
@@ -196,6 +201,29 @@ struct LeagueMatchDetailView: View {
                         )
                     }
                     
+                    // Isı Haritası Bölümü
+                    VStack(alignment: .leading, spacing: 16) {
+                        if isLoadingLocations {
+                            HStack {
+                                Spacer()
+                                ProgressView("Isı haritası yükleniyor...")
+                                    .tint(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                    .foregroundColor(.gray)
+                                Spacer()
+                            }
+                            .padding(.vertical, 24)
+                        } else {
+                            MatchHeatmapView(locations: locations)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
+                    
                     // 2. Vuruş Analizi Bölümü
                     VStack(alignment: .leading, spacing: 16) {
                         Text("MAÇ VURUŞ ANALİZİ")
@@ -234,10 +262,16 @@ struct LeagueMatchDetailView: View {
                             .cornerRadius(12)
                         } else {
                             // İstatistik Kartları
-                            HStack(spacing: 12) {
-                                SummaryStatBox(title: "Ort. Hız", value: String(format: "%.0f km/h", viewModel.averageSpeed), color: Color(red: 0.86, green: 0.98, blue: 0.22))
-                                SummaryStatBox(title: "Maks Hız", value: String(format: "%.0f km/h", viewModel.maxSpeed), color: Color(red: 0.1, green: 0.8, blue: 0.5))
-                                SummaryStatBox(title: "Toplam", value: "\(viewModel.records.count) Vuruş", color: .orange)
+                            VStack(spacing: 12) {
+                                HStack(spacing: 12) {
+                                    SummaryStatBox(title: "Ort. Hız", value: String(format: "%.0f km/h", viewModel.averageSpeed), color: Color(red: 0.86, green: 0.98, blue: 0.22))
+                                    SummaryStatBox(title: "Maks Hız", value: String(format: "%.0f km/h", viewModel.maxSpeed), color: Color(red: 0.1, green: 0.8, blue: 0.5))
+                                    SummaryStatBox(title: "Toplam", value: "\(viewModel.records.count) Vuruş", color: .orange)
+                                }
+                                
+                                if !locations.isEmpty {
+                                    SummaryStatBox(title: "Koşu Mesafesi", value: formatDistance(calculateTotalDistance(for: locations)), color: Color(red: 0.86, green: 0.98, blue: 0.22))
+                                }
                             }
                             
                             // Vuruş Kayıtları Listesi
@@ -297,6 +331,39 @@ struct LeagueMatchDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadSwings(for: match.id)
+            await loadLocations()
+        }
+    }
+    
+    private func loadLocations() async {
+        isLoadingLocations = true
+        locationsError = nil
+        do {
+            let service = LeagueService()
+            self.locations = try await service.fetchMatchLocations(matchId: match.id)
+        } catch {
+            self.locationsError = error.localizedDescription
+            print("DEBUG: Failed to load locations: \(error.localizedDescription)")
+        }
+        isLoadingLocations = false
+    }
+    
+    private func calculateTotalDistance(for trackedLocations: [TrackedLocation]) -> Double {
+        guard trackedLocations.count > 1 else { return 0.0 }
+        var totalDistance: Double = 0.0
+        for i in 0..<(trackedLocations.count - 1) {
+            let p1 = CLLocation(latitude: trackedLocations[i].latitude, longitude: trackedLocations[i].longitude)
+            let p2 = CLLocation(latitude: trackedLocations[i+1].latitude, longitude: trackedLocations[i+1].longitude)
+            totalDistance += p1.distance(from: p2)
+        }
+        return totalDistance
+    }
+    
+    private func formatDistance(_ meters: Double) -> String {
+        if meters < 1000.0 {
+            return String(format: "%.0f m", meters)
+        } else {
+            return String(format: "%.2f km", meters / 1000.0)
         }
     }
     

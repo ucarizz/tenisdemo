@@ -83,6 +83,8 @@ enum LeagueEndpoint: APIEndpoint {
         player1Partner: String?,
         player2Partner: String?
     )
+    case uploadLocations(id: Int, locations: [TrackedLocation])
+    case getLocations(id: Int)
     
     var path: String {
         switch self {
@@ -94,14 +96,16 @@ enum LeagueEndpoint: APIEndpoint {
             return "/matches/completed"
         case .updateLiveProgress(let id, _, _, _):
             return "/matches/\(id)/live-progress"
+        case .uploadLocations(let id, _), .getLocations(let id):
+            return "/matches/\(id)/locations"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .getMatches, .getMatchDetails:
+        case .getMatches, .getMatchDetails, .getLocations:
             return .get
-        case .saveCompleted:
+        case .saveCompleted, .uploadLocations:
             return .post
         case .createMatch:
             return .post
@@ -165,6 +169,14 @@ enum LeagueEndpoint: APIEndpoint {
             }
             let request = UpdateProgressRequest(score: score, isCompleted: isCompleted, history: history)
             return try? JSONEncoder().encode(request)
+        case .uploadLocations(_, let locations):
+            struct LocationsRequest: Encodable {
+                let locations: [TrackedLocation]
+            }
+            let request = LocationsRequest(locations: locations)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            return try? encoder.encode(request)
         default:
             return nil
         }
@@ -198,6 +210,9 @@ protocol LeagueServiceProtocol {
         isCompleted: Bool,
         history: [PointHistoryItem]
     ) async throws
+    
+    func uploadMatchLocations(matchId: Int, locations: [TrackedLocation]) async throws
+    func fetchMatchLocations(matchId: Int) async throws -> [TrackedLocation]
 }
 
 struct UpdateLiveProgressResponse: Decodable {
@@ -267,5 +282,16 @@ class LeagueService: LeagueServiceProtocol {
             isCompleted: isCompleted,
             history: history
         ))
+    }
+    
+    func uploadMatchLocations(matchId: Int, locations: [TrackedLocation]) async throws {
+        struct MessageResponse: Decodable {
+            let message: String
+        }
+        let _: MessageResponse = try await apiClient.request(LeagueEndpoint.uploadLocations(id: matchId, locations: locations))
+    }
+    
+    func fetchMatchLocations(matchId: Int) async throws -> [TrackedLocation] {
+        return try await apiClient.request(LeagueEndpoint.getLocations(id: matchId))
     }
 }

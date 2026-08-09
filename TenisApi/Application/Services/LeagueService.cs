@@ -2,21 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TenisApi.Application.DTOs;
 using TenisApi.Domain.Entities;
 using TenisApi.Domain.Repositories;
+using TenisApi.Infrastructure.Persistence;
 
 namespace TenisApi.Application.Services
 {
     public class LeagueService : ILeagueService
     {
         private readonly ILeagueMatchRepository _matchRepository;
+        private readonly TenisDbContext _context;
         private readonly ILogger<LeagueService> _logger;
 
-        public LeagueService(ILeagueMatchRepository matchRepository, ILogger<LeagueService> logger)
+        public LeagueService(ILeagueMatchRepository matchRepository, TenisDbContext context, ILogger<LeagueService> logger)
         {
             _matchRepository = matchRepository;
+            _context = context;
             _logger = logger;
         }
 
@@ -152,6 +156,33 @@ namespace TenisApi.Application.Services
                     CreatedTime = h.CreatedTime
                 }).OrderBy(h => h.SequenceNumber).ToList()
             };
+        }
+        public async Task SaveMatchLocationsAsync(int matchId, IEnumerable<MatchLocationDto> locations)
+        {
+            var matchLocations = locations.Select(l => new MatchLocation(
+                matchId,
+                l.Latitude,
+                l.Longitude,
+                l.Timestamp
+            )).ToList();
+
+            await _context.MatchLocations.AddRangeAsync(matchLocations);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Saved {LocationCount} location records for match {MatchId}", matchLocations.Count, matchId);
+        }
+
+        public async Task<IEnumerable<MatchLocationDto>> GetMatchLocationsAsync(int matchId)
+        {
+            return await _context.MatchLocations
+                .Where(l => l.MatchId == matchId)
+                .OrderBy(l => l.Timestamp)
+                .Select(l => new MatchLocationDto
+                {
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude,
+                    Timestamp = l.Timestamp
+                })
+                .ToListAsync();
         }
     }
 }

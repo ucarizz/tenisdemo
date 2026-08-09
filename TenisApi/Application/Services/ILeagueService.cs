@@ -33,5 +33,8 @@ namespace TenisApi.Application.Services
             string score, 
             IEnumerable<MatchPointHistoryDto> history,
             bool isCompleted);
+
+        Task SaveMatchLocationsAsync(int matchId, IEnumerable<MatchLocationDto> locations);
+        Task<IEnumerable<MatchLocationDto>> GetMatchLocationsAsync(int matchId);
     }
 }
