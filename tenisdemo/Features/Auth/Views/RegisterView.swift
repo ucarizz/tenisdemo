@@ -8,6 +8,8 @@ struct RegisterView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var errorMessage = ""
+    @State private var isKvkkAccepted = false
+    @State private var showKvkkSheet = false
     
     var body: some View {
         ZStack {
@@ -143,6 +145,42 @@ struct RegisterView: View {
                     }
                     .padding(.horizontal, 24)
                     
+                    // KVKK ve Onay Kutusu
+                    HStack(alignment: .top, spacing: 10) {
+                        Button(action: {
+                            isKvkkAccepted.toggle()
+                        }) {
+                            Image(systemName: isKvkkAccepted ? "checkmark.square.fill" : "square")
+                                .font(.system(size: 18))
+                                .foregroundColor(isKvkkAccepted ? .emerald : .gray)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Kayıt olarak ")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.gray)
+                            + Text("Kullanım Koşulları'nı")
+                                .font(.system(.caption, design: .rounded))
+                                .bold()
+                                .foregroundColor(.white)
+                            + Text(" ve ")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.gray)
+                            + Text("KVKK Aydınlatma Metni'ni")
+                                .font(.system(.caption, design: .rounded))
+                                .bold()
+                                .foregroundColor(.emerald)
+                            + Text(" okuduğumu ve kabul ettiğimi onaylıyorum.")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                        .onTapGesture {
+                            showKvkkSheet = true
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+                    
                     // Hata Mesajı
                     if !errorMessage.isEmpty {
                         Text(errorMessage)
@@ -184,11 +222,19 @@ struct RegisterView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showKvkkSheet) {
+            LegalView()
+        }
     }
     
     private func registerUser() {
         guard !fullName.isEmpty && !email.isEmpty && !password.isEmpty && !confirmPassword.isEmpty else {
             errorMessage = "Lütfen tüm alanları doldurun."
+            return
+        }
+        
+        guard isKvkkAccepted else {
+            errorMessage = "Devam etmek için KVKK Aydınlatma Metni'ni kabul etmelisiniz."
             return
         }
         

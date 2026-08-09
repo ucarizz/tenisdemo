@@ -7,6 +7,7 @@ struct ProfileView: View {
     @State private var uploadError: String? = nil
     @State private var showDeleteConfirmation = false
     @State private var deleteError: String? = nil
+    @State private var showKvkkSheet = false
     
     var body: some View {
         ZStack {
@@ -137,6 +138,28 @@ struct ProfileView: View {
                 
                 // Oturum ve Hesap Yönetimi Butonları
                 VStack(spacing: 12) {
+                    // Hukuki Metinler ve KVKK Butonu
+                    Button(action: {
+                        showKvkkSheet = true
+                    }) {
+                        HStack {
+                            Image(systemName: "doc.text.magnifyingglass")
+                                .font(.system(size: 16, weight: .bold))
+                            Text("Hukuki Metinler & KVKK")
+                                .font(.system(.body, design: .rounded))
+                                .bold()
+                        }
+                        .foregroundColor(.emerald)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color.emerald.opacity(0.08))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.emerald.opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                    
                     // Çıkış Yap Butonu
                     Button(action: {
                         authManager.logout()
@@ -192,6 +215,9 @@ struct ProfileView: View {
             } message: {
                 Text("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm maç/vuruş geçmişiniz kalıcı olarak silinir.")
             }
+        }
+        .sheet(isPresented: $showKvkkSheet) {
+            LegalView()
         }
     }
     

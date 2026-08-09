@@ -46,18 +46,43 @@ namespace TenisApi.Infrastructure.Middlewares
                 var responseBody = await new StreamReader(responseBodyMemoryStream).ReadToEndAsync();
                 responseBodyMemoryStream.Position = 0;
 
+                // Hassas verileri maskele
+                var maskedRequest = MaskSensitiveData(requestBody);
+                var maskedResponse = MaskSensitiveData(responseBody);
+
                 // Graylog'da JSON olarak aratılabilmesi için Structured logging yapıyoruz
                 _logger.LogInformation(
                     "API Transaction: {Method} {Path} responded {StatusCode}. RequestBody: {RequestBody} ResponseBody: {ResponseBody}",
                     context.Request.Method,
                     context.Request.Path,
                     context.Response.StatusCode,
-                    string.IsNullOrWhiteSpace(requestBody) ? null : requestBody,
-                    string.IsNullOrWhiteSpace(responseBody) ? null : responseBody
+                    string.IsNullOrWhiteSpace(maskedRequest) ? null : maskedRequest,
+                    string.IsNullOrWhiteSpace(maskedResponse) ? null : maskedResponse
                 );
 
                 // Gerçek response akışına verileri geri kopyala ki istemci yanıtı alabilsin
                 await responseBodyMemoryStream.CopyToAsync(originalResponseBodyStream);
+            }
+        }
+
+        private string MaskSensitiveData(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return json;
+
+            try
+            {
+                // password, token, confirmPassword vb. alanların değerlerini *** ile maskele
+                var pattern = @"(""(?:password|confirmPassword|token|newPassword|passwordConfirm)"")\s*:\s*""(?:[^""\\]|\\.)*""";
+                return System.Text.RegularExpressions.Regex.Replace(
+                    json, 
+                    pattern, 
+                    "$1:\"***\"", 
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                );
+            }
+            catch
+            {
+                return json; // Regex hata verirse orijinal veriyi değil, güvenlik için maskeli bir hata uyarısı dönebiliriz.
             }
         }
     }
