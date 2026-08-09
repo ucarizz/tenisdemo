@@ -12,5 +12,7 @@
 		<string>instagram-stories</string>
 		<string>instagram</string>
 	</array>
+	<key>NSMotionUsageDescription</key>
+	<string>Tenis vuruş hızınızı ve ivmesini ölçmek için hareket sensörlerine erişim gerekir.</string>
 </dict>
 </plist>

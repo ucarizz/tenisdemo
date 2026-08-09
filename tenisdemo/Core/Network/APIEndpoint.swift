@@ -19,8 +19,9 @@ protocol APIEndpoint {
 enum AppEnvironment {
     case development
     case testServer
+    case production // App Store canlı ortamı
     
-    static var current: AppEnvironment = .testServer
+    static var current: AppEnvironment = .testServer // NOT: App Store'a göndermeden önce .production olarak güncelleyin.
     
     var apiBaseURL: URL {
         switch self {
@@ -28,6 +29,9 @@ enum AppEnvironment {
             return URL(string: "http://192.168.1.4:5200/v1")!
         case .testServer:
             return URL(string: "http://207.154.234.58:5200/v1")!
+        case .production:
+            // TODO: Buraya kendi SSL sertifikalı canlı alan adınızı girin (Örn: https://api.tenisliginiz.com/v1)
+            return URL(string: "https://api.yourproductiondomain.com/v1")!
         }
     }
     
@@ -37,6 +41,9 @@ enum AppEnvironment {
             return "http://192.168.1.4:5200/hubs/tennis"
         case .testServer:
             return "http://207.154.234.58:5200/hubs/tennis"
+        case .production:
+            // TODO: Canlı hub bağlantı adresi (Örn: https://api.tenisliginiz.com/hubs/tennis)
+            return "https://api.yourproductiondomain.com/hubs/tennis"
         }
     }
     
@@ -46,6 +53,9 @@ enum AppEnvironment {
             return URL(string: "http://192.168.1.4:5200/v1/logs/client-diagnostics")!
         case .testServer:
             return URL(string: "http://207.154.234.58:5200/v1/logs/client-diagnostics")!
+        case .production:
+            // TODO: Canlı log adresi (Örn: https://api.tenisliginiz.com/v1/logs/client-diagnostics)
+            return URL(string: "https://api.yourproductiondomain.com/v1/logs/client-diagnostics")!
         }
     }
 }

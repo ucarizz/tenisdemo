@@ -44,5 +44,37 @@ namespace TenisApi.Controllers
                 return Unauthorized(new { message = ex.Message });
             }
         }
+
+        [HttpPost("otp/send")]
+        public async Task<ActionResult> SendOtp([FromBody] SendOtpRequest request)
+        {
+            try
+            {
+                await _authService.SendOtpAsync(request);
+                return Ok(new { message = "Doğrulama kodu e-posta adresinize gönderildi." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("otp/verify")]
+        public async Task<ActionResult<VerifyOtpResponse>> VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            try
+            {
+                var response = await _authService.VerifyOtpAsync(request);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

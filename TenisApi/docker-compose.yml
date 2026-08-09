@@ -5,13 +5,18 @@ services:
     image: postgres:16-alpine
     container_name: tenis_db
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_DB: tenisdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
@@ -29,13 +34,23 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     ports:
-      - "9200:9200"
+      - "127.0.0.1:9200:9200"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mongodb:
     image: mongo:5.0
     container_name: tenis_mongodb
     volumes:
       - mongodb_data:/data/db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   graylog:
     image: graylog/graylog:5.2
@@ -52,11 +67,14 @@ services:
       - GRAYLOG_ELASTICSEARCH_HOSTS=http://opensearch:9200
       - GRAYLOG_MONGODB_URI=mongodb://mongodb:27017/graylog
     ports:
-      - "9000:9000"
-      - "12201:12201/udp"
-      - "12201:12201"
+      - "127.0.0.1:9000:9000"
     volumes:
       - graylog_data:/usr/share/graylog/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   tenis_api:
     build:
@@ -70,11 +88,23 @@ services:
       - ConnectionStrings__DefaultConnection=Host=tenis_db;Port=5432;Database=tenisdb;Username=postgres;Password=password
       - GRAYLOG_HOST=graylog
       - GRAYLOG_PORT=12201
+      - SmtpSettings__Host=smtp.resend.com
+      - SmtpSettings__Port=587
+      - SmtpSettings__Username=resend
+      - SmtpSettings__Password=${SMTP_PASSWORD}
+      - SmtpSettings__EnableSsl=true
+      - SmtpSettings__FromAddress=onboarding@resend.dev
+      - SmtpSettings__FromName=Tenis Ligi
     depends_on:
       - tenis_db
       - graylog
     volumes:
       - uploads_data:/app/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:

@@ -2,16 +2,24 @@ import Foundation
 
 enum UserEndpoint: APIEndpoint {
     case uploadProfileImage(Data)
+    case deleteAccount
     
     var path: String {
         switch self {
         case .uploadProfileImage:
             return "users/profile-image"
+        case .deleteAccount:
+            return "users"
         }
     }
     
     var method: HTTPMethod {
-        return .post
+        switch self {
+        case .uploadProfileImage:
+            return .post
+        case .deleteAccount:
+            return .delete
+        }
     }
     
     var headers: [String: String]? {
@@ -20,6 +28,11 @@ enum UserEndpoint: APIEndpoint {
             let boundary = "Boundary-ProfileImageUpload"
             return [
                 "Content-Type": "multipart/form-data; boundary=\(boundary)",
+                "Accept": "application/json"
+            ]
+        case .deleteAccount:
+            return [
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             ]
         }
@@ -39,6 +52,8 @@ enum UserEndpoint: APIEndpoint {
             data.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
             
             return data
+        case .deleteAccount:
+            return nil
         }
     }
 }

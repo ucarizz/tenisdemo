@@ -58,6 +58,40 @@ class AuthManager: ObservableObject {
         saveAuthSession(response)
     }
     
+    // OTP Kodu Gönderme fonksiyonu
+    func sendOtp(email: String) async throws {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let request = SendOtpRequest(email: email)
+        struct MessageResponse: Decodable {
+            let message: String
+        }
+        let _: MessageResponse = try await apiClient.request(AuthEndpoint.sendOtp(request))
+    }
+    
+    // OTP Kodu Doğrulama fonksiyonu
+    // Giriş tamamlandıysa true, ad-soyad gerekiyorsa false döner
+    func verifyOtp(email: String, code: String, fullName: String? = nil) async throws -> Bool {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let request = VerifyOtpRequest(email: email, code: code, fullName: fullName)
+        let response: VerifyOtpResponse = try await apiClient.request(AuthEndpoint.verifyOtp(request))
+        
+        if response.requiresFullName {
+            return false
+        }
+        
+        if let token = response.token, let user = response.user {
+            let authResponse = AuthResponse(token: token, user: user)
+            saveAuthSession(authResponse)
+            return true
+        }
+        
+        throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Geçersiz sunucu yanıtı."])
+    }
+    
     // Profil fotoğrafı yükleme fonksiyonu
     func uploadProfileImage(imageData: Data) async throws {
         isLoading = true
@@ -81,6 +115,19 @@ class AuthManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: userKey)
         self.currentUser = nil
         self.isAuthenticated = false
+    }
+    
+    // Hesabı silme fonksiyonu
+    func deleteAccount() async throws {
+        isLoading = true
+        defer { isLoading = false }
+        
+        struct MessageResponse: Decodable {
+            let message: String
+        }
+        
+        let _: MessageResponse = try await apiClient.request(UserEndpoint.deleteAccount)
+        logout()
     }
     
     // Oturum verilerini kaydeder

@@ -17,14 +17,19 @@ struct LocalSwingRecord: Identifiable {
     let recordedAt: Date
 }
 
-class SwingTracker: ObservableObject {
+class SwingTracker: NSObject, ObservableObject, WKExtendedRuntimeSessionDelegate {
     private let motionManager = CMMotionManager()
+    private var session: WKExtendedRuntimeSession?
     
     @Published var isTracking = false
     @Published var lastSwingSpeedKmh: Double = 0.0
     @Published var lastAccelerationG: Double = 0.0
     @Published var lastSwingType: String = "-"
     @Published var recentSwings: [LocalSwingRecord] = []
+    
+    override init() {
+        super.init()
+    }
     
     private var lastSwingTime: Date = .distantPast
     private let swingCooldown: TimeInterval = 1.2 // İki vuruş arası minimum bekleme süresi (sn)
@@ -43,6 +48,11 @@ class SwingTracker: ObservableObject {
             self.processMotionData(motion)
         }
         
+        // Ekran karardığında takibin durmaması için arka plan oturumu başlatıyoruz
+        session = WKExtendedRuntimeSession()
+        session?.delegate = self
+        session?.start()
+        
         // Takip başladığına dair titreşim verelim
         WKInterfaceDevice.current().play(.start)
     }
@@ -50,6 +60,11 @@ class SwingTracker: ObservableObject {
     func stopTracking() {
         motionManager.stopDeviceMotionUpdates()
         isTracking = false
+        
+        // Arka plan oturumunu sonlandır
+        session?.invalidate()
+        session = nil
+        
         WKInterfaceDevice.current().play(.stop)
     }
     
@@ -119,5 +134,25 @@ class SwingTracker: ObservableObject {
             
             print("DEBUG [SwingTracker]: Swing detected: \(type) - \(String(format: "%.1f", speedKmh)) km/h (\(String(format: "%.1f", accelerationG))G)")
         }
+    }
+    
+    // MARK: - WKExtendedRuntimeSessionDelegate
+    
+    func extendedRuntimeSession(_ extendedRuntimeSession: WKExtendedRuntimeSession, didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason, error: Error?) {
+        print("DEBUG [SwingTracker]: Extended runtime session invalidated. Reason: \(reason.rawValue), Error: \(String(describing: error))")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.isTracking {
+                self.stopTracking()
+            }
+        }
+    }
+    
+    func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        print("DEBUG [SwingTracker]: Extended runtime session started successfully")
+    }
+    
+    func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        print("DEBUG [SwingTracker]: Extended runtime session is about to expire")
     }
 }
