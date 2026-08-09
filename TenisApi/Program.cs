@@ -39,6 +39,7 @@ builder.Services.AddDbContext<TenisDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Register Repositories and Services (Dependency Injection)
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ILeagueMatchRepository, LeagueMatchRepository>();
 builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

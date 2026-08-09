@@ -1,6 +1,8 @@
 using System;
-using System.Net;
-using System.Net.Mail;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -12,24 +14,25 @@ namespace TenisApi.Infrastructure.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
+        private readonly HttpClient _httpClient;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, HttpClient httpClient)
         {
             _configuration = configuration;
             _logger = logger;
+            _httpClient = httpClient;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
             var smtpSettings = _configuration.GetSection("SmtpSettings");
-            var host = smtpSettings.GetValue<string>("Host");
-            var username = smtpSettings.GetValue<string>("Username");
+            var apiKey = smtpSettings.GetValue<string>("Password");
 
-            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "YOUR_RESEND_API_KEY_HERE" || apiKey.Contains("YOUR_RESEND"))
             {
                 // MOCK/LOG MODE for development
                 _logger.LogWarning("************************************************************");
-                _logger.LogWarning("SMTP settings are not configured in appsettings.json. Logging email to terminal instead:");
+                _logger.LogWarning("Resend API Key is not configured. Logging email to terminal instead:");
                 _logger.LogWarning("TO: {ToEmail}", toEmail);
                 _logger.LogWarning("SUBJECT: {Subject}", subject);
                 _logger.LogWarning("BODY: {Body}", body);
@@ -37,36 +40,42 @@ namespace TenisApi.Infrastructure.Services
                 return;
             }
 
-            var port = smtpSettings.GetValue<int>("Port", 587);
-            var password = smtpSettings.GetValue<string>("Password") ?? string.Empty;
-            var enableSsl = smtpSettings.GetValue<bool>("EnableSsl", true);
-            var fromAddress = smtpSettings.GetValue<string>("FromAddress") ?? "noreply@tenisligi.com";
+            var fromAddress = smtpSettings.GetValue<string>("FromAddress") ?? "onboarding@resend.dev";
             var fromName = smtpSettings.GetValue<string>("FromName") ?? "Tenis Ligi";
 
             try
             {
-                using var mailMessage = new MailMessage
+                // Resend API Mail formatı
+                var payload = new
                 {
-                    From = new MailAddress(fromAddress, fromName),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = true
+                    from = $"{fromName} <{fromAddress}>",
+                    to = new[] { toEmail },
+                    subject = subject,
+                    html = body
                 };
 
-                mailMessage.To.Add(toEmail);
+                var jsonPayload = JsonSerializer.Serialize(payload);
+                
+                using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                using var smtpClient = new SmtpClient(host, port)
+                _logger.LogInformation("Sending email to {ToEmail} via Resend HTTP API...", toEmail);
+                
+                var response = await _httpClient.SendAsync(request);
+                
+                if (!response.IsSuccessStatusCode)
                 {
-                    Credentials = new NetworkCredential(username, password),
-                    EnableSsl = enableSsl
-                };
+                    var errorResponse = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Resend API returned error code {StatusCode}: {ErrorResponse}", response.StatusCode, errorResponse);
+                    throw new Exception($"Resend API error: {response.StatusCode} - {errorResponse}");
+                }
 
-                await smtpClient.SendMailAsync(mailMessage);
-                _logger.LogInformation("Email sent successfully to {ToEmail}.", toEmail);
+                _logger.LogInformation("Email sent successfully to {ToEmail} via Resend HTTP API.", toEmail);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {ToEmail} via SMTP.", toEmail);
+                _logger.LogError(ex, "Failed to send email to {ToEmail} via Resend HTTP API.", toEmail);
                 throw;
             }
         }
