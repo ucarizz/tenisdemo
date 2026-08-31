@@ -17,19 +17,7 @@ struct MatchPointHistory: Decodable, Identifiable {
     let p2Sets: Int
     let server: String
     let sequenceNumber: Int
-    let createdTime: String
-    
-    enum CodingKeys: String, CodingKey {
-        case p1Points = "p1_points"
-        case p2Points = "p2_points"
-        case p1Games = "p1_games"
-        case p2Games = "p2_games"
-        case p1Sets = "p1_sets"
-        case p2Sets = "p2_sets"
-        case server
-        case sequenceNumber = "sequence_number"
-        case createdTime = "created_time"
-    }
+    let createdTime: String?
 }
 
 struct LeagueMatch: Identifiable, Decodable {
@@ -44,20 +32,6 @@ struct LeagueMatch: Identifiable, Decodable {
     let player1PartnerName: String?
     let player2PartnerName: String?
     let pointHistories: [MatchPointHistory]?
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case player1Name
-        case player2Name
-        case matchDate
-        case score
-        case isCompleted
-        case createDate = "create_date"
-        case isDouble = "is_double"
-        case player1PartnerName = "player_1_partner_name"
-        case player2PartnerName = "player_2_partner_name"
-        case pointHistories = "pointHistories" // API default serializer retains camelCase
-    }
     
     init(
         id: Int, 

@@ -39,6 +39,8 @@ struct MatchState: Codable, Equatable {
     var server: Player = .player1
     var isMatchOver: Bool = false
     var winner: Player? = nil
+    var isGameBreak: Bool = false
+    var lastGameWinner: Player? = nil
 }
 
 class TennisMatchViewModel: ObservableObject {
@@ -72,7 +74,7 @@ class TennisMatchViewModel: ObservableObject {
     }
     
     func scorePoint(for player: Player) {
-        if state.isMatchOver { return }
+        if state.isMatchOver || state.isGameBreak { return }
         
         // Undo için mevcut durumu geçmişe ekle
         history.append(state)
@@ -89,6 +91,16 @@ class TennisMatchViewModel: ObservableObject {
         if state.isMatchOver {
             syncMatchResult()
         }
+    }
+    
+    func startNextGame() {
+        guard state.isGameBreak else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            state.isGameBreak = false
+            state.lastGameWinner = nil
+        }
+        playHapticFeedback()
+        ClientLogger.shared.info("Next game started on watch.")
     }
     
     private func scoreNormalPoint(for player: Player) {
@@ -168,6 +180,11 @@ class TennisMatchViewModel: ObservableObject {
         ClientLogger.shared.info("Game won by \(winnerName). Score now: Sets \(state.p1Sets)-\(state.p2Sets), Games \(state.p1Games)-\(state.p2Games)")
         
         checkSetWin()
+        
+        if !state.isMatchOver {
+            state.isGameBreak = true
+            state.lastGameWinner = player
+        }
     }
     
     private func winTiebreak(for player: Player) {
@@ -189,6 +206,11 @@ class TennisMatchViewModel: ObservableObject {
         }
         
         winSet(for: player)
+        
+        if !state.isMatchOver {
+            state.isGameBreak = true
+            state.lastGameWinner = player
+        }
     }
     
     private func checkSetWin() {

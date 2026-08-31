@@ -124,6 +124,10 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         sendMessageToCompanion(["action": "reset"])
     }
     
+    func sendStartNextGameAction() {
+        sendMessageToCompanion(["action": "startNextGame"])
+    }
+    
     func sendNewMatchAction() {
         sendMessageToCompanion(["action": "newMatch"])
         self.isCompanionActive = false

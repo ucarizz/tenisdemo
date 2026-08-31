@@ -63,6 +63,7 @@ struct LiveMatchState: Codable, Equatable {
     var server: String
     var isMatchOver: Bool
     var winner: String?
+    var isGameBreak: Bool? = false
     var history: [PointHistoryItem]
     
     enum CodingKeys: String, CodingKey {
@@ -78,6 +79,7 @@ struct LiveMatchState: Codable, Equatable {
         case server
         case isMatchOver = "is_match_over"
         case winner
+        case isGameBreak = "is_game_break"
         case history
     }
 }

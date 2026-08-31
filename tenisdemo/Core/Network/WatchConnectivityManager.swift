@@ -121,6 +121,8 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 viewModel.undo()
             case "reset":
                 viewModel.reset()
+            case "startNextGame":
+                viewModel.startNextGame()
             case "newMatch":
                 viewModel.newMatch()
             case "recordSwing":

@@ -80,74 +80,87 @@ struct MatchTrackerView: View {
                     .padding(.top, 8)
                     
                     // Main Scoreboard: Select layout based on width class (iPhone vs iPad)
-                    if horizontalSizeClass == .regular {
-                        // iPad Layout: Side-by-side cards
-                        HStack(spacing: 20) {
-                            ScorePlayerCard(
-                                player: .player1,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                                    : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                                points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p1Games)",
-                                sets: "\(viewModel.state.p1Sets)",
-                                isServing: viewModel.state.server == .player1,
-                                color: Color.emerald,
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: { viewModel.scorePoint(for: .player1) },
-                                onTapServer: { viewModel.toggleStartingServer() }
-                            )
-                            
-                            ScorePlayerCard(
-                                player: .player2,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                                    : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                                points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p2Games)",
-                                sets: "\(viewModel.state.p2Sets)",
-                                isServing: viewModel.state.server == .player2,
-                                color: Color(red: 0.95, green: 0.45, blue: 0.15),
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: { viewModel.scorePoint(for: .player2) },
-                                onTapServer: { viewModel.toggleStartingServer() }
-                            )
+                    ZStack {
+                        Group {
+                            if horizontalSizeClass == .regular {
+                                // iPad Layout: Side-by-side cards
+                                HStack(spacing: 20) {
+                                    ScorePlayerCard(
+                                        player: .player1,
+                                        name: viewModel.isDouble 
+                                            ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
+                                            : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
+                                        points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
+                                        games: "\(viewModel.state.p1Games)",
+                                        sets: "\(viewModel.state.p1Sets)",
+                                        isServing: viewModel.state.server == .player1,
+                                        color: Color.emerald,
+                                        isMatchOver: viewModel.state.isMatchOver,
+                                        onTap: { viewModel.scorePoint(for: .player1) },
+                                        onTapServer: { viewModel.toggleStartingServer() }
+                                    )
+                                    
+                                    ScorePlayerCard(
+                                        player: .player2,
+                                        name: viewModel.isDouble 
+                                            ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
+                                            : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
+                                        points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
+                                        games: "\(viewModel.state.p2Games)",
+                                        sets: "\(viewModel.state.p2Sets)",
+                                        isServing: viewModel.state.server == .player2,
+                                        color: Color(red: 0.95, green: 0.45, blue: 0.15),
+                                        isMatchOver: viewModel.state.isMatchOver,
+                                        onTap: { viewModel.scorePoint(for: .player2) },
+                                        onTapServer: { viewModel.toggleStartingServer() }
+                                    )
+                                }
+                                .padding(.horizontal)
+                            } else {
+                                // iPhone Layout: Vertically stacked cards
+                                VStack(spacing: 16) {
+                                    ScorePlayerCard(
+                                        player: .player1,
+                                        name: viewModel.isDouble 
+                                            ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
+                                            : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
+                                        points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
+                                        games: "\(viewModel.state.p1Games)",
+                                        sets: "\(viewModel.state.p1Sets)",
+                                        isServing: viewModel.state.server == .player1,
+                                        color: Color.emerald,
+                                        isMatchOver: viewModel.state.isMatchOver,
+                                        onTap: { viewModel.scorePoint(for: .player1) },
+                                        onTapServer: { viewModel.toggleStartingServer() }
+                                    )
+                                    
+                                    ScorePlayerCard(
+                                        player: .player2,
+                                        name: viewModel.isDouble 
+                                            ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
+                                            : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
+                                        points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
+                                        games: "\(viewModel.state.p2Games)",
+                                        sets: "\(viewModel.state.p2Sets)",
+                                        isServing: viewModel.state.server == .player2,
+                                        color: Color(red: 0.95, green: 0.45, blue: 0.15),
+                                        isMatchOver: viewModel.state.isMatchOver,
+                                        onTap: { viewModel.scorePoint(for: .player2) },
+                                        onTapServer: { viewModel.toggleStartingServer() }
+                                    )
+                                }
+                                .padding(.horizontal)
+                            }
                         }
-                        .padding(.horizontal)
-                    } else {
-                        // iPhone Layout: Vertically stacked cards
-                        VStack(spacing: 16) {
-                            ScorePlayerCard(
-                                player: .player1,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                                    : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                                points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p1Games)",
-                                sets: "\(viewModel.state.p1Sets)",
-                                isServing: viewModel.state.server == .player1,
-                                color: Color.emerald,
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: { viewModel.scorePoint(for: .player1) },
-                                onTapServer: { viewModel.toggleStartingServer() }
-                            )
-                            
-                            ScorePlayerCard(
-                                player: .player2,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                                    : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                                points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p2Games)",
-                                sets: "\(viewModel.state.p2Sets)",
-                                isServing: viewModel.state.server == .player2,
-                                color: Color(red: 0.95, green: 0.45, blue: 0.15),
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: { viewModel.scorePoint(for: .player2) },
-                                onTapServer: { viewModel.toggleStartingServer() }
-                            )
+                        .opacity(viewModel.state.isGameBreak ? 0.3 : 1.0)
+                        .blur(radius: viewModel.state.isGameBreak ? 3 : 0)
+                        .allowsHitTesting(!viewModel.state.isGameBreak)
+                        
+                        // Game Arası / Su Molası Kartı
+                        if viewModel.state.isGameBreak {
+                            GameBreakCardView(viewModel: viewModel)
+                                .transition(.scale(scale: 0.9).combined(with: .opacity))
                         }
-                        .padding(.horizontal)
                     }
                     
                     // Bottom Bar Controls
@@ -371,6 +384,130 @@ struct ScorePlayerCard: View {
         }
         .buttonStyle(.plain)
         .disabled(isMatchOver)
+    }
+}
+
+struct GameBreakCardView: View {
+    @ObservedObject var viewModel: TennisMatchViewModel
+    
+    var winnerName: String {
+        guard let winner = viewModel.state.lastGameWinner else { return "OYUN TAMAMLANDI" }
+        if winner == .player1 {
+            return viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name
+        } else {
+            return viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name
+        }
+    }
+    
+    var winnerColor: Color {
+        viewModel.state.lastGameWinner == .player1 ? Color.emerald : Color(red: 0.95, green: 0.45, blue: 0.15)
+    }
+    
+    var nextServerName: String {
+        if viewModel.state.server == .player1 {
+            return viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name
+        } else {
+            return viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 18) {
+            // Su Molası Rozeti
+            HStack(spacing: 6) {
+                Image(systemName: "drop.fill")
+                    .foregroundColor(Color(red: 0.35, green: 0.75, blue: 1.0))
+                    .font(.system(size: 13, weight: .bold))
+                
+                Text("SU MOLASI • OYUN ARASI")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundColor(Color(red: 0.35, green: 0.75, blue: 1.0))
+                    .tracking(1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color(red: 0.35, green: 0.75, blue: 1.0).opacity(0.15))
+            .cornerRadius(20)
+            
+            // Kazanan & Skor
+            VStack(spacing: 6) {
+                HStack(spacing: 8) {
+                    Image(systemName: "tennisball.fill")
+                        .foregroundColor(winnerColor)
+                        .font(.system(size: 20))
+                    
+                    Text("GAME: \(winnerName.uppercased())")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundColor(.white)
+                }
+                
+                Text("Set Skoru: \(viewModel.state.p1Games) - \(viewModel.state.p2Games)")
+                    .font(.system(size: 15, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.85))
+            }
+            
+            // Sıradaki Servis
+            HStack(spacing: 6) {
+                Image(systemName: "figure.tennis")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                Text("Sıradaki Servis: ")
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundColor(.gray)
+                Text(nextServerName)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.06))
+            .cornerRadius(10)
+            
+            // Yeni Game Başlat Butonu
+            Button(action: {
+                viewModel.startNextGame()
+            }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 16, weight: .bold))
+                    Text("YENİ GAME'İ BAŞLAT")
+                        .font(.system(size: 16, weight: .black, design: .rounded))
+                        .tracking(0.5)
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.86, green: 0.98, blue: 0.22), Color(red: 0.76, green: 0.92, blue: 0.15)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(16)
+                .shadow(color: Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.35), radius: 12, x: 0, y: 6)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 4)
+        }
+        .padding(22)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(red: 0.10, green: 0.11, blue: 0.15).opacity(0.98))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.25), Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.4), Color.white.opacity(0.08)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.6), radius: 24, x: 0, y: 12)
+        )
+        .padding(.horizontal, 20)
     }
 }
 

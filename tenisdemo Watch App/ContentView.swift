@@ -74,49 +74,53 @@ struct ContentView: View {
                         .padding(.horizontal, 6)
                         .frame(height: 24)
                         
-                        // Oyuncu Kartları (Tıklanabilir Alanlar)
-                        VStack(spacing: 5) {
-                            PlayerCard(
-                                player: .player1,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                                    : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                                points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p1Games)",
-                                sets: "\(viewModel.state.p1Sets)",
-                                isServing: viewModel.state.server == .player1,
-                                color: Color(red: 0.1, green: 0.8, blue: 0.5), // Emerald
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: {
-                                    if connectivityManager.isCompanionActive {
-                                        connectivityManager.sendScoreAction(for: .player1)
-                                    } else {
-                                        viewModel.scorePoint(for: .player1)
-                                    }
-                                },
-                                onLongPressServer: { viewModel.toggleStartingServer() }
-                            )
-                            
-                            PlayerCard(
-                                player: .player2,
-                                name: viewModel.isDouble 
-                                    ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                                    : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                                points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                                games: "\(viewModel.state.p2Games)",
-                                sets: "\(viewModel.state.p2Sets)",
-                                isServing: viewModel.state.server == .player2,
-                                color: Color(red: 0.95, green: 0.45, blue: 0.15), // Orange
-                                isMatchOver: viewModel.state.isMatchOver,
-                                onTap: {
-                                    if connectivityManager.isCompanionActive {
-                                        connectivityManager.sendScoreAction(for: .player2)
-                                    } else {
-                                        viewModel.scorePoint(for: .player2)
-                                    }
-                                },
-                                onLongPressServer: { viewModel.toggleStartingServer() }
-                            )
+                        // Oyuncu Kartları veya Mola Ekranı
+                        if viewModel.state.isGameBreak {
+                            WatchGameBreakView(viewModel: viewModel, connectivityManager: connectivityManager)
+                        } else {
+                            VStack(spacing: 5) {
+                                PlayerCard(
+                                    player: .player1,
+                                    name: viewModel.isDouble 
+                                        ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
+                                        : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
+                                    points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
+                                    games: "\(viewModel.state.p1Games)",
+                                    sets: "\(viewModel.state.p1Sets)",
+                                    isServing: viewModel.state.server == .player1,
+                                    color: Color(red: 0.1, green: 0.8, blue: 0.5), // Emerald
+                                    isMatchOver: viewModel.state.isMatchOver,
+                                    onTap: {
+                                        if connectivityManager.isCompanionActive {
+                                            connectivityManager.sendScoreAction(for: .player1)
+                                        } else {
+                                            viewModel.scorePoint(for: .player1)
+                                        }
+                                    },
+                                    onLongPressServer: { viewModel.toggleStartingServer() }
+                                )
+                                
+                                PlayerCard(
+                                    player: .player2,
+                                    name: viewModel.isDouble 
+                                        ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
+                                        : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
+                                    points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
+                                    games: "\(viewModel.state.p2Games)",
+                                    sets: "\(viewModel.state.p2Sets)",
+                                    isServing: viewModel.state.server == .player2,
+                                    color: Color(red: 0.95, green: 0.45, blue: 0.15), // Orange
+                                    isMatchOver: viewModel.state.isMatchOver,
+                                    onTap: {
+                                        if connectivityManager.isCompanionActive {
+                                            connectivityManager.sendScoreAction(for: .player2)
+                                        } else {
+                                            viewModel.scorePoint(for: .player2)
+                                        }
+                                    },
+                                    onLongPressServer: { viewModel.toggleStartingServer() }
+                                )
+                            }
                         }
                         
                         // Alt Kontrol Paneli (Geri Al / Ayarlar)
@@ -592,5 +596,63 @@ struct SettingsView: View {
             }
             .padding(.bottom, 10)
         }
+    }
+}
+
+struct WatchGameBreakView: View {
+    @ObservedObject var viewModel: TennisMatchViewModel
+    @ObservedObject var connectivityManager: WatchConnectivityManager
+    
+    var winnerName: String {
+        guard let winner = viewModel.state.lastGameWinner else { return "OYUN BİTTİ" }
+        if winner == .player1 {
+            return viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name
+        } else {
+            return viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: "drop.fill")
+                    .foregroundColor(Color(red: 0.3, green: 0.7, blue: 1.0))
+                    .font(.system(size: 10))
+                Text("SU MOLASI")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0.3, green: 0.7, blue: 1.0))
+            }
+            
+            Text("Game: \(winnerName)")
+                .font(.system(size: 13, weight: .black, design: .rounded))
+                .foregroundColor(.white)
+            
+            Text("Skor: \(viewModel.state.p1Games) - \(viewModel.state.p2Games)")
+                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+            
+            Button(action: {
+                if connectivityManager.isCompanionActive {
+                    connectivityManager.sendStartNextGameAction()
+                } else {
+                    viewModel.startNextGame()
+                }
+            }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 11))
+                    Text("Yeni Game")
+                        .font(.system(size: 12, weight: .black, design: .rounded))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 34)
+                .background(Color(red: 0.86, green: 0.98, blue: 0.22))
+                .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 2)
+        }
+        .padding(.vertical, 4)
     }
 }

@@ -39,6 +39,8 @@ struct MatchState: Codable, Equatable {
     var server: Player = .player1
     var isMatchOver: Bool = false
     var winner: Player? = nil
+    var isGameBreak: Bool = false
+    var lastGameWinner: Player? = nil
     
     // Story paylaşım kartı için yeni istatistik alanları
     var p1Aces: Int = 0
@@ -119,7 +121,7 @@ class TennisMatchViewModel: ObservableObject {
     }
     
     func scorePoint(for player: Player) {
-        if state.isMatchOver { return }
+        if state.isMatchOver || state.isGameBreak { return }
         
         // Undo için mevcut durumu geçmişe ekle
         history.append(state)
@@ -144,6 +146,23 @@ class TennisMatchViewModel: ObservableObject {
             }
             UIApplication.shared.isIdleTimerDisabled = false
         }
+    }
+    
+    func startNextGame() {
+        guard state.isGameBreak else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            state.isGameBreak = false
+            state.lastGameWinner = nil
+        }
+        
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.prepare()
+        generator.impactOccurred()
+        
+        ClientLogger.shared.info("Next game started by user.")
+        
+        // Veri tabanını anlık güncelle (Yerel maç ise)
+        syncLiveProgressToDatabase()
     }
     
     private func scoreNormalPoint(for player: Player) {
@@ -220,6 +239,12 @@ class TennisMatchViewModel: ObservableObject {
         ClientLogger.shared.info("Game won by \(winnerName). Score now: Sets \(state.p1Sets)-\(state.p2Sets), Games \(state.p1Games)-\(state.p2Games)")
         
         checkSetWin()
+        
+        // Eğer maç bitmediyse, oyuncuların dinlenmesi için game arası molasına geç
+        if !state.isMatchOver {
+            state.isGameBreak = true
+            state.lastGameWinner = player
+        }
     }
     
     private func winTiebreak(for player: Player) {
@@ -241,6 +266,12 @@ class TennisMatchViewModel: ObservableObject {
         }
         
         winSet(for: player)
+        
+        // Eğer maç bitmediyse, yeni set öncesi mola durumu
+        if !state.isMatchOver {
+            state.isGameBreak = true
+            state.lastGameWinner = player
+        }
     }
     
     private func checkSetWin() {
@@ -529,6 +560,7 @@ class TennisMatchViewModel: ObservableObject {
             server: state.server.rawValue,
             isMatchOver: state.isMatchOver,
             winner: state.winner?.rawValue,
+            isGameBreak: state.isGameBreak,
             history: historyItems
         )
     }
@@ -551,6 +583,7 @@ class TennisMatchViewModel: ObservableObject {
         newState.server = newServer
         newState.isMatchOver = remote.isMatchOver
         newState.winner = newWinner
+        newState.isGameBreak = remote.isGameBreak ?? false
         
         if self.state != newState {
             self.state = newState

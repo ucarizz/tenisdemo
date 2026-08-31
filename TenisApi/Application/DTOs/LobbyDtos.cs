@@ -100,5 +100,8 @@ namespace TenisApi.Application.DTOs
 
         [JsonPropertyName("winner")]
         public string? Winner { get; set; }
+
+        [JsonPropertyName("is_game_break")]
+        public bool IsGameBreak { get; set; } = false;
     }
 }
