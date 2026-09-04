@@ -13,65 +13,87 @@ struct LeagueListView: View {
     var body: some View {
         VStack {
             if viewModel.isLoading {
-                ProgressView("Maçlar Yükleniyor...")
+                VStack(spacing: 6) {
+                    ProgressView()
+                        .tint(.zinc400)
+                    Text("Yükleniyor...")
+                        .font(.system(size: 10))
+                        .foregroundColor(.zinc400)
+                }
             } else if let errorMessage = viewModel.errorMessage {
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle")
-                        .foregroundColor(.red)
-                        .font(.title2)
+                        .foregroundColor(.statusRed)
+                        .font(.system(size: 18))
                     Text(errorMessage)
-                        .font(.caption2)
+                        .font(.system(size: 10))
+                        .foregroundColor(.zinc400)
                         .multilineTextAlignment(.center)
-                    Button("Yeniden Dene") {
+                    Button(action: {
                         Task {
                             await viewModel.loadMatches()
                         }
+                    }) {
+                        Text("Yeniden Dene")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.zinc950)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color.zinc50)
+                            .cornerRadius(6)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
                 }
             } else {
                 if viewModel.matches.isEmpty {
                     Text("Yaklaşan maç bulunamadı.")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                        .font(.system(size: 11))
+                        .foregroundColor(.zinc500)
                 } else {
                     List(viewModel.matches) { match in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text(match.player1Name)
-                                    .font(.body)
-                                    .bold()
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.zinc100)
                                 Spacer()
                                 Text("vs")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.zinc500)
                                 Spacer()
                                 Text(match.player2Name)
-                                    .font(.body)
-                                    .bold()
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.zinc100)
                             }
                             
                             HStack {
                                 Text(match.matchDate)
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.zinc500)
                                 Spacer()
                                 if let score = match.score {
                                     Text(score)
-                                        .font(.caption2)
-                                        .bold()
-                                        .foregroundColor(.yellow)
+                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                        .foregroundColor(.zinc100)
                                 }
                             }
                         }
                         .padding(.vertical, 4)
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.zinc900)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
+                                )
+                        )
                     }
+                    .listStyle(.carousel)
                 }
             }
         }
-        .navigationTitle("Lig Fikstürü")
+        .navigationTitle("Fikstür")
         .task {
-            // Görünüm yüklendiğinde otomatik olarak API'den veri çeker
             await viewModel.loadMatches()
         }
     }

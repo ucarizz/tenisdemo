@@ -15,114 +15,130 @@ struct SwingTrackerView: View {
             VStack(spacing: 8) {
                 // Başlık
                 Text("VURUŞ ANALİZİ")
-                    .font(.system(.footnote, design: .rounded))
-                    .bold()
-                    .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22)) // Neon sarı/yeşil
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc400)
+                    .padding(.top, 2)
                 
                 if !tracker.isTracking {
                     // Takip Başlatma Ekranı
                     VStack(spacing: 6) {
                         Image(systemName: "gauge.with.needle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 24))
+                            .foregroundColor(.zinc500)
                         
                         Text("Vuruş hızınızı ve ivmenizi anlık ölçün.")
                             .font(.system(size: 10))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.zinc400)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                         
                         Button(action: {
                             tracker.startTracking()
                         }) {
-                            HStack {
+                            HStack(spacing: 4) {
                                 Image(systemName: "play.fill")
+                                    .font(.system(size: 11))
                                 Text("Takibi Başlat")
+                                    .font(.system(size: 12, weight: .semibold))
                             }
-                            .font(.system(.body, design: .rounded).bold())
+                            .foregroundColor(.zinc950)
+                            .frame(maxWidth: .infinity, minHeight: 32)
+                            .background(Color.zinc50)
+                            .cornerRadius(6)
                         }
-                        .tint(Color(red: 0.1, green: 0.8, blue: 0.5)) // Yeşil buton
+                        .buttonStyle(.plain)
+                        .padding(.top, 2)
                         
-                        Text("⚠️ Doğru analiz için saati raketi tuttuğunuz (baskın) kolunuza takmalısınız.")
+                        Text("⚠️ Saati raketi tuttuğunuz baskın kolunuza takmalısınız.")
                             .font(.system(size: 8))
-                            .foregroundColor(.orange)
+                            .foregroundColor(.zinc500)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                            .padding(.top, 4)
+                            .padding(.top, 2)
                     }
                     .padding(.top, 4)
                 } else {
                     // Takip Ekranı (Canlı Veri)
-                    VStack(spacing: 4) {
+                    VStack(spacing: 6) {
                         // Son Vuruş Kartı
                         VStack(spacing: 2) {
                             Text("SON VURUŞ HIZI")
-                                .font(.system(size: 8))
-                                .foregroundColor(.gray)
+                                .font(.system(size: 8, weight: .semibold))
+                                .foregroundColor(.zinc500)
                             
                             Text(tracker.lastSwingSpeedKmh > 0 ? String(format: "%.0f km/h", tracker.lastSwingSpeedKmh) : "- km/h")
-                                .font(.system(size: 28, weight: .black, design: .rounded))
-                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                                .foregroundColor(.zinc50)
                             
                             HStack(spacing: 12) {
                                 Text("Tür: \(tracker.lastSwingType)")
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.zinc200)
                                 
                                 Text("İvme: \(String(format: "%.1fG", tracker.lastAccelerationG))")
-                                    .font(.system(size: 10, design: .rounded))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(.zinc400)
                             }
                         }
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
-                        .background(Color.white.opacity(0.06))
-                        .cornerRadius(10)
+                        .background(Color.zinc900)
+                        .cornerRadius(6)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.3), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
                         )
                         
                         // Takibi Durdurma Butonu
                         Button(action: {
                             tracker.stopTracking()
                         }) {
-                            HStack {
+                            HStack(spacing: 4) {
                                 Image(systemName: "stop.fill")
+                                    .font(.system(size: 10))
                                 Text("Takibi Durdur")
+                                    .font(.system(size: 11, weight: .semibold))
                             }
-                            .font(.system(.caption, design: .rounded).bold())
+                            .foregroundColor(.statusRed)
+                            .frame(maxWidth: .infinity, minHeight: 28)
+                            .background(Color.zinc900)
+                            .cornerRadius(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                         }
-                        .tint(.red)
-                        .frame(height: 28)
+                        .buttonStyle(.plain)
                         
                         // Son Vuruşlar Listesi (Görsel Log)
                         if !tracker.recentSwings.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 3) {
                                 Text("SON VURUŞLAR")
-                                    .font(.system(size: 8))
-                                    .foregroundColor(.gray)
-                                    .bold()
-                                    .padding(.top, 4)
+                                    .font(.system(size: 8, weight: .semibold))
+                                    .foregroundColor(.zinc500)
+                                    .padding(.top, 2)
                                 
                                 ForEach(tracker.recentSwings) { swing in
                                     HStack {
                                         Text(swing.swingType)
-                                            .font(.system(size: 10, weight: .bold))
-                                            .foregroundColor(.white)
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(.zinc200)
                                         Spacer()
                                         Text(String(format: "%.0f km/h", swing.speedKmh))
-                                            .font(.system(size: 10, design: .monospaced))
-                                            .bold()
-                                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.zinc100)
                                         Text(String(format: "%.1fG", swing.accelerationG))
-                                            .font(.system(size: 8))
-                                            .foregroundColor(.gray)
+                                            .font(.system(size: 8, design: .monospaced))
+                                            .foregroundColor(.zinc500)
                                     }
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 3)
-                                    .background(Color.white.opacity(0.03))
+                                    .background(Color.zinc900)
                                     .cornerRadius(4)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(Color.zinc850, lineWidth: 1)
+                                    )
                                 }
                             }
                         }

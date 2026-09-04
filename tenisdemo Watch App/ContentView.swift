@@ -23,17 +23,17 @@ struct ContentView: View {
                 } else if viewModel.state.isMatchOver {
                     MatchSummaryView(viewModel: viewModel)
                 } else {
-                    VStack(spacing: 6) {
+                    VStack(spacing: 5) {
                         // Üst Bar: Başlık ve Set Skorları
                         HStack {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(connectivityManager.isCompanionActive ? "CANLI" : "YEREL")
-                                    .font(.system(size: 10, weight: .black, design: .rounded))
-                                    .foregroundColor(connectivityManager.isCompanionActive ? Color(red: 0.1, green: 0.8, blue: 0.5) : .gray)
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(connectivityManager.isCompanionActive ? .statusGreen : .zinc500)
                                 
                                 Text("MAÇI")
-                                    .font(.system(size: 8, weight: .bold, design: .rounded))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 8, weight: .semibold))
+                                    .foregroundColor(.zinc500)
                             }
                             
                             Spacer()
@@ -44,41 +44,49 @@ struct ContentView: View {
                                     ForEach(viewModel.state.setScores) { setScore in
                                         Text("\(setScore.p1Games)-\(setScore.p2Games)")
                                             .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                            .padding(.horizontal, 6)
+                                            .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
-                                            .background(Color.white.opacity(0.12))
+                                            .background(Color.zinc900)
                                             .cornerRadius(4)
-                                            .foregroundColor(.white)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 4)
+                                                    .stroke(Color.zinc800, lineWidth: 1)
+                                            )
+                                            .foregroundColor(.zinc200)
                                     }
                                 }
                             } else {
                                 Text("0-0")
                                     .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                    .padding(.horizontal, 6)
+                                    .padding(.horizontal, 5)
                                     .padding(.vertical, 2)
-                                    .background(Color.white.opacity(0.08))
+                                    .background(Color.zinc900)
                                     .cornerRadius(4)
-                                    .foregroundColor(.gray)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(Color.zinc800, lineWidth: 1)
+                                    )
+                                    .foregroundColor(.zinc500)
                             }
                             
                             if viewModel.state.isMatchTiebreak || viewModel.state.isTiebreak {
                                 Text("TB")
-                                    .font(.system(size: 9, weight: .black, design: .rounded))
-                                    .foregroundColor(.black)
-                                    .padding(.horizontal, 5)
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.zinc950)
+                                    .padding(.horizontal, 4)
                                     .padding(.vertical, 2)
-                                    .background(Color(red: 0.86, green: 0.98, blue: 0.22))
+                                    .background(Color.zinc50)
                                     .cornerRadius(4)
                             }
                         }
-                        .padding(.horizontal, 6)
-                        .frame(height: 24)
+                        .padding(.horizontal, 4)
+                        .frame(height: 22)
                         
                         // Oyuncu Kartları veya Mola Ekranı
                         if viewModel.state.isGameBreak {
                             WatchGameBreakView(viewModel: viewModel, connectivityManager: connectivityManager)
                         } else {
-                            VStack(spacing: 5) {
+                            VStack(spacing: 4) {
                                 PlayerCard(
                                     player: .player1,
                                     name: viewModel.isDouble 
@@ -88,7 +96,6 @@ struct ContentView: View {
                                     games: "\(viewModel.state.p1Games)",
                                     sets: "\(viewModel.state.p1Sets)",
                                     isServing: viewModel.state.server == .player1,
-                                    color: Color(red: 0.1, green: 0.8, blue: 0.5), // Emerald
                                     isMatchOver: viewModel.state.isMatchOver,
                                     onTap: {
                                         if connectivityManager.isCompanionActive {
@@ -109,7 +116,6 @@ struct ContentView: View {
                                     games: "\(viewModel.state.p2Games)",
                                     sets: "\(viewModel.state.p2Sets)",
                                     isServing: viewModel.state.server == .player2,
-                                    color: Color(red: 0.95, green: 0.45, blue: 0.15), // Orange
                                     isMatchOver: viewModel.state.isMatchOver,
                                     onTap: {
                                         if connectivityManager.isCompanionActive {
@@ -125,7 +131,6 @@ struct ContentView: View {
                         
                         // Alt Kontrol Paneli (Geri Al / Ayarlar)
                         HStack {
-                            // Geri Al (Undo) Butonu
                             Button(action: {
                                 if connectivityManager.isCompanionActive {
                                     connectivityManager.sendUndoAction()
@@ -133,39 +138,47 @@ struct ContentView: View {
                                     viewModel.undo()
                                 }
                             }) {
-                                HStack(spacing: 4) {
+                                HStack(spacing: 3) {
                                     Image(systemName: "arrow.uturn.backward")
-                                        .font(.system(size: 11, weight: .bold))
+                                        .font(.system(size: 10, weight: .bold))
                                     Text("Geri")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                        .font(.system(size: 10, weight: .semibold))
                                 }
-                                .foregroundColor(.white)
+                                .foregroundColor(.zinc300)
                             }
                             .buttonStyle(.plain)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.white.opacity(0.12))
-                            .cornerRadius(8)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.zinc900)
+                            .cornerRadius(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                             .disabled(connectivityManager.isCompanionActive ? !connectivityManager.canUndo : viewModel.history.isEmpty)
+                            .opacity((connectivityManager.isCompanionActive ? !connectivityManager.canUndo : viewModel.history.isEmpty) ? 0.4 : 1.0)
                             
                             Spacer()
                             
-                            // Ayarlar Butonu
                             Button(action: {
                                 showSettings = true
                             }) {
                                 Image(systemName: "gearshape.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.zinc400)
                             }
                             .buttonStyle(.plain)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.white.opacity(0.08))
-                            .cornerRadius(8)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.zinc900)
+                            .cornerRadius(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                         }
-                        .padding(.horizontal, 4)
-                        .frame(height: 24)
+                        .padding(.horizontal, 2)
+                        .frame(height: 22)
                     }
                     .padding(.horizontal, 4)
                     .padding(.bottom, 2)
@@ -193,7 +206,6 @@ struct PlayerCard: View {
     let games: String
     let sets: String
     let isServing: Bool
-    let color: Color
     let isMatchOver: Bool
     let onTap: () -> Void
     let onLongPressServer: () -> Void
@@ -201,42 +213,35 @@ struct PlayerCard: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 6) {
-                // Servisçi İkonu (Dokunulunca başlangıçta servis değiştirir)
+                // Servisçi İkonu
                 Button(action: onLongPressServer) {
                     ZStack {
                         Circle()
-                            .fill(isServing ? Color(red: 0.86, green: 0.98, blue: 0.22) : Color.clear)
-                            .frame(width: 18, height: 18)
-                        
-                        if isServing {
-                            Image(systemName: "tennisball.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(.black)
-                        } else {
-                            Image(systemName: "tennisball")
-                                .font(.system(size: 10))
-                                .foregroundColor(.gray.opacity(0.3))
-                        }
+                            .fill(isServing ? Color.zinc50 : Color.clear)
+                            .frame(width: 8, height: 8)
+                            .overlay(
+                                Circle()
+                                    .stroke(isServing ? Color.clear : Color.zinc700, lineWidth: 1)
+                            )
                     }
                 }
                 .buttonStyle(.plain)
-                .frame(width: 22)
+                .frame(width: 14)
                 
                 // Oyuncu Adı ve Set Sayısı
                 VStack(alignment: .leading, spacing: 1) {
                     Text(name)
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.zinc100)
+                        .lineLimit(1)
                     
                     HStack(spacing: 2) {
                         Text("Set:")
-                            .font(.system(.caption2, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 9))
+                            .foregroundColor(.zinc500)
                         Text(sets)
-                            .font(.system(.caption2, design: .rounded))
-                            .bold()
-                            .foregroundColor(color)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc300)
                     }
                 }
                 
@@ -246,29 +251,28 @@ struct PlayerCard: View {
                 HStack(spacing: 8) {
                     VStack(spacing: 0) {
                         Text("Oyn")
-                            .font(.system(size: 8, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 7))
+                            .foregroundColor(.zinc500)
                         Text(games)
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(.white)
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc200)
                     }
                     
                     Text(points)
-                        .font(.system(size: 24, weight: .black, design: .rounded))
-                        .foregroundColor(color)
+                        .font(.system(size: 22, weight: .bold, design: .monospaced))
+                        .foregroundColor(.zinc50)
                         .frame(width: 32, alignment: .trailing)
                 }
             }
             .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.vertical, 5)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(color.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(isServing ? color.opacity(0.5) : color.opacity(0.15), lineWidth: 1)
-                    )
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isServing ? Color.zinc850 : Color.zinc900)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(isServing ? Color.zinc700 : Color.zinc800, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -282,18 +286,18 @@ struct SetupMatchView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
-                Text("MAÇ AYARLARI")
-                    .font(.system(.headline, design: .rounded))
-                    .bold()
-                    .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+            VStack(spacing: 8) {
+                Text("MAÇ KURULUMU")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc400)
                     .padding(.top, 2)
                 
                 Divider()
+                    .background(Color.zinc800)
 
-                Toggle("Çiftler (Double)", isOn: $viewModel.isDouble)
-                    .font(.system(.footnote, design: .rounded))
-                    .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
+                Toggle("Çiftler", isOn: $viewModel.isDouble)
+                    .font(.system(size: 11))
+                    .foregroundColor(.zinc300)
 
                 VStack(spacing: 4) {
                     TextField("Oyuncu 1", text: $viewModel.player1Name)
@@ -305,37 +309,35 @@ struct SetupMatchView: View {
                         TextField("Ortak 2", text: $viewModel.player2PartnerName)
                     }
                 }
-                .font(.system(.footnote, design: .rounded))
+                .font(.system(size: 11))
+                .foregroundColor(.zinc100)
                 .padding(.vertical, 2)
                 
                 // Set kazanmak için oyun sayısı
                 SegmentedSelector(
-                    title: "Set Kazanmak İçin Game:",
+                    title: "Set İçin Game:",
                     options: [4, 6],
-                    selection: $viewModel.gamesPerSet,
-                    color: Color(red: 0.1, green: 0.8, blue: 0.5)
+                    selection: $viewModel.gamesPerSet
                 )
                 
                 // Kazanılması gereken set sayısı
                 SegmentedSelector(
-                    title: "Kazanılması Gereken Set:",
+                    title: "Kazanılacak Set:",
                     options: [1, 2],
-                    selection: $viewModel.setsToWin,
-                    color: Color(red: 0.95, green: 0.45, blue: 0.15)
+                    selection: $viewModel.setsToWin
                 )
                 
-                // 1-1 set beraberliğinde Tiebreak oynanacak mı (Match/Super Tiebreak)
                 if viewModel.setsToWin > 1 {
                     Toggle(isOn: $viewModel.useMatchTiebreak) {
                         VStack(alignment: .leading, spacing: 1) {
-                            Text("Süper Tiebreak (10)")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                            Text("1-1'de 3. set yerine oynanır")
+                            Text("Süper Tiebreak")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.zinc200)
+                            Text("1-1'de 10 puan")
                                 .font(.system(size: 8))
-                                .foregroundColor(.gray)
+                                .foregroundColor(.zinc500)
                         }
                     }
-                    .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
                     .padding(.vertical, 2)
                 }
                 
@@ -344,15 +346,14 @@ struct SetupMatchView: View {
                     viewModel.startMatch()
                 }) {
                     Text("Maçı Başlat")
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, minHeight: 36)
-                        .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                        .cornerRadius(10)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.zinc950)
+                        .frame(maxWidth: .infinity, minHeight: 34)
+                        .background(Color.zinc50)
+                        .cornerRadius(6)
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 6)
+                .padding(.top, 4)
             }
             .padding(.horizontal, 4)
         }
@@ -364,27 +365,29 @@ struct SegmentedSelector: View {
     let title: String
     let options: [Int]
     @Binding var selection: Int
-    let color: Color
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(title)
-                .font(.system(.caption, design: .rounded))
-                .foregroundColor(.gray)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(.zinc500)
             
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 ForEach(options, id: \.self) { option in
                     Button(action: {
                         selection = option
                         WKInterfaceDevice.current().play(.click)
                     }) {
                         Text("\(option)")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(selection == option ? .black : .white)
-                            .frame(maxWidth: .infinity, minHeight: 30)
-                            .background(selection == option ? color : Color.white.opacity(0.12))
-                            .cornerRadius(8)
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(selection == option ? .zinc950 : .zinc300)
+                            .frame(maxWidth: .infinity, minHeight: 26)
+                            .background(selection == option ? Color.zinc50 : Color.zinc900)
+                            .cornerRadius(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(selection == option ? Color.clear : Color.zinc800, lineWidth: 1)
+                            )
                     }
                     .buttonStyle(.plain)
                 }
@@ -400,78 +403,80 @@ struct MatchSummaryView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
-                // Trophy veya Başarı İkonu
-                VStack(spacing: 4) {
-                    Image(systemName: viewModel.state.winner == .player1 ? "trophy.fill" : "hand.thumbsup.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(viewModel.state.winner == .player1 ? Color(red: 0.86, green: 0.98, blue: 0.22) : .orange)
-                    
-                    Text(viewModel.state.winner == .player1 ? "MAÇI KAZANDINIZ!" : "RAKİP KAZANDI")
-                        .font(.system(.headline, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
+            VStack(spacing: 8) {
+                // Sonuç Başlığı
+                VStack(spacing: 2) {
+                    Text(viewModel.state.winner == .player1 ? "MAÇI KAZANDINIZ" : "RAKİP KAZANDI")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.zinc50)
                 }
                 .padding(.top, 4)
                 
                 Divider()
+                    .background(Color.zinc800)
                 
                 // Set Skorları Listesi
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("SET SKORLARI")
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundColor(.gray)
-                        .bold()
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(.zinc500)
                     
                     ForEach(Array(viewModel.state.setScores.enumerated()), id: \.offset) { index, setScore in
                         HStack {
                             Text("\(index + 1). Set")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(.gray)
+                                .font(.system(size: 10))
+                                .foregroundColor(.zinc400)
                             Spacer()
                             Text("\(setScore.p1Games) - \(setScore.p2Games)")
-                                .font(.system(.body, design: .monospaced))
-                                .bold()
-                                .foregroundColor(setScore.p1Games > setScore.p2Games ? Color(red: 0.1, green: 0.8, blue: 0.5) : Color(red: 0.95, green: 0.45, blue: 0.15))
+                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                .foregroundColor(.zinc100)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.06))
+                        .background(Color.zinc900)
                         .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 2)
                 
                 // İstatistikler Özet
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("İSTATİSTİKLER")
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundColor(.gray)
-                        .bold()
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(.zinc500)
                     
                     let totalGamesP1 = viewModel.state.setScores.reduce(0) { $0 + $1.p1Games }
                     let totalGamesP2 = viewModel.state.setScores.reduce(0) { $0 + $1.p2Games }
                     
                     HStack {
                         Text("Toplam Game:")
-                            .font(.system(.caption2, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 9))
+                            .foregroundColor(.zinc400)
                         Spacer()
                         Text("Siz: \(totalGamesP1) / Rakip: \(totalGamesP2)")
-                            .font(.system(.caption2, design: .rounded))
-                            .bold()
+                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                            .foregroundColor(.zinc200)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.06))
+                    .background(Color.zinc900)
                     .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
+                    )
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 2)
                 
                 Divider()
+                    .background(Color.zinc800)
                 
                 // Aksiyon Butonları
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     Button(action: {
                         if connectivityManager.isCompanionActive {
                             connectivityManager.sendResetAction()
@@ -479,16 +484,16 @@ struct MatchSummaryView: View {
                             viewModel.reset()
                         }
                     }) {
-                        HStack {
+                        HStack(spacing: 4) {
                             Image(systemName: "arrow.clockwise")
-                            Text("Aynı Kurallarla Yeniden Oyna")
-                                .bold()
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Yeniden Oyna")
+                                .font(.system(size: 11, weight: .semibold))
                         }
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, minHeight: 32)
-                        .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                        .cornerRadius(8)
+                        .foregroundColor(.zinc950)
+                        .frame(maxWidth: .infinity, minHeight: 30)
+                        .background(Color.zinc50)
+                        .cornerRadius(6)
                     }
                     .buttonStyle(.plain)
                     
@@ -499,23 +504,27 @@ struct MatchSummaryView: View {
                             viewModel.newMatch()
                         }
                     }) {
-                        HStack {
-                            Image(systemName: "plus.circle")
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 10, weight: .bold))
                             Text("Yeni Maç Kur")
-                                .bold()
+                                .font(.system(size: 11, weight: .semibold))
                         }
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, minHeight: 32)
-                        .background(Color.white.opacity(0.12))
-                        .cornerRadius(8)
+                        .foregroundColor(.zinc300)
+                        .frame(maxWidth: .infinity, minHeight: 30)
+                        .background(Color.zinc900)
+                        .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.top, 4)
+                .padding(.top, 2)
             }
             .padding(.horizontal, 4)
-            .padding(.bottom, 8)
+            .padding(.bottom, 6)
         }
     }
 }
@@ -526,32 +535,40 @@ struct SettingsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 Text("Ayarlar")
-                    .font(.headline)
-                    .foregroundColor(.yellow)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.zinc50)
                     .padding(.top, 2)
                 
                 Divider()
+                    .background(Color.zinc800)
                 
                 // Aktif maç kuralları özeti
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("Aktif Maç Kuralları:")
-                        .font(.caption2)
-                        .foregroundColor(.gray)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.zinc500)
                     Text("• Set limiti: \(viewModel.gamesPerSet) Game")
-                        .font(.caption2)
+                        .font(.system(size: 9))
+                        .foregroundColor(.zinc300)
                     Text("• Maç limiti: \(viewModel.setsToWin) Set")
-                        .font(.caption2)
+                        .font(.system(size: 9))
+                        .foregroundColor(.zinc300)
                     if viewModel.setsToWin > 1 {
                         Text("• Karar Seti: \(viewModel.useMatchTiebreak ? "Süper Tiebreak" : "Normal Set")")
-                            .font(.caption2)
+                            .font(.system(size: 9))
+                            .foregroundColor(.zinc300)
                     }
                 }
-                .padding(.horizontal)
+                .padding(8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Divider()
+                .background(Color.zinc900)
+                .cornerRadius(6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.zinc800, lineWidth: 1)
+                )
                 
                 Button(action: {
                     if WatchConnectivityManager.shared.isCompanionActive {
@@ -561,14 +578,21 @@ struct SettingsView: View {
                     }
                     showSettings = false
                 }) {
-                    HStack {
+                    HStack(spacing: 4) {
                         Image(systemName: "arrow.clockwise")
-                        Text("Maçı Yenile")
-                            .bold()
+                        Text("Maçı Sıfırla")
                     }
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc200)
+                    .frame(maxWidth: .infinity, minHeight: 28)
+                    .background(Color.zinc900)
+                    .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
+                    )
                 }
-                .buttonStyle(.bordered)
-                .tint(.white.opacity(0.15))
+                .buttonStyle(.plain)
                 
                 Button(action: {
                     if WatchConnectivityManager.shared.isCompanionActive {
@@ -578,23 +602,27 @@ struct SettingsView: View {
                     }
                     showSettings = false
                 }) {
-                    HStack {
-                        Image(systemName: "xmark.circle")
-                        Text("Yeni Maç Kur")
-                            .bold()
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                        Text("Yeni Maç")
                     }
-                    .foregroundColor(.yellow)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc950)
+                    .frame(maxWidth: .infinity, minHeight: 28)
+                    .background(Color.zinc50)
+                    .cornerRadius(6)
                 }
-                .buttonStyle(.bordered)
-                .tint(.yellow.opacity(0.15))
+                .buttonStyle(.plain)
                 
                 Button("Kapat") {
                     showSettings = false
                 }
-                .buttonStyle(.bordered)
-                .tint(.white.opacity(0.15))
+                .font(.system(size: 11))
+                .foregroundColor(.zinc400)
+                .padding(.top, 2)
             }
-            .padding(.bottom, 10)
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
         }
     }
 }
@@ -613,23 +641,24 @@ struct WatchGameBreakView: View {
     }
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 3) {
             HStack(spacing: 4) {
                 Image(systemName: "drop.fill")
-                    .foregroundColor(Color(red: 0.3, green: 0.7, blue: 1.0))
-                    .font(.system(size: 10))
+                    .foregroundColor(.zinc400)
+                    .font(.system(size: 9))
                 Text("SU MOLASI")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0.3, green: 0.7, blue: 1.0))
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.zinc400)
             }
             
             Text("Game: \(winnerName)")
-                .font(.system(size: 13, weight: .black, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.zinc100)
+                .lineLimit(1)
             
             Text("Skor: \(viewModel.state.p1Games) - \(viewModel.state.p2Games)")
-                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundColor(.zinc50)
             
             Button(action: {
                 if connectivityManager.isCompanionActive {
@@ -640,19 +669,19 @@ struct WatchGameBreakView: View {
             }) {
                 HStack(spacing: 4) {
                     Image(systemName: "play.fill")
-                        .font(.system(size: 11))
+                        .font(.system(size: 10))
                     Text("Yeni Game")
-                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .font(.system(size: 12, weight: .semibold))
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.zinc950)
                 .frame(maxWidth: .infinity)
-                .frame(height: 34)
-                .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                .cornerRadius(8)
+                .frame(height: 32)
+                .background(Color.zinc50)
+                .cornerRadius(6)
             }
             .buttonStyle(.plain)
             .padding(.top, 2)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
