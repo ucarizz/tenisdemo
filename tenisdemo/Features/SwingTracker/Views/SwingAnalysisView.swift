@@ -3,6 +3,7 @@
 //  tenisdemo
 //
 //  Created by Antigravity on 07.08.2026.
+//  Refactored for Linear / Vercel Minimal Aesthetic
 //
 
 import SwiftUI
@@ -51,107 +52,134 @@ struct SwingAnalysisView: View {
     @StateObject private var viewModel = SwingAnalysisViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.zinc950.ignoresSafeArea()
                 
-                // Dekoratif Arka Plan Işığı
-                VStack {
-                    HStack {
-                        Spacer()
-                        Circle()
-                            .fill(Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.06))
-                            .frame(width: 200, height: 200)
-                            .blur(radius: 40)
-                            .offset(x: 50, y: -50)
-                    }
-                    Spacer()
-                }
-                
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     if viewModel.isLoading && viewModel.records.isEmpty {
-                        ProgressView("Yükleniyor...")
-                            .foregroundColor(.white)
+                        Spacer()
+                        ProgressView()
+                            .tint(.zinc400)
+                        Text("Yükleniyor...")
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc500)
+                        Spacer()
                     } else if let errorMessage = viewModel.errorMessage {
+                        Spacer()
                         VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.title)
-                                .foregroundColor(.orange)
+                            Image(systemName: "exclamationmark.circle")
+                                .font(.system(size: 28))
+                                .foregroundColor(.zinc500)
                             Text(errorMessage)
-                                .foregroundColor(.gray)
-                                .font(.subheadline)
+                                .foregroundColor(.zinc400)
+                                .font(.system(size: 13))
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal)
+                                .padding(.horizontal, 24)
                             Button("Tekrar Dene") {
                                 Task { await viewModel.loadHistory() }
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(Color(red: 0.86, green: 0.98, blue: 0.22))
-                            .foregroundColor(.black)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc950)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color.zinc50)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc300, lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                         }
+                        Spacer()
                     } else {
-                        // Özet İstatistik Paneli
-                        HStack(spacing: 12) {
-                            SummaryStatBox(title: "Ort. Hız", value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.averageSpeed), color: Color(red: 0.86, green: 0.98, blue: 0.22))
-                            SummaryStatBox(title: "Maks Hız", value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.maxSpeed), color: Color(red: 0.1, green: 0.8, blue: 0.5))
-                            SummaryStatBox(title: "Toplam", value: "\(viewModel.records.count) Vuruş", color: .orange)
+                        // Summary Metric Cards (Linear / Vercel style)
+                        HStack(spacing: 8) {
+                            SummaryStatBox(
+                                title: "ORT. HIZ",
+                                value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.averageSpeed)
+                            )
+                            SummaryStatBox(
+                                title: "MAKS. HIZ",
+                                value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.maxSpeed)
+                            )
+                            SummaryStatBox(
+                                title: "TOPLAM",
+                                value: "\(viewModel.records.count)"
+                            )
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 8)
+                        .padding(.top, 12)
                         
-                        // Liste
+                        // Swing Records List
                         if viewModel.records.isEmpty {
                             Spacer()
-                            Text("Henüz vuruş kaydı bulunamadı.")
-                                .foregroundColor(.white)
-                                .font(.system(.headline, design: .rounded))
-                            Text("Apple Watch uygulamasından Vuruş Analizi'ni başlatıp deneme yapın.")
-                                .foregroundColor(.gray)
-                                .font(.system(.caption, design: .rounded))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
+                            VStack(spacing: 6) {
+                                Text("Henüz vuruş kaydı bulunamadı")
+                                    .foregroundColor(.zinc300)
+                                    .font(.system(size: 14, weight: .medium))
+                                Text("Apple Watch uygulamasından vuruş analizi başlatıldığında burada listelenir.")
+                                    .foregroundColor(.zinc500)
+                                    .font(.system(size: 12))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
+                            }
                             Spacer()
                         } else {
-                            List {
-                                ForEach(viewModel.records) { record in
-                                    HStack(spacing: 12) {
-                                        // Vuruş türüne göre renk ve ikon
-                                        Circle()
-                                            .fill(typeColor(record.swingType).opacity(0.15))
-                                            .frame(width: 40, height: 40)
-                                            .overlay(
-                                                Image(systemName: "tennis.racket")
-                                                    .foregroundColor(typeColor(record.swingType))
-                                                    .font(.system(size: 16))
-                                            )
-                                        
-                                        VStack(alignment: .leading, spacing: 4) {
+                            ScrollView {
+                                LazyVStack(spacing: 6) {
+                                    ForEach(viewModel.records) { record in
+                                        HStack(spacing: 12) {
+                                            // Swing Type Badge
                                             Text(record.swingType.uppercased())
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .bold()
-                                                .foregroundColor(.white)
+                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                                .foregroundColor(.zinc200)
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(Color.zinc850)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 4)
+                                                        .stroke(Color.zinc700, lineWidth: 1)
+                                                )
+                                            
+                                            // Date
                                             Text(formatDate(record.recordedAt))
-                                                .font(.system(size: 10))
-                                                .foregroundColor(.gray)
+                                                .font(.system(size: 12, design: .monospaced))
+                                                .foregroundColor(.zinc500)
+                                            
+                                            Spacer()
+                                            
+                                            // Metrics
+                                            HStack(spacing: 10) {
+                                                Text(String(format: "%.0f km/h", record.speedKmh))
+                                                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                                                    .foregroundColor(.zinc50)
+                                                
+                                                Text(String(format: "%.1f G", record.accelerationG))
+                                                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                                    .foregroundColor(.zinc500)
+                                                    .padding(.horizontal, 5)
+                                                    .padding(.vertical, 2)
+                                                    .background(Color.zinc850)
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 3)
+                                                            .stroke(Color.zinc800, lineWidth: 1)
+                                                    )
+                                            }
                                         }
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing, spacing: 4) {
-                                            Text(String(format: "%.0f km/h", record.speedKmh))
-                                                .font(.system(.body, design: .monospaced))
-                                                .bold()
-                                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                            Text(String(format: "%.1f G", record.accelerationG))
-                                                .font(.system(size: 10))
-                                                .foregroundColor(.gray)
-                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 10)
+                                        .background(Color.zinc900)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                .stroke(Color.zinc800, lineWidth: 1)
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                     }
-                                    .padding(.vertical, 4)
-                                    .listRowBackground(Color.white.opacity(0.04))
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.top, 4)
+                                .padding(.bottom, 24)
                             }
-                            .scrollContentBackground(.hidden)
                             .refreshable {
                                 await viewModel.loadHistory()
                             }
@@ -159,15 +187,18 @@ struct SwingAnalysisView: View {
                     }
                 }
             }
-            .navigationTitle("VURUŞ ANALİZİ")
+            .navigationTitle("Vuruş Analizi")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.zinc950, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         Task { await viewModel.loadHistory() }
                     }) {
                         Image(systemName: "arrow.clockwise")
-                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc400)
                     }
                 }
             }
@@ -177,25 +208,12 @@ struct SwingAnalysisView: View {
         }
     }
     
-    private func typeColor(_ type: String) -> Color {
-        switch type.lowercased() {
-        case "forehand":
-            return Color(red: 0.1, green: 0.8, blue: 0.5)
-        case "backhand":
-            return .orange
-        case "servis":
-            return Color(red: 0.86, green: 0.98, blue: 0.22)
-        default:
-            return .gray
-        }
-    }
-    
     private func formatDate(_ dateStr: String) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "dd.MM.yyyy HH:mm"
+        outputFormatter.dateFormat = "dd.MM.yy HH:mm"
         
         if let date = formatter.date(from: dateStr) {
             return outputFormatter.string(from: date)
@@ -210,28 +228,30 @@ struct SwingAnalysisView: View {
     }
 }
 
+// MARK: - Minimal Summary Metric Box
 struct SummaryStatBox: View {
     let title: String
     let value: String
-    let color: Color
     
     var body: some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(.headline, design: .rounded))
-                .bold()
-                .foregroundColor(color)
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(.caption2, design: .rounded))
-                .foregroundColor(.gray)
+                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                .foregroundColor(.zinc500)
+                .tracking(0.5)
+            
+            Text(value)
+                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                .foregroundColor(.zinc50)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white.opacity(0.04))
-        .cornerRadius(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.zinc900)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .stroke(Color.zinc800, lineWidth: 1)
         )
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 }

@@ -4,51 +4,41 @@ struct ForceUpdateView: View {
     let appStoreUrl: String
     let message: String
     
-    private let brandColor = Color(red: 0.86, green: 0.98, blue: 0.22)
-    
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.zinc950.ignoresSafeArea()
             
-            // Neon arkaplan ışıkları
-            VStack {
-                Circle()
-                    .fill(brandColor.opacity(0.12))
-                    .frame(width: 320, height: 320)
-                    .blur(radius: 60)
-                    .offset(y: -50)
-                Spacer()
-            }
-            
-            VStack(spacing: 32) {
+            VStack(spacing: 28) {
                 Spacer()
                 
                 // İkon Grubu
                 ZStack {
-                    Circle()
-                        .fill(brandColor.opacity(0.15))
-                        .frame(width: 110, height: 110)
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.zinc900)
+                        .frame(width: 56, height: 56)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                     
                     Image(systemName: "arrow.down.circle.fill")
-                        .font(.system(size: 56))
-                        .foregroundColor(brandColor)
+                        .font(.system(size: 28))
+                        .foregroundColor(.zinc100)
                 }
                 
                 // Başlık ve Açıklamalar
-                VStack(spacing: 16) {
-                    Text("GÜNCELLEME GEREKLİ")
-                        .font(.system(.title2, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
-                        .tracking(3)
+                VStack(spacing: 12) {
+                    Text("Güncelleme Gerekli")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.zinc50)
                         .multilineTextAlignment(.center)
                     
                     Text(message)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundColor(.gray)
+                        .font(.system(size: 13))
+                        .foregroundColor(.zinc400)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
-                        .lineSpacing(4)
+                        .lineSpacing(3)
                 }
                 
                 Spacer()
@@ -57,20 +47,19 @@ struct ForceUpdateView: View {
                 Button(action: {
                     openAppStore()
                 }) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "square.and.arrow.down.fill")
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.to.line")
+                            .font(.system(size: 13, weight: .semibold))
                         Text("App Store'da Güncelle")
-                            .bold()
+                            .font(.system(size: 14, weight: .semibold))
                     }
-                    .font(.system(.body, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(.zinc950)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(brandColor)
-                    .cornerRadius(16)
-                    .shadow(color: brandColor.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .frame(height: 44)
+                    .background(Color.zinc50)
+                    .cornerRadius(6)
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
         }
@@ -88,7 +77,6 @@ struct SoftUpdateView: View {
     let message: String
     let onDismiss: () -> Void
     
-    private let brandColor = Color(red: 0.86, green: 0.98, blue: 0.22)
     @State private var isShowing = false
     
     var body: some View {
@@ -104,98 +92,97 @@ struct SoftUpdateView: View {
             VStack {
                 Spacer()
                 
-                // Güncelleme Kartı (Glassmorphic)
-                VStack(spacing: 24) {
-                    // Küçük Çizgi (Tasarım detayı)
+                // Güncelleme Kartı
+                VStack(spacing: 20) {
+                    // Küçük Çizgi
                     Capsule()
-                        .fill(Color.white.opacity(0.2))
-                        .frame(width: 40, height: 5)
-                        .padding(.top, 8)
+                        .fill(Color.zinc700)
+                        .frame(width: 36, height: 4)
+                        .padding(.top, 10)
                     
                     // Başlık ve İkon
-                    HStack(spacing: 16) {
+                    HStack(spacing: 12) {
                         ZStack {
-                            Circle()
-                                .fill(brandColor.opacity(0.2))
-                                .frame(width: 48, height: 48)
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.zinc800)
+                                .frame(width: 36, height: 36)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc700, lineWidth: 1)
+                                )
                             
                             Image(systemName: "sparkles")
-                                .font(.system(size: 22))
-                                .foregroundColor(brandColor)
+                                .font(.system(size: 16))
+                                .foregroundColor(.zinc100)
                         }
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Yeni Özellikler Hazır!")
-                                .font(.system(.headline, design: .rounded))
-                                .bold()
-                                .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Yeni Sürüm Mevcut")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.zinc50)
                             
-                            Text("Sürüm Güncellemesi Mevcut")
-                                .font(.system(.subheadline, design: .rounded))
-                                .foregroundColor(.gray)
+                            Text("Yeni özellikler ve iyileştirmeler")
+                                .font(.system(size: 12))
+                                .foregroundColor(.zinc400)
                         }
                         Spacer()
                     }
-                    .padding(.horizontal, 4)
                     
                     // Mesaj
                     Text(message)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundColor(.white.opacity(0.85))
+                        .font(.system(size: 13))
+                        .foregroundColor(.zinc300)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineSpacing(3)
                     
                     // Butonlar
-                    VStack(spacing: 12) {
-                        // Güncelle Butonu
+                    VStack(spacing: 8) {
                         Button(action: {
                             openAppStore()
                         }) {
                             Text("Şimdi Güncelle")
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(.black)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.zinc950)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(brandColor)
-                                .cornerRadius(14)
+                                .frame(height: 42)
+                                .background(Color.zinc50)
+                                .cornerRadius(6)
                         }
                         
-                        // Daha Sonra Butonu
                         Button(action: {
                             withAnimation(.spring()) {
                                 onDismiss()
                             }
                         }) {
                             Text("Daha Sonra")
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(.white)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.zinc300)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.white.opacity(0.08))
-                                .cornerRadius(14)
+                                .frame(height: 42)
+                                .background(Color.zinc800)
+                                .cornerRadius(6)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc700, lineWidth: 1)
                                 )
                         }
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 34)
-                .background(.ultraThinMaterial) // iOS 15+ Native Glassmorphism
-                .cornerRadius(28)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 28)
+                .background(Color.zinc900)
+                .cornerRadius(8)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.zinc800, lineWidth: 1)
                 )
+                .padding(.horizontal, 16)
                 .offset(y: isShowing ? 0 : 400)
             }
         }
         .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.8, blendDuration: 0)) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8, blendDuration: 0)) {
                 isShowing = true
             }
         }
@@ -210,7 +197,7 @@ struct SoftUpdateView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.zinc950.ignoresSafeArea()
         SoftUpdateView(
             appStoreUrl: "https://apps.apple.com",
             message: "Uygulamamıza heyecan verici lig maç takip ve yeni swing analiz istatistikleri eklendi! Hemen güncelleyin.",

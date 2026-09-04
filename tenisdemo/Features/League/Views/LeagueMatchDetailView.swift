@@ -3,6 +3,7 @@
 //  tenisdemo
 //
 //  Created by Antigravity on 07.08.2026.
+//  Refactored for Linear / Vercel Minimal Aesthetic
 //
 
 import SwiftUI
@@ -49,80 +50,88 @@ struct LeagueMatchDetailView: View {
     
     var body: some View {
         ZStack {
-            // Premium Koyu Arka Plan
-            LinearGradient(
-                gradient: Gradient(colors: [Color(red: 0.08, green: 0.09, blue: 0.12), Color(red: 0.03, green: 0.04, blue: 0.06)]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            Color.zinc950.ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     // 1. Maç Kartı Detayı
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         HStack {
-                            Label(match.matchDate, systemImage: "calendar")
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
-                                .foregroundColor(.gray)
+                            Text(match.matchDate)
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundColor(.zinc500)
                             
                             Spacer()
                             
-                            Text(match.isCompleted ? "TAMAMLANDI" : "BEKLENİYOR")
-                                .font(.system(size: 9, weight: .black, design: .rounded))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(match.isCompleted ? Color.emerald.opacity(0.15) : Color.orange.opacity(0.15))
-                                .foregroundColor(match.isCompleted ? Color.emerald : Color.orange)
-                                .cornerRadius(4)
+                            HStack(spacing: 5) {
+                                Circle()
+                                    .fill(match.isCompleted ? Color.statusGreen : Color.statusOrange)
+                                    .frame(width: 5, height: 5)
+                                
+                                Text(match.isCompleted ? "TAMAMLANDI" : "BEKLENİYOR")
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundColor(match.isCompleted ? .zinc300 : .zinc400)
+                            }
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(Color.zinc850)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                         }
                         
                         Divider()
-                            .background(Color.white.opacity(0.08))
+                            .background(Color.zinc800)
                         
-                        HStack(spacing: 12) {
+                        HStack(spacing: 8) {
                             // Oyuncu 1
-                            VStack(spacing: 6) {
-                                Image(systemName: "person.circle.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
+                            VStack(spacing: 4) {
                                 Text(match.player1Name)
-                                    .font(.system(.body, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.white)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.zinc100)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
+                                if match.isDouble, let p1Partner = match.player1PartnerName {
+                                    Text("& \(p1Partner)")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.zinc500)
+                                }
                             }
                             .frame(maxWidth: .infinity)
                             
-                            // VS Ortadaki Rozet
-                            Text("VS")
-                                .font(.system(size: 13, weight: .black, design: .rounded))
-                                .foregroundColor(.black)
-                                .frame(width: 32, height: 32)
-                                .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                .clipShape(Circle())
+                            Text("vs")
+                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                .foregroundColor(.zinc500)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.zinc850)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(Color.zinc800, lineWidth: 1)
+                                )
                             
                             // Oyuncu 2
-                            VStack(spacing: 6) {
-                                Image(systemName: "person.circle.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
+                            VStack(spacing: 4) {
                                 Text(match.player2Name)
-                                    .font(.system(.body, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.white)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.zinc100)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
+                                if match.isDouble, let p2Partner = match.player2PartnerName {
+                                    Text("& \(p2Partner)")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.zinc500)
+                                }
                             }
                             .frame(maxWidth: .infinity)
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 6)
                         
                         // Detaylı Set Skorları (Scoreboard)
                         if let score = match.score, !score.isEmpty {
                             Divider()
-                                .background(Color.white.opacity(0.08))
+                                .background(Color.zinc800)
                             
                             TennisScoreboardView(
                                 player1Name: match.player1Name,
@@ -131,252 +140,255 @@ struct LeagueMatchDetailView: View {
                             )
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(16)
+                    .padding(14)
+                    .background(Color.zinc900)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(Color.zinc800, lineWidth: 1)
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     
                     // 1.5. Sayı Geçmişi (Puan Akışı)
                     if let history = match.pointHistories, !history.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("MAÇ SAYI GEÇMİŞİ")
-                                .font(.system(.subheadline, design: .rounded))
-                                .bold()
-                                .foregroundColor(.gray)
-                                .tracking(1)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("SAYI GEÇMİŞİ")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.zinc500)
+                                .padding(.horizontal, 4)
                             
-                            ScrollView {
-                                LazyVStack(spacing: 8) {
-                                    ForEach(history.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })) { pt in
-                                        HStack {
-                                            Text("#\(pt.sequenceNumber)")
-                                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                                .foregroundColor(.gray)
-                                                .frame(width: 28, alignment: .leading)
-                                            
-                                            // Servis atan ikonu
-                                            Image(systemName: "tennisball.fill")
-                                                .font(.system(size: 8))
-                                                .foregroundColor(pt.server.lowercased() == "p1" ? Color(red: 0.86, green: 0.98, blue: 0.22) : .orange)
-                                            
-                                            Text(pt.server.lowercased() == "p1" ? "\(match.player1Name)" : "\(match.player2Name)")
-                                                .font(.system(size: 11, design: .rounded))
-                                                .foregroundColor(.white.opacity(0.8))
-                                                .lineLimit(1)
-                                            
-                                            Spacer()
-                                            
-                                            // Sayı Skoru (Örn: 40 - 15)
-                                            Text("\(pt.p1Points) - \(pt.p2Points)")
-                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                                .padding(.horizontal, 6)
-                                                .padding(.vertical, 2)
-                                                .background(Color.white.opacity(0.06))
-                                                .cornerRadius(4)
-                                            
-                                            // Oyun durum bilgisi (Örn: Oyun: 2-1)
-                                            Text("Set: \(pt.p1Sets)-\(pt.p2Sets) (Oyun: \(pt.p1Games)-\(pt.p2Games))")
-                                                .font(.system(size: 9, design: .rounded))
-                                                .foregroundColor(.gray)
-                                        }
-                                        .padding(.vertical, 6)
-                                        .padding(.horizontal, 8)
-                                        .background(Color.white.opacity(0.02))
-                                        .cornerRadius(8)
+                            VStack(spacing: 4) {
+                                ForEach(history.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })) { pt in
+                                    HStack {
+                                        Text("#\(pt.sequenceNumber + 1)")
+                                            .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                            .foregroundColor(.zinc500)
+                                            .frame(width: 32, alignment: .leading)
+                                        
+                                        Circle()
+                                            .fill(pt.server.lowercased() == "p1" || pt.server.lowercased() == "player1" || pt.server == "SİZ" ? Color.zinc100 : Color.zinc600)
+                                            .frame(width: 5, height: 5)
+                                        
+                                        Text(pt.server.lowercased() == "p1" || pt.server.lowercased() == "player1" || pt.server == "SİZ" ? "\(match.player1Name)" : "\(match.player2Name)")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.zinc300)
+                                            .lineLimit(1)
+                                        
+                                        Spacer()
+                                        
+                                        Text("\(pt.p1Points) - \(pt.p2Points)")
+                                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.zinc100)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color.zinc850)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 3)
+                                                    .stroke(Color.zinc800, lineWidth: 1)
+                                            )
                                     }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.zinc900)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(Color.zinc850, lineWidth: 1)
+                                    )
                                 }
                             }
-                            .frame(maxHeight: 180)
                         }
-                        .padding()
-                        .background(Color.white.opacity(0.03))
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                        )
                     }
                     
-                    // Isı Haritası Bölümü
-                    VStack(alignment: .leading, spacing: 16) {
+                    // 2. Koşu Mesafesi ve Isı Haritası
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("KORT KONUM ANALİZİ")
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .foregroundColor(.zinc500)
+                            .padding(.horizontal, 4)
+                        
                         if isLoadingLocations {
                             HStack {
                                 Spacer()
-                                ProgressView("Isı haritası yükleniyor...")
-                                    .tint(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                    .foregroundColor(.gray)
+                                ProgressView()
+                                    .tint(.zinc400)
+                                Text("Konumlar yükleniyor...")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.zinc500)
                                 Spacer()
                             }
-                            .padding(.vertical, 24)
+                            .padding(20)
+                            .background(Color.zinc900)
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.zinc800, lineWidth: 1))
+                        } else if !locations.isEmpty {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Toplam Koşu Mesafesi")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.zinc500)
+                                        Text(formatDistance(calculateTotalDistance(for: locations)))
+                                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.zinc100)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "figure.run")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.zinc400)
+                                }
+                                .padding(12)
+                                .background(Color.zinc900)
+                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.zinc800, lineWidth: 1))
+                                
+                                MatchHeatmapView(locations: locations)
+                            }
                         } else {
-                            MatchHeatmapView(locations: locations)
+                            HStack {
+                                Spacer()
+                                Text("Bu maça ait GPS konum verisi bulunamadı.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.zinc500)
+                                Spacer()
+                            }
+                            .padding(20)
+                            .background(Color.zinc900)
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.zinc800, lineWidth: 1))
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
                     
-                    // 2. Vuruş Analizi Bölümü
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("MAÇ VURUŞ ANALİZİ")
-                            .font(.system(.subheadline, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
-                            .tracking(1)
+                    // 3. Vuruş Hızları ve Analizi
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("VURUŞ ANALİZİ (APPLE WATCH)")
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .foregroundColor(.zinc500)
+                            .padding(.horizontal, 4)
                         
                         if viewModel.isLoading {
                             HStack {
                                 Spacer()
-                                ProgressView("Vuruşlar yükleniyor...")
-                                    .tint(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                    .foregroundColor(.gray)
+                                ProgressView()
+                                    .tint(.zinc400)
+                                Text("Vuruşlar yükleniyor...")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.zinc500)
                                 Spacer()
                             }
-                            .padding(.vertical, 24)
-                        } else if let errorMessage = viewModel.errorMessage {
-                            Text("Hata: \(errorMessage)")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                                .padding(.vertical, 12)
+                            .padding(20)
+                            .background(Color.zinc900)
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.zinc800, lineWidth: 1))
                         } else if viewModel.records.isEmpty {
-                            VStack(spacing: 8) {
-                                Image(systemName: "gauge.badge.minus")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(.gray)
-                                Text("Bu maç için kaydedilmiş vuruş bulunamadı.")
-                                    .font(.system(.caption, design: .rounded))
-                                    .foregroundColor(.gray)
-                                    .multilineTextAlignment(.center)
+                            HStack {
+                                Spacer()
+                                Text("Bu maça ait kayıtlı vuruş verisi bulunamadı.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.zinc500)
+                                Spacer()
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 24)
-                            .background(Color.white.opacity(0.02))
-                            .cornerRadius(12)
+                            .padding(20)
+                            .background(Color.zinc900)
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.zinc800, lineWidth: 1))
                         } else {
-                            // İstatistik Kartları
-                            VStack(spacing: 12) {
-                                HStack(spacing: 12) {
-                                    SummaryStatBox(title: "Ort. Hız", value: String(format: "%.0f km/h", viewModel.averageSpeed), color: Color(red: 0.86, green: 0.98, blue: 0.22))
-                                    SummaryStatBox(title: "Maks Hız", value: String(format: "%.0f km/h", viewModel.maxSpeed), color: Color(red: 0.1, green: 0.8, blue: 0.5))
-                                    SummaryStatBox(title: "Toplam", value: "\(viewModel.records.count) Vuruş", color: .orange)
+                            VStack(spacing: 8) {
+                                HStack(spacing: 8) {
+                                    SummaryStatBox(
+                                        title: "ORT. HIZ",
+                                        value: String(format: "%.0f km/h", viewModel.averageSpeed)
+                                    )
+                                    SummaryStatBox(
+                                        title: "MAKS. HIZ",
+                                        value: String(format: "%.0f km/h", viewModel.maxSpeed)
+                                    )
+                                    SummaryStatBox(
+                                        title: "TOPLAM",
+                                        value: "\(viewModel.records.count)"
+                                    )
                                 }
                                 
-                                if !locations.isEmpty {
-                                    SummaryStatBox(title: "Koşu Mesafesi", value: formatDistance(calculateTotalDistance(for: locations)), color: Color(red: 0.86, green: 0.98, blue: 0.22))
-                                }
-                            }
-                            
-                            // Vuruş Kayıtları Listesi
-                            VStack(spacing: 10) {
-                                ForEach(viewModel.records) { record in
-                                    HStack(spacing: 12) {
-                                        Circle()
-                                            .fill(typeColor(record.swingType).opacity(0.15))
-                                            .frame(width: 36, height: 36)
-                                            .overlay(
-                                                Image(systemName: "tennis.racket")
-                                                    .foregroundColor(typeColor(record.swingType))
-                                                    .font(.system(size: 14))
-                                            )
-                                        
-                                        VStack(alignment: .leading, spacing: 2) {
+                                VStack(spacing: 4) {
+                                    ForEach(viewModel.records) { record in
+                                        HStack {
                                             Text(record.swingType.uppercased())
-                                                .font(.system(.caption, design: .rounded))
-                                                .bold()
-                                                .foregroundColor(.white)
+                                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                                .foregroundColor(.zinc300)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.zinc850)
+                                                .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color.zinc800, lineWidth: 1))
+                                            
                                             Text(formatTime(record.recordedAt))
-                                                .font(.system(size: 9))
-                                                .foregroundColor(.gray)
+                                                .font(.system(size: 11, design: .monospaced))
+                                                .foregroundColor(.zinc500)
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 8) {
+                                                Text(String(format: "%.0f km/h", record.speedKmh))
+                                                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                                                    .foregroundColor(.zinc100)
+                                                
+                                                Text(String(format: "%.1f G", record.accelerationG))
+                                                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                                    .foregroundColor(.zinc500)
+                                                    .padding(.horizontal, 4)
+                                                    .padding(.vertical, 1)
+                                                    .background(Color.zinc850)
+                                                    .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.zinc800, lineWidth: 1))
+                                            }
                                         }
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing, spacing: 2) {
-                                            Text(String(format: "%.0f km/h", record.speedKmh))
-                                                .font(.system(.subheadline, design: .monospaced))
-                                                .bold()
-                                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                                            Text(String(format: "%.1f G", record.accelerationG))
-                                                .font(.system(size: 9))
-                                                .foregroundColor(.gray)
-                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 7)
+                                        .background(Color.zinc900)
+                                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.zinc850, lineWidth: 1))
                                     }
-                                    .padding()
-                                    .background(Color.white.opacity(0.02))
-                                    .cornerRadius(10)
                                 }
                             }
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
             }
         }
         .navigationTitle("Maç Detayı")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.zinc950, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
             await viewModel.loadSwings(for: match.id)
-            await loadLocations()
+            await loadLocations(for: match.id)
         }
     }
     
-    private func loadLocations() async {
+    private func loadLocations(for matchId: Int) async {
         isLoadingLocations = true
         locationsError = nil
         do {
             let service = LeagueService()
-            self.locations = try await service.fetchMatchLocations(matchId: match.id)
+            self.locations = try await service.fetchMatchLocations(matchId: matchId)
         } catch {
             self.locationsError = error.localizedDescription
-            print("DEBUG: Failed to load locations: \(error.localizedDescription)")
         }
         isLoadingLocations = false
     }
     
-    private func calculateTotalDistance(for trackedLocations: [TrackedLocation]) -> Double {
-        guard trackedLocations.count > 1 else { return 0.0 }
-        var totalDistance: Double = 0.0
-        for i in 0..<(trackedLocations.count - 1) {
-            let p1 = CLLocation(latitude: trackedLocations[i].latitude, longitude: trackedLocations[i].longitude)
-            let p2 = CLLocation(latitude: trackedLocations[i+1].latitude, longitude: trackedLocations[i+1].longitude)
-            totalDistance += p1.distance(from: p2)
+    private func calculateTotalDistance(for locs: [TrackedLocation]) -> Double {
+        guard locs.count > 1 else { return 0.0 }
+        var total: Double = 0.0
+        for i in 1..<locs.count {
+            let prev = CLLocation(latitude: locs[i-1].latitude, longitude: locs[i-1].longitude)
+            let curr = CLLocation(latitude: locs[i].latitude, longitude: locs[i].longitude)
+            let d = curr.distance(from: prev)
+            if d > 0.3 && d < 20.0 {
+                total += d
+            }
         }
-        return totalDistance
+        return total
     }
     
-    private func formatDistance(_ meters: Double) -> String {
-        if meters < 1000.0 {
-            return String(format: "%.0f m", meters)
+    private func formatDistance(_ distanceMeters: Double) -> String {
+        if distanceMeters >= 1000 {
+            return String(format: "%.2f km", distanceMeters / 1000.0)
         } else {
-            return String(format: "%.2f km", meters / 1000.0)
-        }
-    }
-    
-    private func typeColor(_ type: String) -> Color {
-        switch type.lowercased() {
-        case "forehand":
-            return Color(red: 0.1, green: 0.8, blue: 0.5)
-        case "backhand":
-            return .orange
-        case "servis":
-            return Color(red: 0.86, green: 0.98, blue: 0.22)
-        default:
-            return .gray
+            return String(format: "%.0f metre", distanceMeters)
         }
     }
     
@@ -400,6 +412,7 @@ struct LeagueMatchDetailView: View {
     }
 }
 
+// MARK: - Minimal Table Scoreboard
 struct TennisScoreboardView: View {
     let player1Name: String
     let player2Name: String
@@ -408,68 +421,68 @@ struct TennisScoreboardView: View {
     var body: some View {
         let sets = parseScore(scoreString)
         
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             // Sütun Başlıkları (S1, S2, S3...)
             HStack(spacing: 0) {
                 Text("Set Dağılımı")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.zinc500)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(0..<sets.count, id: \.self) { idx in
                         Text("S\(idx + 1)")
-                            .font(.system(size: 10, weight: .black, design: .rounded))
-                            .foregroundColor(.gray)
-                            .frame(width: 30, alignment: .center)
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc500)
+                            .frame(width: 28, alignment: .center)
                     }
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 2)
             
             // Oyuncu 1 Satırı
             HStack(spacing: 0) {
                 Text(player1Name)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.zinc100)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(0..<sets.count, id: \.self) { idx in
                         Text(sets[idx].0)
-                            .font(.system(size: 14, weight: .bold, design: .monospaced))
-                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                            .frame(width: 30, height: 30)
-                            .background(Color.white.opacity(0.06))
-                            .cornerRadius(6)
+                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc50)
+                            .frame(width: 28, height: 26)
+                            .background(Color.zinc850)
+                            .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color.zinc800, lineWidth: 1))
                     }
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 2)
             
             // Oyuncu 2 Satırı
             HStack(spacing: 0) {
                 Text(player2Name)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.zinc400)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(0..<sets.count, id: \.self) { idx in
                         Text(sets[idx].1)
-                            .font(.system(size: 14, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                            .frame(width: 30, height: 30)
-                            .background(Color.white.opacity(0.03))
-                            .cornerRadius(6)
+                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc300)
+                            .frame(width: 28, height: 26)
+                            .background(Color.zinc850)
+                            .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color.zinc800, lineWidth: 1))
                     }
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 2)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
     }
     
     private func parseScore(_ score: String) -> [(String, String)] {

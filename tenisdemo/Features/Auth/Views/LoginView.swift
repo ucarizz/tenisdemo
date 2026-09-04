@@ -19,65 +19,49 @@ struct LoginView: View {
         case nameInput
     }
     
-    private let brandColor = Color(red: 0.86, green: 0.98, blue: 0.22)
-    
     var body: some View {
         NavigationView {
             ZStack {
-                // Koyu Arka Plan
-                Color.black.ignoresSafeArea()
-                
-                // Dekoratif Arka Plan Işıkları (Premium Hissiyat)
-                VStack {
-                    HStack {
-                        Circle()
-                            .fill(brandColor.opacity(0.08))
-                            .frame(width: 250, height: 250)
-                            .blur(radius: 50)
-                            .offset(x: -80, y: -80)
-                        Spacer()
-                    }
-                    Spacer()
-                }
+                Color.zinc950.ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 30) {
+                    VStack(spacing: 28) {
                         Spacer(minLength: 40)
                         
                         // Logo ve Başlık
                         VStack(spacing: 12) {
                             ZStack {
-                                Circle()
-                                    .fill(brandColor.opacity(0.15))
-                                    .frame(width: 90, height: 90)
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.zinc900)
+                                    .frame(width: 48, height: 48)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.zinc800, lineWidth: 1)
+                                    )
                                 
                                 Image(systemName: "tennisball.fill")
-                                    .font(.system(size: 44))
-                                    .foregroundColor(brandColor)
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.zinc100)
                             }
                             
                             if authStep == .nameInput {
-                                Text("PROFİL OLUŞTUR")
-                                    .font(.system(.title, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.white)
-                                    .tracking(3)
+                                Text("Profil Oluştur")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.zinc50)
                                 
                                 Text("Ligi takip etmek için bilgilerinizi tamamlayın.")
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.zinc400)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             } else {
-                                Text("TENİS LİGİ")
-                                    .font(.system(.title, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.white)
-                                    .tracking(3)
+                                Text("Tenis Ligi")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.zinc50)
                                 
                                 Text(authStep == .otpInput ? "E-postanıza gelen 6 haneli doğrulama kodunu girin." : "Maçlarını takip et, skorları canlı paylaş.")
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.zinc400)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
@@ -107,19 +91,19 @@ struct LoginView: View {
         VStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("E-POSTA ADRESİNİZ")
-                    .font(.system(.caption2, design: .rounded))
-                    .bold()
-                    .foregroundColor(.gray)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc400)
                 
                 TextField("ornek@eposta.com", text: $email)
-                    .font(.system(.body, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(14)
+                    .font(.system(size: 14))
+                    .foregroundColor(.zinc100)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Color.zinc900)
+                    .cornerRadius(6)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
                     )
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
@@ -129,8 +113,8 @@ struct LoginView: View {
             
             if !errorMessage.isEmpty {
                 Text(errorMessage)
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundColor(.red)
+                    .font(.system(size: 12))
+                    .foregroundColor(.statusRed)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
@@ -138,28 +122,27 @@ struct LoginView: View {
             Button(action: {
                 sendOtpCode()
             }) {
-                HStack {
+                HStack(spacing: 8) {
                     if authManager.isLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .zinc950))
                     } else {
                         Text("Doğrulama Kodu Gönder")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
+                            .font(.system(size: 14, weight: .semibold))
                         Image(systemName: "arrow.right")
-                            .font(.system(size: 14))
+                            .font(.system(size: 12, weight: .semibold))
                     }
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.zinc950)
                 .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(brandColor)
-                .cornerRadius(16)
-                .shadow(color: brandColor.opacity(0.3), radius: 10, y: 5)
+                .frame(height: 44)
+                .background(Color.zinc50)
+                .cornerRadius(6)
             }
             .disabled(authManager.isLoading || email.isEmpty)
+            .opacity((authManager.isLoading || email.isEmpty) ? 0.5 : 1.0)
             .padding(.horizontal, 24)
-            .padding(.top, 8)
+            .padding(.top, 4)
         }
     }
     
@@ -168,15 +151,13 @@ struct LoginView: View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
                 Text("GÖNDERİLEN E-POSTA")
-                    .font(.system(.caption2, design: .rounded))
-                    .bold()
-                    .foregroundColor(.gray)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc400)
                 
                 HStack(spacing: 6) {
                     Text(email)
-                        .font(.system(.subheadline, design: .rounded))
-                        .foregroundColor(.white)
-                        .bold()
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.zinc100)
                     
                     Button(action: {
                         authStep = .emailInput
@@ -184,8 +165,8 @@ struct LoginView: View {
                         errorMessage = ""
                     }) {
                         Text("Düzenle")
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundColor(brandColor)
+                            .font(.system(size: 12))
+                            .foregroundColor(.zinc400)
                             .underline()
                     }
                 }
@@ -217,28 +198,27 @@ struct LoginView: View {
                         isOtpFieldFocused = true
                     }
             }
-            .frame(height: 60)
+            .frame(height: 52)
             
             // Sayac ve Tekrar Gönderim
             if timerActive {
                 Text("Kodu tekrar gönder (\(resendTimer)s)")
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 12))
+                    .foregroundColor(.zinc500)
             } else {
                 Button(action: {
                     sendOtpCode()
                 }) {
                     Text("Tekrar Kod Gönder")
-                        .font(.system(.footnote, design: .rounded))
-                        .bold()
-                        .foregroundColor(brandColor)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.zinc200)
                 }
             }
             
             if !errorMessage.isEmpty {
                 Text(errorMessage)
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundColor(.red)
+                    .font(.system(size: 12))
+                    .foregroundColor(.statusRed)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
@@ -246,26 +226,25 @@ struct LoginView: View {
             Button(action: {
                 verifyOtpCode()
             }) {
-                HStack {
+                HStack(spacing: 8) {
                     if authManager.isLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .zinc950))
                     } else {
                         Text("Kodu Doğrula")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
+                            .font(.system(size: 14, weight: .semibold))
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14))
+                            .font(.system(size: 12, weight: .semibold))
                     }
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.zinc950)
                 .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(brandColor)
-                .cornerRadius(16)
-                .shadow(color: brandColor.opacity(0.3), radius: 10, y: 5)
+                .frame(height: 44)
+                .background(Color.zinc50)
+                .cornerRadius(6)
             }
             .disabled(authManager.isLoading || otpCode.count < 6)
+            .opacity((authManager.isLoading || otpCode.count < 6) ? 0.5 : 1.0)
             .padding(.horizontal, 24)
         }
     }
@@ -275,19 +254,19 @@ struct LoginView: View {
         VStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("ADINIZ SOYADINIZ")
-                    .font(.system(.caption2, design: .rounded))
-                    .bold()
-                    .foregroundColor(.gray)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.zinc400)
                 
                 TextField("Ad Soyad", text: $fullName)
-                    .font(.system(.body, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(14)
+                    .font(.system(size: 14))
+                    .foregroundColor(.zinc100)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Color.zinc900)
+                    .cornerRadius(6)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
                     )
                     .textInputAutocapitalization(.words)
                     .disableAutocorrection(true)
@@ -296,8 +275,8 @@ struct LoginView: View {
             
             if !errorMessage.isEmpty {
                 Text(errorMessage)
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundColor(.red)
+                    .font(.system(size: 12))
+                    .foregroundColor(.statusRed)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
@@ -305,47 +284,45 @@ struct LoginView: View {
             Button(action: {
                 registerNewUser()
             }) {
-                HStack {
+                HStack(spacing: 8) {
                     if authManager.isLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .zinc950))
                     } else {
                         Text("Profilimi Kaydet ve Başla")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
+                            .font(.system(size: 14, weight: .semibold))
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14))
+                            .font(.system(size: 12, weight: .semibold))
                     }
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.zinc950)
                 .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(brandColor)
-                .cornerRadius(16)
-                .shadow(color: brandColor.opacity(0.3), radius: 10, y: 5)
+                .frame(height: 44)
+                .background(Color.zinc50)
+                .cornerRadius(6)
             }
             .disabled(authManager.isLoading || fullName.isEmpty)
+            .opacity((authManager.isLoading || fullName.isEmpty) ? 0.5 : 1.0)
             .padding(.horizontal, 24)
         }
     }
     
     // OTP Kutu Görünümü
     private var otpBoxesView: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             ForEach(0..<6, id: \.self) { index in
                 let char = index < otpCode.count ? String(otpCode[otpCode.index(otpCode.startIndex, offsetBy: index)]) : ""
                 let isCurrent = index == otpCode.count
                 
                 Text(char)
-                    .font(.system(.title2, design: .rounded))
-                    .bold()
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 54)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(12)
+                    .font(.system(size: 18, weight: .bold, design: .monospaced))
+                    .foregroundColor(.zinc50)
+                    .frame(width: 44, height: 48)
+                    .background(Color.zinc900)
+                    .cornerRadius(6)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isCurrent ? brandColor : Color.white.opacity(0.08), lineWidth: isCurrent ? 2 : 1)
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(isCurrent ? Color.zinc300 : Color.zinc800, lineWidth: 1)
                     )
             }
         }

@@ -11,16 +11,25 @@ struct ContentView: View {
     @State private var selectedTab = 0
     
     init() {
-        // Tab Bar'ın arka planını koyu yapmak için UIKit özelleştirmesi yapıyoruz
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(red: 0.05, green: 0.06, blue: 0.08, alpha: 1.0)
+        appearance.backgroundColor = .zinc950
         
-        // Aktif ve aktif olmayan sekmelerin renkleri
-        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(red: 0.86, green: 0.98, blue: 0.22, alpha: 1.0)
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(red: 0.86, green: 0.98, blue: 0.22, alpha: 1.0)]
-        appearance.stackedLayoutAppearance.normal.iconColor = .gray
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        // 1px crisp top hairline border
+        appearance.shadowColor = .zinc800
+        appearance.shadowImage = nil
+        
+        // Active & Inactive styles - Linear Neutral White / Zinc
+        appearance.stackedLayoutAppearance.selected.iconColor = .zinc50
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: UIColor.zinc50,
+            .font: UIFont.systemFont(ofSize: 10, weight: .medium)
+        ]
+        appearance.stackedLayoutAppearance.normal.iconColor = .zinc500
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.zinc500,
+            .font: UIFont.systemFont(ofSize: 10, weight: .regular)
+        ]
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -28,35 +37,36 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Tab 1: Maç Sayacı (Match Tracker)
+            // Tab 1: Maç Sayacı
             MatchTrackerView()
                 .tabItem {
-                    Label("Maç Sayacı", systemImage: "tennisball.fill")
+                    Label("Maç", systemImage: "figure.tennis")
                 }
                 .tag(0)
             
-            // Tab 2: Lig Fikstürü (League Fixtures)
+            // Tab 2: Lig Fikstürü
             LeagueListView()
                 .tabItem {
-                    Label("Lig Fikstürü", systemImage: "list.bullet.rectangle.portrait.fill")
+                    Label("Fikstür", systemImage: "list.bullet.rectangle")
                 }
                 .tag(1)
             
-            // Tab 3: Vuruş Analizi (Swing Analysis)
+            // Tab 3: Vuruş Analizi
             SwingAnalysisView()
                 .tabItem {
-                    Label("Vuruş Analizi", systemImage: "gauge.with.needle.fill")
+                    Label("Analiz", systemImage: "chart.xyaxis.line")
                 }
                 .tag(2)
             
-            // Tab 4: Profilim (User Profile & Settings)
+            // Tab 4: Profil
             ProfileView()
                 .tabItem {
-                    Label("Profilim", systemImage: "person.fill")
+                    Label("Profil", systemImage: "person")
                 }
                 .tag(3)
         }
-        .tint(Color(red: 0.86, green: 0.98, blue: 0.22)) // Aktif sekme rengi
+        .tint(.zinc50)
+        .background(Color.zinc950.ignoresSafeArea())
     }
 }
 

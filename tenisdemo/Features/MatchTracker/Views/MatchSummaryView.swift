@@ -15,237 +15,248 @@ struct MatchSummaryView: View {
     @State private var isRendering = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    Spacer()
-                    
-                    // Başarı Görseli
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(viewModel.state.winner == .player1 ? Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.15) : Color.orange.opacity(0.15))
-                        .frame(width: 100, height: 100)
-                    
-                    Image(systemName: viewModel.state.winner == .player1 ? "trophy.fill" : "hand.thumbsup.fill")
-                        .font(.system(size: 48))
-                        .foregroundColor(viewModel.state.winner == .player1 ? Color(red: 0.86, green: 0.98, blue: 0.22) : .orange)
+        ZStack {
+            Color.zinc950.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        // Minimal Result Banner
+                        VStack(spacing: 6) {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(viewModel.state.winner == .player1 ? Color.statusGreen : Color.statusOrange)
+                                    .frame(width: 6, height: 6)
+                                Text(viewModel.state.winner == .player1 ? "MAÇ KAZANILDI" : "MAÇ KAYBEDİLDİ")
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.zinc300)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
+                            
+                            Text(viewModel.state.winner == .player1 ? "Tebrikler, galip geldiniz." : "Rakip oyuncu maçı kazandı.")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.zinc400)
+                        }
+                        .padding(.top, 16)
+                        
+                        // Set Skor Kartı
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("SET SKORLARI")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.zinc500)
+                                .padding(.horizontal, 4)
+                            
+                            VStack(spacing: 6) {
+                                ForEach(Array(viewModel.state.setScores.enumerated()), id: \.offset) { index, setScore in
+                                    HStack {
+                                        Text("\(index + 1). Set")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.zinc400)
+                                        
+                                        Spacer()
+                                        
+                                        HStack(spacing: 8) {
+                                            Text("\(setScore.p1Games)")
+                                                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                                .foregroundColor(setScore.p1Games > setScore.p2Games ? .zinc50 : .zinc400)
+                                            
+                                            Text("-")
+                                                .font(.system(size: 12, design: .monospaced))
+                                                .foregroundColor(.zinc600)
+                                            
+                                            Text("\(setScore.p2Games)")
+                                                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                                .foregroundColor(setScore.p2Games > setScore.p1Games ? .zinc50 : .zinc400)
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.zinc850)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(Color.zinc800, lineWidth: 1)
+                                        )
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 10)
+                                    .background(Color.zinc900)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .stroke(Color.zinc800, lineWidth: 1)
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        // İstatistik Kartı
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("İSTATİSTİKLER")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.zinc500)
+                                .padding(.horizontal, 4)
+                            
+                            let totalGamesP1 = viewModel.state.setScores.reduce(0) { $0 + $1.p1Games }
+                            let totalGamesP2 = viewModel.state.setScores.reduce(0) { $0 + $1.p2Games }
+                            
+                            VStack(spacing: 6) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Toplam Alınan Game")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.zinc500)
+                                        Text("Siz: \(totalGamesP1)  /  Rakip: \(totalGamesP2)")
+                                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                                            .foregroundColor(.zinc100)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                                .background(Color.zinc900)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
+                                )
+                                
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Toplam Koşu Mesafesi")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.zinc500)
+                                        Text(formatDistance(MatchLocationManager.shared.calculateTotalDistance()))
+                                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                                            .foregroundColor(.zinc100)
+                                    }
+                                    Spacer()
+                                    
+                                    Image(systemName: "figure.run")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.zinc400)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                                .background(Color.zinc900)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        // Isı Haritası Kartı
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("KORT KONUM ANALİZİ")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.zinc500)
+                                .padding(.horizontal, 4)
+                            
+                            MatchHeatmapView(locations: MatchLocationManager.shared.locations)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 20)
+                    }
                 }
                 
-                Text(viewModel.state.winner == .player1 ? "MAÇI KAZANDINIZ!" : "RAKİP KAZANDI")
-                    .font(.system(.title3, design: .rounded))
-                    .bold()
-                    .foregroundColor(.white)
-                    .tracking(1)
-            }
-            .padding(.top)
-            
-            // Set Skor Kartı
-            VStack(alignment: .leading, spacing: 16) {
-                Text("SET SKORLARI")
-                    .font(.system(.caption, design: .rounded))
-                    .bold()
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 4)
-                
+                // Aksiyon Butonları (Linear / Vercel style)
                 VStack(spacing: 8) {
-                    ForEach(Array(viewModel.state.setScores.enumerated()), id: \.offset) { index, setScore in
-                        HStack {
-                            Text("\(index + 1). Set")
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.gray)
-                            
-                            Spacer()
-                            
-                            HStack(spacing: 12) {
-                                Text("\(setScore.p1Games)")
-                                    .font(.system(.title3, design: .monospaced))
-                                    .bold()
-                                    .foregroundColor(setScore.p1Games > setScore.p2Games ? Color.emerald : .white)
-                                
-                                Text("-")
-                                    .font(.system(.title3, design: .rounded))
-                                    .foregroundColor(.gray)
-                                
-                                Text("\(setScore.p2Games)")
-                                    .font(.system(.title3, design: .monospaced))
-                                    .bold()
-                                    .foregroundColor(setScore.p2Games > setScore.p1Games ? Color.orange : .white)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(8)
+                    Button(action: {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                            viewModel.reset()
                         }
-                        .padding()
-                        .background(Color.white.opacity(0.03))
-                        .cornerRadius(12)
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 12))
+                            Text("Aynı Kurallarla Yeniden Oyna")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(.zinc950)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 42)
+                        .background(Color.zinc50)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc300, lineWidth: 1)
                         )
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
-                }
-            }
-            .padding(.horizontal)
-            
-            // İstatistik Kartı
-            VStack(alignment: .leading, spacing: 12) {
-                Text("İSTATİSTİKLER")
-                    .font(.system(.caption, design: .rounded))
-                    .bold()
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 4)
-                
-                let totalGamesP1 = viewModel.state.setScores.reduce(0) { $0 + $1.p1Games }
-                let totalGamesP2 = viewModel.state.setScores.reduce(0) { $0 + $1.p2Games }
-                
-                VStack(spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Toplam Alınan Game")
-                                .font(.system(.subheadline, design: .rounded))
-                                .foregroundColor(.gray)
-                            Text("Siz: \(totalGamesP1)  /  Rakip: \(totalGamesP2)")
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(.white)
-                        }
-                        Spacer()
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
                     
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Toplam Koşu Mesafesi")
-                                .font(.system(.subheadline, design: .rounded))
-                                .foregroundColor(.gray)
-                            Text(formatDistance(MatchLocationManager.shared.calculateTotalDistance()))
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                        }
-                        Spacer()
-                        
-                        Image(systemName: "figure.run")
-                            .font(.system(size: 20))
-                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
-                }
-            }
-            .padding(.horizontal)
-            
-            // Isı Haritası Kartı
-            VStack(alignment: .leading, spacing: 12) {
-                MatchHeatmapView(locations: MatchLocationManager.shared.locations)
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 24)
-                }
-            }
-            
-            // Aksiyon Butonları
-            VStack(spacing: 12) {
-                Button(action: {
-                    withAnimation(.spring()) {
-                        viewModel.reset()
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Aynı Kurallarla Yeniden Oyna")
-                    }
-                    .font(.system(.body, design: .rounded))
-                    .bold()
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                    .cornerRadius(14)
-                }
-                
-                Button(action: {
-                    isRendering = true
-                    Task {
-                        let p1ImageUrl = AuthManager.shared.currentUser?.profileImageUrl
-                        let p1Image = await downloadImage(from: p1ImageUrl)
-                        
-                        await MainActor.run {
-                            if let image = renderShareCard(p1Image: p1Image) {
-                                shareToInstagramStories(image: image)
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            isRendering = true
+                            Task {
+                                let p1ImageUrl = AuthManager.shared.currentUser?.profileImageUrl
+                                let p1Image = await downloadImage(from: p1ImageUrl)
+                                
+                                await MainActor.run {
+                                    if let image = renderShareCard(p1Image: p1Image) {
+                                        shareToInstagramStories(image: image)
+                                    }
+                                    isRendering = false
+                                }
                             }
-                            isRendering = false
+                        }) {
+                            HStack(spacing: 6) {
+                                if isRendering {
+                                    ProgressView()
+                                        .tint(.zinc200)
+                                        .scaleEffect(0.8)
+                                    Text("Hazırlanıyor...")
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 12))
+                                    Text("Özeti Paylaş")
+                                }
+                            }
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc200)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                        }
+                        .disabled(isRendering)
+                        
+                        Button(action: {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                viewModel.newMatch()
+                            }
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 12))
+                                Text("Yeni Maç")
+                            }
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc200)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                         }
                     }
-                }) {
-                    HStack {
-                        if isRendering {
-                            ProgressView()
-                                .tint(.white)
-                                .padding(.trailing, 8)
-                            Text("Hazırlanıyor...")
-                        } else {
-                            Image(systemName: "camera.fill")
-                            Text("Instagram Story'de Paylaş")
-                        }
-                    }
-                    .font(.system(.body, design: .rounded))
-                    .bold()
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.51, green: 0.20, blue: 0.69),
-                                Color(red: 0.87, green: 0.16, blue: 0.48),
-                                Color(red: 0.96, green: 0.52, blue: 0.16)
-                            ]),
-                            startPoint: .bottomLeading,
-                            endPoint: .topTrailing
-                        )
-                    )
-                    .cornerRadius(14)
                 }
-                .disabled(isRendering)
-                
-                Button(action: {
-                    withAnimation(.spring()) {
-                        viewModel.newMatch()
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "plus.circle")
-                        Text("Yeni Maç Kur")
-                    }
-                    .font(.system(.body, design: .rounded))
-                    .bold()
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(14)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    )
-                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
+                .background(Color.zinc950)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
         }
         .sheet(isPresented: $showShareSheet) {
             if let image = shareImage {
@@ -408,7 +419,7 @@ struct MatchShareCardView: View {
                     .tracking(8)
                 
                 Text("OFFICIAL SCORECARD")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.8))
                     .tracking(4)
             }
@@ -465,7 +476,7 @@ struct MatchShareCardView: View {
             // Set Skorları Kırılımı
             VStack(spacing: 16) {
                 Text("SET BREAKDOWN")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(Color(red: 0.95, green: 0.80, blue: 0.20))
                     .tracking(3)
                 
@@ -473,7 +484,7 @@ struct MatchShareCardView: View {
                     ForEach(Array(setScores.enumerated()), id: \.offset) { idx, score in
                         VStack(spacing: 8) {
                             Text("SET \(idx + 1)")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(.white.opacity(0.5))
                             
                             Text("\(score.p1Games) - \(score.p2Games)")
@@ -483,9 +494,9 @@ struct MatchShareCardView: View {
                         .frame(width: 140)
                         .padding(.vertical, 16)
                         .background(Color.white.opacity(0.04))
-                        .cornerRadius(16)
+                        .cornerRadius(8)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
                         )
                     }
@@ -504,14 +515,14 @@ struct MatchShareCardView: View {
                         .foregroundColor(Color(red: 0.95, green: 0.80, blue: 0.20))
                     
                     Text("MAÇ SÜRESİ: \(duration.uppercased())")
-                        .font(.system(size: 13, weight: .black, design: .rounded))
+                        .font(.system(size: 13, weight: .black))
                         .foregroundColor(.white)
                         .tracking(1.5)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
                 .background(Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.12))
-                .cornerRadius(20)
+                .cornerRadius(8)
                 
                 // İstatistik Satırları
                 VStack(spacing: 20) {
@@ -526,11 +537,11 @@ struct MatchShareCardView: View {
                 .padding(.vertical, 24)
             }
             .background(
-                RoundedRectangle(cornerRadius: 24)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(Color.white.opacity(0.04))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 24)
+                RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.white.opacity(0.08), lineWidth: 1)
             )
             .padding(.horizontal, 50)
@@ -540,46 +551,14 @@ struct MatchShareCardView: View {
             // Alt Bilgi
             VStack(spacing: 6) {
                 Text("tenisdemo uygulaması ile oluşturuldu")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white.opacity(0.3))
                     .tracking(1)
             }
             .padding(.bottom, 100)
         }
         .frame(width: 1080, height: 1920)
-        .background(
-            ZStack {
-                // Wimbledon Koyu Yeşil Gradyan Arka Plan
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.04, green: 0.16, blue: 0.08),
-                        Color(red: 0.01, green: 0.05, blue: 0.02)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                
-                // Köşelerden hafif Altın/Sarı Işık Sızması
-                RadialGradient(
-                    colors: [Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.04), Color.clear],
-                    center: .topLeading,
-                    startRadius: 10,
-                    endRadius: 800
-                )
-                
-                RadialGradient(
-                    colors: [Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.04), Color.clear],
-                    center: .bottomTrailing,
-                    startRadius: 10,
-                    endRadius: 800
-                )
-                
-                // Klasik İnce Çerçeve
-                RoundedRectangle(cornerRadius: 40)
-                    .stroke(Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.18), lineWidth: 2)
-                    .padding(30)
-            }
-        )
+        .background(Color.black)
     }
 }
 
@@ -605,7 +584,6 @@ struct PlayerColumn: View {
                         Circle()
                             .stroke(isWinner ? Color(red: 0.95, green: 0.80, blue: 0.20) : Color.white.opacity(0.2), lineWidth: 3)
                     )
-                    .shadow(color: isWinner ? Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.2) : Color.clear, radius: 10)
             } else {
                 let initials = name.prefix(2).uppercased()
                 ZStack {
@@ -622,26 +600,25 @@ struct PlayerColumn: View {
                         .frame(width: 180, height: 180)
                     
                     Text(initials)
-                        .font(.system(size: 54, weight: .bold, design: .rounded))
+                        .font(.system(size: 54, weight: .bold))
                         .foregroundColor(isWinner ? .black : .white)
                 }
                 .overlay(
                     Circle()
                         .stroke(isWinner ? Color(red: 0.95, green: 0.80, blue: 0.20) : Color.white.opacity(0.2), lineWidth: 3)
                 )
-                .shadow(color: isWinner ? Color(red: 0.95, green: 0.80, blue: 0.20).opacity(0.2) : Color.clear, radius: 10)
             }
             
             // İsim Bölümü
             VStack(spacing: 4) {
                 Text(name.uppercased())
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(1)
                 
                 if let partnerName = partner, !partnerName.isEmpty {
                     Text("& \(partnerName.uppercased())")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.white.opacity(0.6))
                         .lineLimit(1)
                 }
@@ -673,7 +650,7 @@ struct StatRow: View {
             Spacer()
             
             Text(label)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.white.opacity(0.4))
                 .tracking(4)
             

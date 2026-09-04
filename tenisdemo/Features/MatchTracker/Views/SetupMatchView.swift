@@ -14,42 +14,63 @@ struct SetupMatchView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 20) {
-                    Spacer(minLength: 16)
+                VStack(spacing: 16) {
+                    // Minimal Linear Header
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Yeni Maç")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.zinc100)
+                        Text("Maç modunu ve oyuncuları yapılandırın.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc500)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
                     
-                    // Logo / Başlık
-                    VStack(spacing: 8) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0.86, green: 0.98, blue: 0.22).opacity(0.15))
-                                .frame(width: 80, height: 80)
-                            
-                            Image(systemName: "tennisball.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
+                    // Mode Selector (Segmented Tab Bar)
+                    HStack(spacing: 0) {
+                        Button(action: {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                selectedSetupMode = 0
+                            }
+                        }) {
+                            Text("Yerel Maç")
+                                .font(.system(size: 13, weight: selectedSetupMode == 0 ? .semibold : .medium))
+                                .foregroundColor(selectedSetupMode == 0 ? .zinc100 : .zinc500)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 34)
+                                .background(selectedSetupMode == 0 ? Color.zinc800 : Color.clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
                         }
+                        .buttonStyle(.plain)
                         
-                        Text("MAÇ KURULUMU")
-                            .font(.system(.title2, design: .rounded))
-                            .bold()
-                            .foregroundColor(.white)
-                            .tracking(2)
+                        Button(action: {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                selectedSetupMode = 1
+                            }
+                        }) {
+                            Text("Canlı Lobi")
+                                .font(.system(size: 13, weight: selectedSetupMode == 1 ? .semibold : .medium))
+                                .foregroundColor(selectedSetupMode == 1 ? .zinc100 : .zinc500)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 34)
+                                .background(selectedSetupMode == 1 ? Color.zinc800 : Color.clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.bottom, 4)
-                    
-                    // Maç Tipi Seçimi
-                    Picker("Maç Tipi", selection: $selectedSetupMode) {
-                        Text("Yerel Maç").tag(0)
-                        Text("Canlı Lobi").tag(1)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal, 24)
+                    .padding(3)
+                    .background(Color.zinc900)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
                     
                     if selectedSetupMode == 0 {
-                        // YEREL MAÇ AYARLARI
                         localMatchView
                     } else {
-                        // CANLI LOBİ AYARLARI
                         liveLobbyView
                     }
                     
@@ -57,12 +78,12 @@ struct SetupMatchView: View {
                 }
             }
             
-            // Alt Buton (Maçı Başlat / Katıl / Bağlan)
+            // Bottom Action Button
             actionButton
         }
+        .background(Color.zinc950.ignoresSafeArea())
         .onChange(of: signalRService.isMatchStarted) { started in
             if started, let lobby = signalRService.lobbyState {
-                // Maç başladığında isimleri ve kuralları viewmodel'a yükle
                 viewModel.player1Name = lobby.hostName
                 viewModel.player1PartnerName = lobby.hostPartnerName ?? ""
                 viewModel.player2Name = lobby.guestName ?? "RAKİP"
@@ -72,12 +93,11 @@ struct SetupMatchView: View {
                 viewModel.setsToWin = lobby.settings.setsToWin
                 viewModel.useMatchTiebreak = lobby.settings.useMatchTiebreak
                 
-                withAnimation(.spring()) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                     viewModel.startMatch()
                 }
             }
         }
-        // Kurucu ayarları değiştirdikçe karşıya gönder
         .onChange(of: viewModel.gamesPerSet) { newValue in
             if selectedSetupMode == 1, lobbyRole == 0, let code = signalRService.lobbyState?.code {
                 signalRService.updateSettings(code: code, gamesPerSet: newValue, setsToWin: viewModel.setsToWin, useMatchTiebreak: viewModel.useMatchTiebreak)
@@ -93,7 +113,6 @@ struct SetupMatchView: View {
                 signalRService.updateSettings(code: code, gamesPerSet: viewModel.gamesPerSet, setsToWin: viewModel.setsToWin, useMatchTiebreak: newValue)
             }
         }
-        // Katılımcı iken kurucunun değiştirdiği ayarları local viewmodel'a senkronize et
         .onChange(of: signalRService.lobbyState?.settings.gamesPerSet) { newValue in
             if selectedSetupMode == 1, lobbyRole == 1, let val = newValue {
                 viewModel.gamesPerSet = val
@@ -111,421 +130,325 @@ struct SetupMatchView: View {
         }
     }
     
-    // YEREL MAÇ TASARIMI
+    // MARK: - YEREL MAÇ AYARLARI
     private var localMatchView: some View {
-        VStack(spacing: 20) {
-            Toggle(isOn: $viewModel.isDouble) {
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(spacing: 14) {
+            // Çiftler Toggle Kartı
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Çiftler Maçı (Double)")
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.zinc200)
                     Text("4 oyuncu ile oynanır")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundColor(.gray)
+                        .font(.system(size: 12))
+                        .foregroundColor(.zinc500)
                 }
+                Spacer()
+                Toggle("", isOn: $viewModel.isDouble)
+                    .labelsHidden()
+                    .tint(.zinc400)
             }
-            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.zinc900)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.zinc800, lineWidth: 1)
+            )
             
-            VStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
+            // Oyuncu İsimleri
+            VStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text(viewModel.isDouble ? "1. Takım - 1. Oyuncu (Siz)" : "Oyuncu 1 Adı (Siz)")
-                        .font(.system(.caption, design: .rounded))
-                        .bold()
-                        .foregroundColor(.gray)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.zinc500)
                     TextField("SİZ", text: $viewModel.player1Name)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.zinc100)
+                        .padding(.horizontal, 12)
+                        .frame(height: 38)
+                        .background(Color.zinc900)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                         .textInputAutocapitalization(.characters)
                 }
                 
                 if viewModel.isDouble {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 5) {
                         Text("1. Takım - 2. Oyuncu (Ortak)")
-                            .font(.system(.caption, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.zinc500)
                         TextField("ORTAK 1", text: $viewModel.player1PartnerName)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc100)
+                            .padding(.horizontal, 12)
+                            .frame(height: 38)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                             .textInputAutocapitalization(.characters)
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text(viewModel.isDouble ? "2. Takım - 1. Oyuncu (Rakip)" : "Oyuncu 2 Adı (Rakip)")
-                        .font(.system(.caption, design: .rounded))
-                        .bold()
-                        .foregroundColor(.gray)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.zinc500)
                     TextField("RAKİP", text: $viewModel.player2Name)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.zinc100)
+                        .padding(.horizontal, 12)
+                        .frame(height: 38)
+                        .background(Color.zinc900)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                         .textInputAutocapitalization(.characters)
                 }
                 
                 if viewModel.isDouble {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 5) {
                         Text("2. Takım - 2. Oyuncu (Eş)")
-                            .font(.system(.caption, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.zinc500)
                         TextField("ORTAK 2", text: $viewModel.player2PartnerName)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc100)
+                            .padding(.horizontal, 12)
+                            .frame(height: 38)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                             .textInputAutocapitalization(.characters)
                     }
                 }
             }
             
+            // Kural Seçicileri
             CustomSegmentedSelector(
                 title: "Set Kazanmak İçin Game Sayısı",
                 options: [4, 6],
-                selection: $viewModel.gamesPerSet,
-                color: Color.emerald
+                selection: $viewModel.gamesPerSet
             )
             
             CustomSegmentedSelector(
                 title: "Kazanılması Gereken Set Sayısı",
                 options: [1, 2],
-                selection: $viewModel.setsToWin,
-                color: Color(red: 0.95, green: 0.45, blue: 0.15)
+                selection: $viewModel.setsToWin
             )
             
             if viewModel.setsToWin > 1 {
-                Toggle(isOn: $viewModel.useMatchTiebreak) {
-                    VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("Süper Tiebreak (10 Puan)")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(.white)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc200)
                         Text("1-1 beraberlikte 3. set yerine oynanır")
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 12))
+                            .foregroundColor(.zinc500)
                     }
+                    Spacer()
+                    Toggle("", isOn: $viewModel.useMatchTiebreak)
+                        .labelsHidden()
+                        .tint(.zinc400)
                 }
-                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
-                .padding()
-                .background(Color.white.opacity(0.04))
-                .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.zinc900)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.zinc800, lineWidth: 1)
+                )
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
     }
     
-    // CANLI LOBİ TASARIMI
+    // MARK: - CANLI LOBİ TASARIMI
     private var liveLobbyView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 14) {
             if signalRService.lobbyState == nil {
-                // LOBİ KATILMA/KURMA SEÇİM EKRANI
-                Picker("Rol", selection: $lobbyRole) {
-                    Text("Lobi Kur").tag(0)
-                    Text("Lobiye Katıl").tag(1)
+                // Role Picker
+                HStack(spacing: 0) {
+                    Button(action: { lobbyRole = 0 }) {
+                        Text("Lobi Kur")
+                            .font(.system(size: 13, weight: lobbyRole == 0 ? .semibold : .medium))
+                            .foregroundColor(lobbyRole == 0 ? .zinc100 : .zinc500)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 32)
+                            .background(lobbyRole == 0 ? Color.zinc800 : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button(action: { lobbyRole = 1 }) {
+                        Text("Lobiye Katıl")
+                            .font(.system(size: 13, weight: lobbyRole == 1 ? .semibold : .medium))
+                            .foregroundColor(lobbyRole == 1 ? .zinc100 : .zinc500)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 32)
+                            .background(lobbyRole == 1 ? Color.zinc800 : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .padding(3)
+                .background(Color.zinc900)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.zinc800, lineWidth: 1)
+                )
                 
-                Toggle(isOn: $viewModel.isDouble) {
+                HStack {
                     Text("Çiftler Maçı (Double)")
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.zinc200)
+                    Spacer()
+                    Toggle("", isOn: $viewModel.isDouble)
+                        .labelsHidden()
+                        .tint(.zinc400)
                 }
-                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.zinc900)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.zinc800, lineWidth: 1)
+                )
                 
                 if viewModel.isDouble {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 5) {
                         Text("Ortağınızın Adı")
-                            .font(.system(.caption, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.zinc500)
                         TextField("EŞ", text: lobbyRole == 0 ? $viewModel.player1PartnerName : $viewModel.player2PartnerName)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc100)
+                            .padding(.horizontal, 12)
+                            .frame(height: 38)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                             .textInputAutocapitalization(.characters)
                     }
                 }
                 
                 if lobbyRole == 1 {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 5) {
                         Text("Lobi Kodu")
-                            .font(.system(.caption, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.zinc500)
                         TextField("6 Haneli Kod (Örn: AB12CD)", text: $lobbyCodeInput)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .foregroundColor(.zinc100)
+                            .padding(.horizontal, 12)
+                            .frame(height: 38)
+                            .background(Color.zinc900)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.zinc800, lineWidth: 1)
+                            )
                             .textInputAutocapitalization(.characters)
                     }
                 }
                 
                 if let error = signalRService.errorMessage {
                     Text(error)
-                        .font(.system(.footnote, design: .rounded))
-                        .foregroundColor(.red)
-                        .padding(.top, 4)
+                        .font(.system(size: 12))
+                        .foregroundColor(.statusRed)
                 }
             } else if let lobby = signalRService.lobbyState {
-                // AKTİF LOBİ ODA EKRANI (BAĞLANDIKTAN SONRA)
-                VStack(spacing: 24) {
-                    // Oda Kodu Kartı
-                    VStack(spacing: 8) {
+                VStack(spacing: 16) {
+                    // Lobi Kodu Kartı
+                    VStack(spacing: 6) {
                         Text("LOBİ KODU")
-                            .font(.system(.caption2, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
-                            .tracking(2)
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc500)
                         
                         Text(lobby.code)
-                            .font(.system(.title, design: .rounded))
-                            .bold()
-                            .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                            .tracking(4)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 12)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            .font(.system(size: 24, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc50)
+                            .tracking(2)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.zinc900)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.zinc800, lineWidth: 1)
+                    )
                     
-                    // Oyuncular / Takımlar Durumu
-                    HStack(spacing: 16) {
-                        VStack(spacing: 8) {
-                            Text("1. TAKIM (Kurucu)")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(.emerald)
-                            
-                            if let urlStr = lobby.hostProfileImageUrl,
-                               let url = URL(string: urlStr) {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Circle())
-                                        .overlay(Circle().stroke(Color.emerald.opacity(0.6), lineWidth: 1.5))
-                                } placeholder: {
-                                    ProgressView()
-                                        .frame(width: 50, height: 50)
-                                }
-                            } else {
-                                Image(systemName: "person.crop.circle.fill")
-                                    .font(.system(size: 50))
-                                    .foregroundColor(.emerald)
-                            }
-                            
+                    // Oyuncular
+                    HStack(spacing: 12) {
+                        VStack(spacing: 6) {
+                            Text("1. Takım (Kurucu)")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.zinc500)
                             Text(lobby.hostName)
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(.white)
-                            
-                            if lobby.isDouble {
-                                Text("& \(lobby.hostPartnerName ?? "ORTAK")")
-                                    .font(.system(.footnote, design: .rounded))
-                                    .foregroundColor(.gray)
-                            }
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.zinc100)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white.opacity(0.04))
-                        .cornerRadius(12)
+                        .padding(.vertical, 12)
+                        .background(Color.zinc900)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                         
                         Text("VS")
-                            .font(.system(.headline, design: .rounded))
-                            .bold()
-                            .foregroundColor(.gray)
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundColor(.zinc500)
                         
-                        VStack(spacing: 8) {
-                            Text("2. TAKIM (Misafir)")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(Color(red: 0.95, green: 0.45, blue: 0.15))
-                            
-                            if let guest = lobby.guestName {
-                                if let urlStr = lobby.guestProfileImageUrl,
-                                   let url = URL(string: urlStr) {
-                                    AsyncImage(url: url) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 50, height: 50)
-                                            .clipShape(Circle())
-                                            .overlay(Circle().stroke(Color(red: 0.95, green: 0.45, blue: 0.15).opacity(0.6), lineWidth: 1.5))
-                                    } placeholder: {
-                                        ProgressView()
-                                            .frame(width: 50, height: 50)
-                                    }
-                                } else {
-                                    Image(systemName: "person.crop.circle.fill")
-                                        .font(.system(size: 50))
-                                        .foregroundColor(Color(red: 0.95, green: 0.45, blue: 0.15))
-                                }
-                                
-                                Text(guest)
-                                    .font(.system(.body, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.white)
-                                
-                                if lobby.isDouble {
-                                    Text("& \(lobby.guestPartnerName ?? "ORTAK")")
-                                        .font(.system(.footnote, design: .rounded))
-                                        .foregroundColor(.gray)
-                                }
-                            } else {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                                    .padding(.vertical, 2)
-                                Text("Rakip Bekleniyor...")
-                                    .font(.system(.caption, design: .rounded))
-                                    .foregroundColor(.gray)
-                            }
+                        VStack(spacing: 6) {
+                            Text("2. Takım (Misafir)")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.zinc500)
+                            Text(lobby.guestName ?? "Bekleniyor...")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(lobby.guestName != nil ? .zinc100 : .zinc600)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white.opacity(0.04))
-                        .cornerRadius(12)
-                    }
-                    
-                    Divider().background(Color.white.opacity(0.1))
-                    
-                    // Maç Kuralları (Kurucu değiştirebilir, katılımcı sadece izler)
-                    VStack(spacing: 16) {
-                        if lobbyRole == 0 {
-                            // Kurucu için interaktif ayarlar
-                            CustomSegmentedSelector(
-                                title: "Set Kazanmak İçin Game Sayısı",
-                                options: [4, 6],
-                                selection: $viewModel.gamesPerSet,
-                                color: Color.emerald
-                            )
-                            
-                            CustomSegmentedSelector(
-                                title: "Kazanılması Gereken Set Sayısı",
-                                options: [1, 2],
-                                selection: $viewModel.setsToWin,
-                                color: Color(red: 0.95, green: 0.45, blue: 0.15)
-                            )
-                            
-                            if viewModel.setsToWin > 1 {
-                                Toggle(isOn: $viewModel.useMatchTiebreak) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Süper Tiebreak (10 Puan)")
-                                            .font(.system(.body, design: .rounded))
-                                            .bold()
-                                            .foregroundColor(.white)
-                                    }
-                                }
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
-                                .padding()
-                                .background(Color.white.opacity(0.04))
-                                .cornerRadius(12)
-                            }
-                        } else {
-                            // Katılımcı için salt okunur ayarlar
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("MAÇ KURALLARI")
-                                    .font(.system(.caption, design: .rounded))
-                                    .bold()
-                                    .foregroundColor(.gray)
-                                
-                                    HStack {
-                                        Text("Set Başına Oyun:")
-                                        Spacer()
-                                        Text("\(lobby.settings.gamesPerSet)").bold()
-                                    }
-                                    HStack {
-                                        Text("Kazanılması Gereken Set:")
-                                        Spacer()
-                                        Text("\(lobby.settings.setsToWin)").bold()
-                                    }
-                                    HStack {
-                                        Text("Süper Tiebreak:")
-                                        Spacer()
-                                        Text(lobby.settings.useMatchTiebreak ? "Açık" : "Kapalı").bold()
-                                    }
-                            }
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.04))
-                            .cornerRadius(12)
-                            
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 0.86, green: 0.98, blue: 0.22)))
-                                    .padding(.trailing, 8)
-                                Text("Kurucunun maçı başlatması bekleniyor...")
-                                    .font(.system(.footnote, design: .rounded))
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                            .padding(.top, 12)
-                        }
-                    }
-                    
-                    // Lobiden Çık Butonu
-                    Button(action: {
-                        signalRService.leaveLobby(code: lobby.code)
-                    }) {
-                        Text("Lobiden Ayrıl")
-                            .font(.system(.footnote, design: .rounded))
-                            .foregroundColor(.red)
-                            .bold()
-                            .padding()
+                        .padding(.vertical, 12)
+                        .background(Color.zinc900)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
+                        )
                     }
                 }
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
     }
     
-    // AKTİF AKSİYON BUTONU
+    // MARK: - AKSİYON BUTONU
     private var actionButton: some View {
         Group {
             if selectedSetupMode == 0 {
-                // Yerel Maç Başlat
                 Button(action: {
-                    withAnimation(.spring()) {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                         viewModel.startMatch()
                     }
                 }) {
-                    buttonContent(title: "Maçı Başlat", icon: "play.fill", color: Color(red: 0.86, green: 0.98, blue: 0.22))
+                    buttonContent(title: "Maçı Başlat", icon: "play.fill")
                 }
             } else if signalRService.lobbyState == nil {
-                // Lobi Kur / Katıl Butonu
                 if lobbyRole == 0 {
                     Button(action: {
                         let name = authManager.currentUser?.fullName ?? "OYUNCU 1"
                         signalRService.createLobby(hostName: name, isDouble: viewModel.isDouble, hostPartnerName: viewModel.isDouble ? viewModel.player1PartnerName : nil, hostProfileImageUrl: authManager.currentUser?.profileImageUrl)
                     }) {
-                        buttonContent(title: "Lobi Oluştur", icon: "plus.circle.fill", color: Color(red: 0.86, green: 0.98, blue: 0.22))
+                        buttonContent(title: "Lobi Oluştur", icon: "plus")
                     }
                 } else {
                     Button(action: {
@@ -533,81 +456,75 @@ struct SetupMatchView: View {
                         let name = authManager.currentUser?.fullName ?? "OYUNCU 2"
                         signalRService.joinLobby(code: lobbyCodeInput, guestName: name, guestPartnerName: viewModel.isDouble ? viewModel.player2PartnerName : nil, guestProfileImageUrl: authManager.currentUser?.profileImageUrl)
                     }) {
-                        buttonContent(title: "Lobiye Bağlan", icon: "link", color: Color.emerald)
+                        buttonContent(title: "Lobiye Bağlan", icon: "link")
                     }
                 }
             } else if let lobby = signalRService.lobbyState, lobbyRole == 0 {
-                // Kurucu İçin Maçı Başlat Butonu
                 Button(action: {
                     signalRService.startMatch(code: lobby.code)
                 }) {
-                    buttonContent(title: "Canlı Maçı Başlat", icon: "play.fill", color: Color(red: 0.86, green: 0.98, blue: 0.22))
+                    buttonContent(title: "Canlı Maçı Başlat", icon: "play.fill")
                 }
                 .disabled(lobby.guestName == nil)
-                .opacity(lobby.guestName == nil ? 0.5 : 1.0)
-            } else {
-                EmptyView()
+                .opacity(lobby.guestName == nil ? 0.4 : 1.0)
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 12)
-        .padding(.bottom, 24)
-        .background(Color.black.edgesIgnoringSafeArea(.bottom))
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 16)
+        .background(Color.zinc950)
     }
     
-    private func buttonContent(title: String, icon: String, color: Color) -> some View {
-        HStack {
-            Text(title)
-                .font(.system(.body, design: .rounded))
-                .bold()
+    private func buttonContent(title: String, icon: String) -> some View {
+        HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(.system(size: 12, weight: .semibold))
+            Text(title)
+                .font(.system(size: 13, weight: .semibold))
         }
-        .foregroundColor(.black)
+        .foregroundColor(.zinc950)
         .frame(maxWidth: .infinity)
-        .frame(height: 54)
-        .background(color)
-        .cornerRadius(16)
-        .shadow(color: color.opacity(0.3), radius: 10, y: 5)
+        .frame(height: 42)
+        .background(Color.zinc50)
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.zinc300, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
 
+// MARK: - Minimal Linear Custom Segmented Selector
 struct CustomSegmentedSelector: View {
     let title: String
     let options: [Int]
     @Binding var selection: Int
-    let color: Color
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.system(.caption, design: .rounded))
-                .bold()
-                .foregroundColor(.gray)
-                .padding(.horizontal, 4)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.zinc500)
             
             HStack(spacing: 8) {
                 ForEach(options, id: \.self) { option in
                     Button(action: {
-                        withAnimation(.interactiveSpring()) {
-                            selection = option
-                        }
+                        selection = option
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.prepare()
                         generator.impactOccurred()
                     }) {
                         Text("\(option)")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(selection == option ? .black : .white)
+                            .font(.system(size: 13, weight: selection == option ? .bold : .medium, design: .monospaced))
+                            .foregroundColor(selection == option ? .zinc950 : .zinc400)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 46)
-                            .background(selection == option ? color : Color.white.opacity(0.05))
-                            .cornerRadius(10)
+                            .frame(height: 36)
+                            .background(selection == option ? Color.zinc100 : Color.zinc900)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(selection == option ? color : Color.white.opacity(0.08), lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(selection == option ? Color.zinc300 : Color.zinc800, lineWidth: 1)
                             )
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .buttonStyle(.plain)
                 }

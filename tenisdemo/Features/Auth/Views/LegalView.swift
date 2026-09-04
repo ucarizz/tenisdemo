@@ -11,26 +11,25 @@ struct LegalView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Koyu Arka Plan
-                Color.black.ignoresSafeArea()
+                Color.zinc950.ignoresSafeArea()
                 
                 if isLoading {
                     VStack(spacing: 12) {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .emerald))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .zinc400))
                         Text("Metin Yükleniyor...")
-                            .font(.system(.footnote, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc400)
                     }
                 } else if !errorMessage.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 36))
-                            .foregroundColor(.red)
+                            .font(.system(size: 32))
+                            .foregroundColor(.statusRed)
                         
                         Text(errorMessage)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc400)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                         
@@ -38,13 +37,12 @@ struct LegalView: View {
                             loadKvkkText()
                         }) {
                             Text("Tekrar Dene")
-                                .font(.system(.body, design: .rounded))
-                                .bold()
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 12)
-                                .background(Color.emerald)
-                                .cornerRadius(10)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.zinc950)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.zinc50)
+                                .cornerRadius(6)
                         }
                     }
                 } else {
@@ -52,13 +50,12 @@ struct LegalView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             if let attributedString = try? AttributedString(markdown: content, options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
                                 Text(attributedString)
-                                    .foregroundColor(.white)
-                                    .font(.system(.body, design: .rounded))
+                                    .foregroundColor(.zinc200)
+                                    .font(.system(size: 13))
                             } else {
-                                // AttributedString başarısız olursa düz metin göster
                                 Text(content)
-                                    .foregroundColor(.white)
-                                    .font(.system(.body, design: .rounded))
+                                    .foregroundColor(.zinc200)
+                                    .font(.system(size: 13))
                             }
                         }
                         .padding(20)
@@ -73,9 +70,8 @@ struct LegalView: View {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Kapat")
-                            .font(.system(.body, design: .rounded))
-                            .bold()
-                            .foregroundColor(.emerald)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.zinc200)
                     }
                 }
             }

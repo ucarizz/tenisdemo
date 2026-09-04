@@ -69,23 +69,22 @@ struct MatchHeatmapView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("KORT HAREKET ISI HARİTASI")
-                        .font(.system(.caption, design: .rounded))
-                        .bold()
-                        .foregroundColor(.gray)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.zinc400)
                         .tracking(1)
                     
                     Text("\(locations.count) veri noktası analiz edildi")
-                        .font(.system(size: 11, design: .rounded))
-                        .foregroundColor(.gray.opacity(0.8))
+                        .font(.system(size: 11))
+                        .foregroundColor(.zinc500)
                 }
                 
                 Spacer()
                 
                 // Color Legend
                 HStack(spacing: 8) {
-                    LegendItem(color: .red, label: "Yoğun")
-                    LegendItem(color: .orange, label: "Orta")
-                    LegendItem(color: .emerald, label: "Az")
+                    LegendItem(color: .statusRed, label: "Yoğun")
+                    LegendItem(color: .statusOrange, label: "Orta")
+                    LegendItem(color: .statusGreen, label: "Az")
                 }
             }
             .padding(.horizontal, 4)
@@ -93,26 +92,20 @@ struct MatchHeatmapView: View {
             if locations.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "location.slash.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.gray)
+                        .font(.system(size: 32))
+                        .foregroundColor(.zinc500)
                     Text("Konum verisi bulunamadı.")
-                        .font(.system(.subheadline, design: .rounded))
-                        .bold()
-                        .foregroundColor(.gray)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.zinc300)
                     Text("Maç esnasında konum takibi kapalıydı veya yeterli GPS sinyali alınamadı.")
-                        .font(.system(size: 11, design: .rounded))
-                        .foregroundColor(.gray.opacity(0.6))
+                        .font(.system(size: 11))
+                        .foregroundColor(.zinc500)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 250)
-                .background(Color.white.opacity(0.03))
-                .cornerRadius(16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                )
+                .zincCard(radius: 8)
             } else {
                 // Tennis Court Drawing
                 GeometryReader { geo in
@@ -122,7 +115,7 @@ struct MatchHeatmapView: View {
                     ZStack {
                         // Court Dark Clay Green Background
                         Color(red: 0.08, green: 0.12, blue: 0.10)
-                            .cornerRadius(16)
+                            .cornerRadius(8)
                         
                         // Tennis Court Lines Canvas
                         Canvas { context, size in
@@ -196,7 +189,7 @@ struct MatchHeatmapView: View {
                             let posY = marginY + (pt.y * ch)
                             
                             let opacity = pt.weight * 0.75 + 0.15
-                            let color = pt.weight > 0.65 ? Color.red : (pt.weight > 0.3 ? Color.orange : Color.emerald)
+                            let color = pt.weight > 0.65 ? Color.statusRed : (pt.weight > 0.3 ? Color.statusOrange : Color.statusGreen)
                             let size = w * 0.07 // responsive dot diameter
                             
                             Circle()
@@ -208,10 +201,10 @@ struct MatchHeatmapView: View {
                     }
                 }
                 .frame(height: 380) // Standard tennis court visual ratio height
-                .cornerRadius(16)
+                .cornerRadius(8)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.zinc800, lineWidth: 1)
                 )
             }
         }
@@ -226,10 +219,10 @@ struct LegendItem: View {
         HStack(spacing: 4) {
             Circle()
                 .fill(color)
-                .frame(width: 8, height: 8)
+                .frame(width: 6, height: 6)
             Text(label)
-                .font(.system(size: 9, design: .rounded))
-                .foregroundColor(.gray)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.zinc400)
         }
     }
 }

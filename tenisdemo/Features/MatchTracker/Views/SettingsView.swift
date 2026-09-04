@@ -3,6 +3,7 @@
 //  tenisdemo
 //
 //  Created by Antigravity on 22.07.2026.
+//  Refactored for Linear / Vercel Minimal Aesthetic
 //
 
 import SwiftUI
@@ -13,114 +14,116 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack {
-            // Arka Plan
-            Color(red: 0.08, green: 0.09, blue: 0.12)
-                .ignoresSafeArea()
+            Color.zinc950.ignoresSafeArea()
             
-            VStack(spacing: 24) {
-                // Başlık
-                VStack(spacing: 4) {
+            VStack(spacing: 20) {
+                // Header & Handle
+                VStack(spacing: 10) {
                     Capsule()
-                        .fill(Color.gray.opacity(0.5))
-                        .frame(width: 40, height: 4)
-                        .padding(.top, 8)
+                        .fill(Color.zinc700)
+                        .frame(width: 32, height: 3)
+                        .padding(.top, 10)
                     
                     Text("Maç Ayarları")
-                        .font(.system(.headline, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
-                        .padding(.top, 8)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.zinc100)
                 }
                 
                 Divider()
-                    .background(Color.white.opacity(0.1))
+                    .background(Color.zinc800)
                 
                 // Aktif Kurallar Kartı
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("AKTİF MAÇ KURALLARI")
-                        .font(.system(.caption, design: .rounded))
-                        .bold()
-                        .foregroundColor(.gray)
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.zinc500)
                     
-                    VStack(alignment: .leading, spacing: 8) {
-                        RuleRow(icon: "tennisball.fill", label: "Set Kazanmak İçin Game", value: "\(viewModel.gamesPerSet) Game")
-                        RuleRow(icon: "number", label: "Kazanılması Gereken Set", value: "\(viewModel.setsToWin) Set")
+                    VStack(alignment: .leading, spacing: 10) {
+                        RuleRow(label: "Set Başına Game", value: "\(viewModel.gamesPerSet) Game")
+                        Divider().background(Color.zinc800)
+                        RuleRow(label: "Kazanılması Gereken Set", value: "\(viewModel.setsToWin) Set")
                         if viewModel.setsToWin > 1 {
+                            Divider().background(Color.zinc800)
                             RuleRow(
-                                icon: "arrow.triangle.merge",
-                                label: "Karar Seti",
-                                value: viewModel.useMatchTiebreak ? "Süper Tiebreak" : "Normal Set"
+                                label: "Karar Seti Kuralı",
+                                value: viewModel.useMatchTiebreak ? "Süper Tiebreak (10)" : "Standart Set"
                             )
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(12)
+                    .padding(12)
+                    .background(Color.zinc900)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(Color.zinc800, lineWidth: 1)
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 16)
                 
                 Spacer()
                 
-                // Aksiyon Listesi
-                VStack(spacing: 12) {
+                // Aksiyon Butonları
+                VStack(spacing: 8) {
+                    // Mevcut Maçı Yenile
                     Button(action: {
-                        withAnimation(.spring()) {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                             viewModel.reset()
                             showSettings = false
                         }
                     }) {
-                        HStack {
+                        HStack(spacing: 6) {
                             Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 12))
                             Text("Mevcut Maçı Yenile")
+                                .font(.system(size: 13, weight: .medium))
                         }
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.white)
+                        .foregroundColor(.zinc200)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.white.opacity(0.08))
-                        .cornerRadius(12)
+                        .frame(height: 40)
+                        .background(Color.zinc900)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc800, lineWidth: 1)
                         )
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     
+                    // Maçı İptal Et ve Yeni Kur
                     Button(action: {
-                        withAnimation(.spring()) {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                             viewModel.newMatch()
                             showSettings = false
                         }
                     }) {
-                        HStack {
-                            Image(systemName: "xmark.circle")
-                            Text("Maçı İptal Et ve Yeni Kur")
+                        HStack(spacing: 6) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12))
+                            Text("Maçı İptal Et & Yeni Kur")
+                                .font(.system(size: 13, weight: .semibold))
                         }
-                        .font(.system(.body, design: .rounded))
-                        .bold()
-                        .foregroundColor(.black)
+                        .foregroundColor(.zinc950)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color(red: 0.86, green: 0.98, blue: 0.22))
-                        .cornerRadius(12)
+                        .frame(height: 40)
+                        .background(Color.zinc50)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.zinc300, lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     
                     Button(action: {
                         showSettings = false
                     }) {
                         Text("Kapat")
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.zinc500)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 44)
+                            .frame(height: 36)
                     }
-                    .padding(.top, 4)
+                    .padding(.top, 2)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
         }
@@ -128,28 +131,20 @@ struct SettingsView: View {
 }
 
 struct RuleRow: View {
-    let icon: String
     let label: String
     let value: String
     
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(Color(red: 0.86, green: 0.98, blue: 0.22))
-                .frame(width: 20)
-            
+        HStack {
             Text(label)
-                .font(.system(.body, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 13))
+                .foregroundColor(.zinc400)
             
             Spacer()
             
             Text(value)
-                .font(.system(.body, design: .rounded))
-                .bold()
-                .foregroundColor(.gray)
+                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .foregroundColor(.zinc100)
         }
-        .padding(.vertical, 4)
     }
 }

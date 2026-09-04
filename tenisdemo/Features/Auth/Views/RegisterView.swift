@@ -13,21 +13,7 @@ struct RegisterView: View {
     
     var body: some View {
         ZStack {
-            // Koyu Arka Plan
-            Color.black.ignoresSafeArea()
-            
-            // Dekoratif Arka Plan Işıkları (Premium Hissiyat)
-            VStack {
-                HStack {
-                    Spacer()
-                    Circle()
-                        .fill(Color.emerald.opacity(0.08))
-                        .frame(width: 250, height: 250)
-                        .blur(radius: 50)
-                        .offset(x: 80, y: -80)
-                }
-                Spacer()
-            }
+            Color.zinc950.ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 24) {
@@ -37,11 +23,15 @@ struct RegisterView: View {
                             presentationMode.wrappedValue.dismiss()
                         }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(Circle())
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.zinc300)
+                                .frame(width: 32, height: 32)
+                                .background(Color.zinc900)
+                                .cornerRadius(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
+                                )
                         }
                         Spacer()
                     }
@@ -51,13 +41,12 @@ struct RegisterView: View {
                     // Başlık
                     VStack(spacing: 8) {
                         Text("Kayıt Ol")
-                            .font(.system(.largeTitle, design: .rounded))
-                            .bold()
-                            .foregroundColor(.white)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.zinc50)
                         
                         Text("Kendi profilini oluştur ve rakiplerinle eşleş.")
-                            .font(.system(.subheadline, design: .rounded))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc400)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -67,19 +56,19 @@ struct RegisterView: View {
                         // Ad Soyad alanı
                         VStack(alignment: .leading, spacing: 6) {
                             Text("AD SOYAD")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(.gray)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.zinc400)
                             
                             TextField("Adınız Soyadınız", text: $fullName)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(14)
+                                .font(.system(size: 14))
+                                .foregroundColor(.zinc100)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(Color.zinc900)
+                                .cornerRadius(6)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
                                 )
                                 .textInputAutocapitalization(.words)
                         }
@@ -87,19 +76,19 @@ struct RegisterView: View {
                         // E-posta alanı
                         VStack(alignment: .leading, spacing: 6) {
                             Text("E-POSTA")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(.gray)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.zinc400)
                             
                             TextField("ornek@eposta.com", text: $email)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(14)
+                                .font(.system(size: 14))
+                                .foregroundColor(.zinc100)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(Color.zinc900)
+                                .cornerRadius(6)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
                                 )
                                 .keyboardType(.emailAddress)
                                 .textInputAutocapitalization(.never)
@@ -108,38 +97,38 @@ struct RegisterView: View {
                         // Şifre alanı
                         VStack(alignment: .leading, spacing: 6) {
                             Text("ŞİFRE")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(.gray)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.zinc400)
                             
                             SecureField("En az 6 karakter", text: $password)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(14)
+                                .font(.system(size: 14))
+                                .foregroundColor(.zinc100)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(Color.zinc900)
+                                .cornerRadius(6)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
                                 )
                         }
                         
                         // Şifre Tekrar alanı
                         VStack(alignment: .leading, spacing: 6) {
                             Text("ŞİFRE TEKRAR")
-                                .font(.system(.caption2, design: .rounded))
-                                .bold()
-                                .foregroundColor(.gray)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.zinc400)
                             
                             SecureField("Şifrenizi tekrar girin", text: $confirmPassword)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(14)
+                                .font(.system(size: 14))
+                                .foregroundColor(.zinc100)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .background(Color.zinc900)
+                                .cornerRadius(6)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.zinc800, lineWidth: 1)
                                 )
                         }
                     }
@@ -151,41 +140,39 @@ struct RegisterView: View {
                             isKvkkAccepted.toggle()
                         }) {
                             Image(systemName: isKvkkAccepted ? "checkmark.square.fill" : "square")
-                                .font(.system(size: 18))
-                                .foregroundColor(isKvkkAccepted ? .emerald : .gray)
+                                .font(.system(size: 16))
+                                .foregroundColor(isKvkkAccepted ? .zinc100 : .zinc500)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Kayıt olarak ")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(.gray)
+                                .font(.system(size: 12))
+                                .foregroundColor(.zinc400)
                             + Text("Kullanım Koşulları'nı")
-                                .font(.system(.caption, design: .rounded))
-                                .bold()
-                                .foregroundColor(.white)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.zinc200)
                             + Text(" ve ")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(.gray)
+                                .font(.system(size: 12))
+                                .foregroundColor(.zinc400)
                             + Text("KVKK Aydınlatma Metni'ni")
-                                .font(.system(.caption, design: .rounded))
-                                .bold()
-                                .foregroundColor(.emerald)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.zinc200)
                             + Text(" okuduğumu ve kabul ettiğimi onaylıyorum.")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(.gray)
+                                .font(.system(size: 12))
+                                .foregroundColor(.zinc400)
                         }
                         .onTapGesture {
                             showKvkkSheet = true
                         }
                     }
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 4)
                     
                     // Hata Mesajı
                     if !errorMessage.isEmpty {
                         Text(errorMessage)
-                            .font(.system(.footnote, design: .rounded))
-                            .foregroundColor(.red)
+                            .font(.system(size: 12))
+                            .foregroundColor(.statusRed)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
                     }
@@ -194,28 +181,27 @@ struct RegisterView: View {
                     Button(action: {
                         registerUser()
                     }) {
-                        HStack {
+                        HStack(spacing: 8) {
                             if authManager.isLoading {
                                 ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .zinc950))
                             } else {
                                 Text("Hesap Oluştur")
-                                    .font(.system(.body, design: .rounded))
-                                    .bold()
+                                    .font(.system(size: 14, weight: .semibold))
                                 Image(systemName: "checkmark")
-                                    .font(.system(size: 14))
+                                    .font(.system(size: 12, weight: .semibold))
                             }
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.zinc950)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                        .background(Color.emerald)
-                        .cornerRadius(16)
-                        .shadow(color: Color.emerald.opacity(0.3), radius: 10, y: 5)
+                        .frame(height: 44)
+                        .background(Color.zinc50)
+                        .cornerRadius(6)
                     }
                     .disabled(authManager.isLoading)
+                    .opacity(authManager.isLoading ? 0.5 : 1.0)
                     .padding(.horizontal, 24)
-                    .padding(.top, 8)
+                    .padding(.top, 4)
                     
                     Spacer(minLength: 24)
                 }
