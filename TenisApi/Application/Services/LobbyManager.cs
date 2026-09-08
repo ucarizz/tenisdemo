@@ -260,11 +260,21 @@ namespace TenisApi.Application.Services
         }
 
         // Oyuncuyu lobiden çıkarma / bağlantı koptuğunda
-        public (string? code, LobbyStateDto? lobby) RemovePlayerByConnection(string connectionId)
+        public (string? code, LobbyStateDto? lobby, string? leftPlayerName, bool isHost) RemovePlayerByConnection(string connectionId, string? fallbackCode = null)
         {
-            if (!_connectionToLobby.TryRemove(connectionId, out var code))
+            string? code = null;
+            if (_connectionToLobby.TryRemove(connectionId, out var registeredCode))
             {
-                return (null, null);
+                code = registeredCode;
+            }
+            else if (!string.IsNullOrEmpty(fallbackCode))
+            {
+                code = fallbackCode.ToUpperInvariant().Trim();
+            }
+
+            if (string.IsNullOrEmpty(code))
+            {
+                return (null, null, null, false);
             }
 
             if (_lobbies.TryGetValue(code, out var lobby))
@@ -272,28 +282,23 @@ namespace TenisApi.Application.Services
                 var player = lobby.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
                 if (player != null)
                 {
+                    string leftPlayerName = player.Name;
+                    bool isHost = player.IsHost;
                     lobby.Players.Remove(player);
 
-                    // Eğer hiç gerçek oyuncu kalmadıysa lobiyi sil
-                    if (!lobby.Players.Any(p => !string.IsNullOrEmpty(p.ConnectionId)))
+                    // Eğer kurucu ayrıldıysa veya hiç gerçek bağlantılı oyuncu kalmadıysa lobiyi tamamen kapat
+                    if (isHost || !lobby.Players.Any(p => !string.IsNullOrEmpty(p.ConnectionId)))
                     {
                         _lobbies.TryRemove(code, out _);
-                        return (code, null);
-                    }
-
-                    // Host çıktıysa kalan ilk oyuncuyu host yap
-                    if (player.IsHost && lobby.Players.Any())
-                    {
-                        var newHost = lobby.Players.First();
-                        newHost.IsHost = true;
+                        return (code, null, leftPlayerName, isHost);
                     }
 
                     SyncLegacyFields(lobby);
-                    return (code, lobby);
+                    return (code, lobby, leftPlayerName, isHost);
                 }
             }
 
-            return (code, null);
+            return (code, null, null, false);
         }
 
         // Lobi maç kurallarını (game/set sayısı) günceller
@@ -341,38 +346,18 @@ namespace TenisApi.Application.Services
         private static void SyncLegacyFields(LobbyStateDto lobby)
         {
             var p0 = lobby.Players.FirstOrDefault(p => p.SlotIndex == 0);
-            if (p0 != null)
-            {
-                lobby.HostName = p0.Name;
-                lobby.HostProfileImageUrl = p0.ProfileImageUrl;
-            }
+            lobby.HostName = p0?.Name ?? string.Empty;
+            lobby.HostProfileImageUrl = p0?.ProfileImageUrl;
 
             var p1 = lobby.Players.FirstOrDefault(p => p.SlotIndex == 1);
-            if (p1 != null)
-            {
-                lobby.HostPartnerName = p1.Name;
-            }
-            else if (!lobby.IsDouble)
-            {
-                lobby.HostPartnerName = null;
-            }
+            lobby.HostPartnerName = p1?.Name;
 
             var p2 = lobby.Players.FirstOrDefault(p => p.SlotIndex == 2 || (!lobby.IsDouble && p.SlotIndex == 1));
-            if (p2 != null)
-            {
-                lobby.GuestName = p2.Name;
-                lobby.GuestProfileImageUrl = p2.ProfileImageUrl;
-            }
+            lobby.GuestName = p2?.Name;
+            lobby.GuestProfileImageUrl = p2?.ProfileImageUrl;
 
             var p3 = lobby.Players.FirstOrDefault(p => p.SlotIndex == 3);
-            if (p3 != null)
-            {
-                lobby.GuestPartnerName = p3.Name;
-            }
-            else if (!lobby.IsDouble)
-            {
-                lobby.GuestPartnerName = null;
-            }
+            lobby.GuestPartnerName = p3?.Name;
         }
 
         // 6 haneli rastgele benzersiz bir kod üretir

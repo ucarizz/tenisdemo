@@ -164,6 +164,9 @@ struct SetupMatchView: View {
         }
         .onDisappear {
             sharePlayManager.leaveSession()
+            if !viewModel.hasMatchStarted, let code = signalRService.lobbyState?.code {
+                signalRService.leaveLobby(code: code)
+            }
         }
     }
     
@@ -445,12 +448,33 @@ struct SetupMatchView: View {
                 }
             } else if let lobby = signalRService.lobbyState {
                 VStack(spacing: 16) {
-                    // Lobi Kodu Editorial Gösterimi
+                    // Lobi Kodu & Ayrılma Butonu
                     VStack(spacing: 8) {
-                        Text("LOBİ KODU")
-                            .font(.system(size: 11, weight: .bold))
-                            .tracking(2.0)
-                            .foregroundColor(.zinc500)
+                        HStack {
+                            Text("LOBİ KODU")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(2.0)
+                                .foregroundColor(.zinc500)
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                signalRService.leaveLobby(code: lobby.code)
+                                sharePlayManager.leaveSession()
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "xmark.circle.fill")
+                                    Text(lobbyRole == 0 ? "LOBİYİ KAPAT" : "LOBİDEN AYRIL")
+                                }
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.statusRed)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color.statusRed.opacity(0.12))
+                                .cornerRadius(6)
+                            }
+                        }
+                        .padding(.horizontal, 20)
                         
                         HStack(spacing: 12) {
                             Text(lobby.code)
@@ -475,6 +499,24 @@ struct SetupMatchView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    
+                    // Ayrılan Oyuncu Bildirimi
+                    if let notification = signalRService.notificationMessage {
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.crop.circle.badge.xmark")
+                                .font(.system(size: 14))
+                                .foregroundColor(.badgeAmber)
+                            Text(notification)
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                        .padding(10)
+                        .background(Color.badgeAmber.opacity(0.15))
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.badgeAmber.opacity(0.3), lineWidth: 1))
+                        .padding(.horizontal, 20)
+                    }
                     
                     // SharePlay Yakınlaşma (Proximity) Banner'ı
                     HStack(spacing: 12) {

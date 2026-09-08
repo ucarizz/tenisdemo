@@ -145,12 +145,16 @@ namespace TenisApi.Hubs
         public async Task LeaveLobby(string code)
         {
             code = code.ToUpperInvariant().Trim();
-            var (_, remainingLobby) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId);
+            var (_, remainingLobby, leftPlayerName, _) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId, code);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, code);
             
             if (remainingLobby != null)
             {
                 await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
+                if (!string.IsNullOrEmpty(leftPlayerName))
+                {
+                    await Clients.Group(code).SendAsync("PlayerLeftSlot", leftPlayerName);
+                }
             }
             else
             {
@@ -160,12 +164,16 @@ namespace TenisApi.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var (code, remainingLobby) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId);
+            var (code, remainingLobby, leftPlayerName, _) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId);
             if (!string.IsNullOrEmpty(code))
             {
                 if (remainingLobby != null)
                 {
                     await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
+                    if (!string.IsNullOrEmpty(leftPlayerName))
+                    {
+                        await Clients.Group(code).SendAsync("PlayerLeftSlot", leftPlayerName);
+                    }
                 }
                 else
                 {

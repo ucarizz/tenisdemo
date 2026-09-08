@@ -125,6 +125,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     @Published var isMatchStarted = false
     @Published var remoteMatchState: LiveMatchState? = nil
     @Published var errorMessage: String? = nil
+    @Published var notificationMessage: String? = nil
     @Published var activeMatchId: Int? = nil
     
     private init() {
@@ -150,11 +151,23 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
             }
         })
         
-        // Lobi güncellendi (Rakip katıldı) yayını
+        // Lobi güncellendi (Rakip katıldı / slot değişti / biri ayrıldı) yayını
         connection?.on(method: "LobbyUpdated", callback: { (lobby: LobbyState) in
             DispatchQueue.main.async {
                 self.lobbyState = lobby
                 self.errorMessage = nil
+            }
+        })
+        
+        // Slot boşaldı (Biri ayrıldı) bilgilendirmesi
+        connection?.on(method: "PlayerLeftSlot", callback: { (playerName: String) in
+            DispatchQueue.main.async {
+                self.notificationMessage = "\(playerName) lobiden ayrıldı."
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                    if self.notificationMessage == "\(playerName) lobiden ayrıldı." {
+                        self.notificationMessage = nil
+                    }
+                }
             }
         })
         
@@ -180,10 +193,10 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
             }
         })
         
-        // Oyuncu ayrıldı yayını
+        // Kurucu ayrıldı / Lobi kapandı yayını
         connection?.on(method: "PlayerLeft", callback: {
             DispatchQueue.main.async {
-                self.errorMessage = "Rakip lobiden/maçtan ayrıldı."
+                self.errorMessage = "Kurucu lobiden ayrıldı veya lobi kapandı."
                 self.lobbyState = nil
                 self.isMatchStarted = false
                 self.remoteMatchState = nil
