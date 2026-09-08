@@ -76,6 +76,10 @@ class TennisMatchViewModel: ObservableObject {
         MatchLocationManager.shared.startTracking()
         UIApplication.shared.isIdleTimerDisabled = true
         
+        // Apple Watch uygulamasını kullanıcının bileğinde otomatik olarak ön plana aç ve senkronize et
+        WatchConnectivityManager.shared.setup(viewModel: self)
+        WatchConnectivityManager.shared.launchWatchAppAndSync()
+        
         let p1 = player1Name.isEmpty ? "SİZ" : player1Name
         let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
         ClientLogger.shared.info("Match started: \(p1) vs \(p2) (Double: \(isDouble))")

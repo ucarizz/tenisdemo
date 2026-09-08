@@ -6,5 +6,9 @@
 	<array>
 		<string>workout-processing</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Tenis maçınızı takip etmek ve vuruş analizi yapmak için HealthKit izni gerekir.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Tenis antrenmanınızı kaydetmek için HealthKit izni gerekir.</string>
 </dict>
 </plist>

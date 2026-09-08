@@ -22,5 +22,9 @@
 	<array>
 		<string>location</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Apple Watch'ta tenis maçınızı başlatmak ve takip etmek için HealthKit izni gerekir.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Apple Watch ile tenis antrenmanınızı kaydetmek için HealthKit izni gerekir.</string>
 </dict>
 </plist>

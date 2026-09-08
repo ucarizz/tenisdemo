@@ -8,6 +8,7 @@
 import Foundation
 import WatchConnectivity
 import Combine
+import HealthKit
 
 class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     static let shared = WatchConnectivityManager()
@@ -30,6 +31,32 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     func setup(viewModel: TennisMatchViewModel) {
         self.viewModel = viewModel
         // İlk bağlantıda mevcut durumu gönder
+        syncWithWatch()
+    }
+    
+    // Telefondan maç başladığında Apple Watch uygulamasını kullanıcının bileğinde otomatik olarak ön plana açar
+    func launchWatchAppOnWrist() {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            print("DEBUG [WatchConnectivity]: Health data not available on this device.")
+            return
+        }
+        
+        let configuration = HKWorkoutConfiguration()
+        configuration.activityType = .tennis
+        configuration.locationType = .outdoor
+        
+        let healthStore = HKHealthStore()
+        healthStore.startWatchApp(with: configuration) { success, error in
+            if success {
+                print("DEBUG [WatchConnectivity]: Apple Watch app successfully launched on wrist via HealthKit workout!")
+            } else {
+                print("DEBUG [WatchConnectivity]: Failed to launch watch app: \(String(describing: error))")
+            }
+        }
+    }
+    
+    func launchWatchAppAndSync() {
+        launchWatchAppOnWrist()
         syncWithWatch()
     }
     
@@ -125,6 +152,8 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 viewModel.startNextGame()
             case "newMatch":
                 viewModel.newMatch()
+            case "requestSync":
+                self.syncWithWatch()
             case "recordSwing":
                 if let speedKmh = message["speedKmh"] as? Double,
                    let accelerationG = message["accelerationG"] as? Double,

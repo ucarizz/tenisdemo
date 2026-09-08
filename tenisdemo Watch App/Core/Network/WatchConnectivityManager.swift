@@ -34,6 +34,25 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         }
     }
     
+    // Telefondan HealthKit workout ile açıldığında çağrılır
+    func handleWatchAppLaunchedFromPhone() {
+        DispatchQueue.main.async {
+            self.isCompanionActive = true
+            if let vm = self.viewModel {
+                vm.hasMatchStarted = true
+                vm.startRuntimeSession()
+            }
+            self.requestLatestStateFromPhone()
+        }
+    }
+    
+    func requestLatestStateFromPhone() {
+        guard WCSession.isSupported() && session.activationState == .activated else { return }
+        session.sendMessage(["action": "requestSync"], replyHandler: nil) { error in
+            print("DEBUG [WatchConnectivity]: Request sync message error: \(error.localizedDescription)")
+        }
+    }
+    
     // Telefondan gelen durum güncellemelerini karşılar (Arka plan/Başlangıç)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
         print("DEBUG [WatchConnectivity]: Received context from iPhone.")
