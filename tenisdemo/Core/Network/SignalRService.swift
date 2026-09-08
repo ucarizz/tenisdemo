@@ -14,6 +14,29 @@ struct LobbySettings: Codable, Equatable {
     }
 }
 
+struct LobbyPlayer: Codable, Equatable, Identifiable {
+    var id: String { connectionId.isEmpty ? "\(name)-\(slotIndex)" : connectionId }
+    var connectionId: String
+    var userId: String?
+    var name: String
+    var profileImageUrl: String?
+    var team: Int
+    var slotIndex: Int
+    var isHost: Bool
+    var isReady: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case connectionId = "connection_id"
+        case userId = "user_id"
+        case name
+        case profileImageUrl = "profile_image_url"
+        case team
+        case slotIndex = "slot_index"
+        case isHost = "is_host"
+        case isReady = "is_ready"
+    }
+}
+
 struct LobbyState: Codable, Equatable {
     var code: String
     var hostName: String
@@ -25,6 +48,8 @@ struct LobbyState: Codable, Equatable {
     var isDouble: Bool
     var settings: LobbySettings
     var isMatchStarted: Bool
+    var players: [LobbyPlayer]?
+    var maxPlayers: Int?
     
     enum CodingKeys: String, CodingKey {
         case code
@@ -37,6 +62,12 @@ struct LobbyState: Codable, Equatable {
         case isDouble = "is_double"
         case settings
         case isMatchStarted = "is_match_started"
+        case players
+        case maxPlayers = "max_players"
+    }
+    
+    func playerAt(slot: Int) -> LobbyPlayer? {
+        return players?.first(where: { $0.slotIndex == slot })
     }
 }
 
@@ -230,6 +261,28 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
                 DispatchQueue.main.async {
                     self.errorMessage = "Lobiye katılamadı: \(error.localizedDescription)"
                 }
+            }
+        }
+    }
+    
+    func joinLobbySlot(code: String, name: String, profileImageUrl: String?, requestedSlotIndex: Int = -1) {
+        errorMessage = nil
+        isMatchStarted = false
+        remoteMatchState = nil
+        
+        connection?.invoke(method: "joinLobbySlot", arguments: [code, name, profileImageUrl ?? "", requestedSlotIndex]) { error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Lobi slotuna katılamadı: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func switchSlot(code: String, targetSlotIndex: Int) {
+        connection?.invoke(method: "switchSlot", arguments: [code, targetSlotIndex]) { error in
+            if let error = error {
+                print("Slot değiştirilemedi: \(error.localizedDescription)")
             }
         }
     }

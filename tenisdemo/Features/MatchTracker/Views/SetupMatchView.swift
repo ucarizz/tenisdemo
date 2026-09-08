@@ -5,11 +5,13 @@ struct SetupMatchView: View {
     
     @StateObject private var signalRService = SignalRService.shared
     @StateObject private var authManager = AuthManager.shared
+    @StateObject private var sharePlayManager = SharePlayManager.shared
     
     @State private var selectedSetupMode = 0 // 0: Yerel Maç, 1: Canlı Lobi
     @State private var lobbyRole = 0 // 0: Lobi Kur, 1: Lobiye Katıl
     @State private var lobbyCodeInput = ""
     @State private var localError = ""
+    @State private var copiedCodeFeedback = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -149,6 +151,19 @@ struct SetupMatchView: View {
             if selectedSetupMode == 1, lobbyRole == 1, let val = newValue {
                 viewModel.useMatchTiebreak = val
             }
+        }
+        .onChange(of: signalRService.lobbyState?.code) { newCode in
+            if let code = newCode, let lobby = signalRService.lobbyState, lobbyRole == 0 {
+                sharePlayManager.startSharing(lobbyCode: code, hostName: lobby.hostName, isDouble: lobby.isDouble)
+            }
+        }
+        .onChange(of: sharePlayManager.receivedLobbyCode) { newCode in
+            if let code = newCode, lobbyRole == 1 {
+                lobbyCodeInput = code
+            }
+        }
+        .onDisappear {
+            sharePlayManager.leaveSession()
         }
     }
     
@@ -326,11 +341,17 @@ struct SetupMatchView: View {
                 
                 Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
                 
+                // Çiftler Maçı Seçimi
                 HStack {
-                    Text("ÇİFTLER MAÇI (DOUBLE)")
-                        .font(.system(size: 12, weight: .bold))
-                        .tracking(1.0)
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("ÇİFTLER MAÇI (4 KİŞİ)")
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1.0)
+                            .foregroundColor(.white)
+                        Text("4 ayrı oyuncu kendi telefonlarıyla lobiye bağlanabilir")
+                            .font(.system(size: 11))
+                            .foregroundColor(.zinc500)
+                    }
                     Spacer()
                     Toggle("", isOn: $viewModel.isDouble)
                         .labelsHidden()
@@ -338,16 +359,16 @@ struct SetupMatchView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                if viewModel.isDouble {
+                if viewModel.isDouble && lobbyRole == 0 {
                     Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1).padding(.horizontal, 20)
                     
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("ORTAĞINIZIN ADI")
+                        Text("ORTAĞINIZIN ADI (İSTEĞE BAĞLI)")
                             .font(.system(size: 10, weight: .bold))
                             .tracking(1.5)
                             .foregroundColor(.zinc500)
-                        TextField("ORTAK İSMİ", text: lobbyRole == 0 ? $viewModel.player1PartnerName : $viewModel.player2PartnerName)
-                            .font(.system(size: 16, weight: .bold))
+                        TextField("TELEFONDAN BAĞLANABİLİR VEYA ELLE YAZIN", text: $viewModel.player1PartnerName)
+                            .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.white)
                             .textInputAutocapitalization(.characters)
                     }
@@ -355,6 +376,52 @@ struct SetupMatchView: View {
                 }
                 
                 if lobbyRole == 1 {
+                    // SharePlay Yakınlaşma ile Algılanan Lobi Kartı
+                    if let detectedCode = sharePlayManager.receivedLobbyCode {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "shareplay")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.tennisVolt)
+                                Text("YAKINDAKİ COURT LOBİSİ ALGILANDI")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .tracking(1.0)
+                                    .foregroundColor(.tennisVolt)
+                                Spacer()
+                            }
+                            
+                            HStack {
+                                Text(detectedCode)
+                                    .font(.system(size: 22, weight: .black, design: .monospaced))
+                                    .foregroundColor(.white)
+                                    .tracking(2)
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    let name = authManager.currentUser?.fullName ?? "OYUNCU"
+                                    signalRService.joinLobbySlot(code: detectedCode, name: name, profileImageUrl: authManager.currentUser?.profileImageUrl)
+                                }) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "bolt.fill")
+                                        Text("ANINDA KATIL")
+                                    }
+                                    .font(.system(size: 11, weight: .bold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.tennisVolt)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(6)
+                                }
+                            }
+                        }
+                        .padding(14)
+                        .background(Color.zinc900)
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.tennisVolt.opacity(0.4), lineWidth: 1))
+                        .padding(.horizontal, 20)
+                    }
+                    
                     Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1).padding(.horizontal, 20)
                     
                     VStack(alignment: .leading, spacing: 6) {
@@ -377,7 +444,7 @@ struct SetupMatchView: View {
                         .padding(.horizontal, 20)
                 }
             } else if let lobby = signalRService.lobbyState {
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     // Lobi Kodu Editorial Gösterimi
                     VStack(spacing: 8) {
                         Text("LOBİ KODU")
@@ -385,48 +452,245 @@ struct SetupMatchView: View {
                             .tracking(2.0)
                             .foregroundColor(.zinc500)
                         
-                        Text(lobby.code)
-                            .font(.system(size: 36, weight: .black, design: .monospaced))
-                            .foregroundColor(.tennisVolt)
-                            .tracking(4)
+                        HStack(spacing: 12) {
+                            Text(lobby.code)
+                                .font(.system(size: 34, weight: .black, design: .monospaced))
+                                .foregroundColor(.tennisVolt)
+                                .tracking(4)
+                            
+                            Button(action: {
+                                UIPasteboard.general.string = lobby.code
+                                copiedCodeFeedback = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    copiedCodeFeedback = false
+                                }
+                            }) {
+                                Image(systemName: copiedCodeFeedback ? "checkmark" : "doc.on.doc")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(copiedCodeFeedback ? .tennisVolt : .zinc400)
+                                    .padding(8)
+                                    .background(Color.zinc850)
+                                    .clipShape(Circle())
+                            }
+                        }
                     }
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 8)
                     
-                    Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
-                    
-                    // Oyuncular
-                    HStack(spacing: 0) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("KURUCU")
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(1.2)
-                                .foregroundColor(.zinc500)
-                            Text(lobby.hostName.uppercased())
-                                .font(.system(size: 15, weight: .bold))
+                    // SharePlay Yakınlaşma (Proximity) Banner'ı
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.tennisVolt.opacity(0.12))
+                                .frame(width: 36, height: 36)
+                            Image(systemName: "wave.3.forward.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.tennisVolt)
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("SHAREPLAY İLE YAKINLAŞTIRIN")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(1.0)
                                 .foregroundColor(.white)
+                            Text(lobby.isDouble ? "Telefonları tepe kısımlarından yaklaştırarak 4 kişiye kadar lobiye dahil edin." : "Telefonları yaklaştırarak rakibi anında lobiye bağlayın.")
+                                .font(.system(size: 10))
+                                .foregroundColor(.zinc400)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        Text("VS")
-                            .font(.system(size: 11, weight: .black, design: .monospaced))
-                            .foregroundColor(.zinc600)
-                            .padding(.horizontal, 12)
-                        
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text("MİSAFİR")
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(1.2)
-                                .foregroundColor(.zinc500)
-                            Text((lobby.guestName ?? "Bekleniyor...").uppercased())
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(lobby.guestName != nil ? .white : .zinc600)
+                        Spacer()
+                        if sharePlayManager.activeParticipantsCount > 1 {
+                            Text("\(sharePlayManager.activeParticipantsCount) Cihaz")
+                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.tennisVolt.opacity(0.2))
+                                .foregroundColor(.tennisVolt)
+                                .cornerRadius(4)
                         }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
+                    .padding(12)
+                    .background(Color.zinc900)
+                    .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.zinc800, lineWidth: 1))
+                    .padding(.horizontal, 20)
+                    
+                    // 4 SLOTLU KORT YERLEŞİMİ (Interactive Court Layout)
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text(lobby.isDouble ? "KORT YERLEŞİMİ (4 KİŞİLİK LOBİ)" : "KORT YERLEŞİMİ (TEKLER)")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1.5)
+                                .foregroundColor(.zinc500)
+                            Spacer()
+                            Text("BOŞ SLOTA TIKLAYARAK GEÇEBİLİRSİNİZ")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.zinc600)
+                        }
+                        .padding(.horizontal, 4)
+                        
+                        // TAKIM 1 (Kurucu & Ortak)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("TAKIM 1")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(1.0)
+                                    .foregroundColor(.tennisVolt)
+                                Spacer()
+                            }
+                            
+                            HStack(spacing: 10) {
+                                slotCard(slot: 0, title: "KURUCU (P1)", lobby: lobby)
+                                if lobby.isDouble {
+                                    slotCard(slot: 1, title: "ORTAK (P2)", lobby: lobby)
+                                }
+                            }
+                        }
+                        
+                        // NET / FİLE ÇİZGİSİ
+                        HStack(spacing: 8) {
+                            Rectangle().fill(Color.zinc800).frame(height: 1)
+                            Text("NET")
+                                .font(.system(size: 9, weight: .black, design: .monospaced))
+                                .foregroundColor(.zinc600)
+                            Rectangle().fill(Color.zinc800).frame(height: 1)
+                        }
+                        .padding(.vertical, 2)
+                        
+                        // TAKIM 2 (Rakip 1 & Rakip 2)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("TAKIM 2")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(1.0)
+                                    .foregroundColor(.zinc400)
+                                Spacer()
+                            }
+                            
+                            HStack(spacing: 10) {
+                                slotCard(slot: 2, title: lobby.isDouble ? "RAKİP 1 (P3)" : "RAKİP (P2)", lobby: lobby)
+                                if lobby.isDouble {
+                                    slotCard(slot: 3, title: "RAKİP 2 (P4)", lobby: lobby)
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.zinc900.opacity(0.7))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.zinc800, lineWidth: 1))
                     .padding(.horizontal, 20)
                 }
             }
         }
+    }
+    
+    // Slot Kartı Görünümü
+    private func slotCard(slot: Int, title: String, lobby: LobbyState) -> some View {
+        let player = playerInSlot(slot, lobby: lobby)
+        let isOccupied = player != nil
+        let isHost = slot == 0
+        
+        return Button(action: {
+            if !isOccupied {
+                signalRService.switchSlot(code: lobby.code, targetSlotIndex: slot)
+            }
+        }) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(title)
+                        .font(.system(size: 9, weight: .bold))
+                        .tracking(1.0)
+                        .foregroundColor(isHost ? .tennisVolt : .zinc500)
+                    Spacer()
+                    if isHost {
+                        Text("KURUCU")
+                            .font(.system(size: 8, weight: .black))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.tennisVolt)
+                            .foregroundColor(.black)
+                            .cornerRadius(3)
+                    } else if isOccupied {
+                        Circle()
+                            .fill(Color.courtGreen)
+                            .frame(width: 6, height: 6)
+                    }
+                }
+                
+                if let p = player {
+                    HStack(spacing: 8) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.zinc800)
+                                .frame(width: 28, height: 28)
+                            Text(String(p.name.prefix(1)).uppercased())
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Text(p.name.uppercased())
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    }
+                } else {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus.circle.dashed")
+                            .font(.system(size: 13))
+                            .foregroundColor(.zinc500)
+                        Text("BU SLOTA GEÇ")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.zinc500)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(isOccupied ? Color.zinc850 : Color.zinc900.opacity(0.6))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isOccupied ? Color.zinc700 : Color.zinc800, style: StrokeStyle(lineWidth: 1, dash: isOccupied ? [] : [4]))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func playerInSlot(_ slot: Int, lobby: LobbyState) -> LobbyPlayer? {
+        if let p = lobby.playerAt(slot: slot) {
+            return p
+        }
+        switch slot {
+        case 0:
+            return LobbyPlayer(connectionId: "host", userId: nil, name: lobby.hostName, profileImageUrl: lobby.hostProfileImageUrl, team: 1, slotIndex: 0, isHost: true, isReady: true)
+        case 1:
+            if lobby.isDouble, let name = lobby.hostPartnerName, !name.isEmpty {
+                return LobbyPlayer(connectionId: "p1_partner", userId: nil, name: name, profileImageUrl: nil, team: 1, slotIndex: 1, isHost: false, isReady: true)
+            }
+        case 2:
+            if let name = lobby.guestName, !name.isEmpty {
+                return LobbyPlayer(connectionId: "guest", userId: nil, name: name, profileImageUrl: lobby.guestProfileImageUrl, team: 2, slotIndex: 2, isHost: false, isReady: true)
+            }
+        case 3:
+            if lobby.isDouble, let name = lobby.guestPartnerName, !name.isEmpty {
+                return LobbyPlayer(connectionId: "p2_partner", userId: nil, name: name, profileImageUrl: nil, team: 2, slotIndex: 3, isHost: false, isReady: true)
+            }
+        default:
+            return nil
+        }
+        return nil
+    }
+
+    private func totalPlayerCount(_ lobby: LobbyState) -> Int {
+        if let players = lobby.players, !players.isEmpty {
+            return players.count
+        }
+        var count = 1
+        if lobby.guestName != nil { count += 1 }
+        if lobby.isDouble {
+            if lobby.hostPartnerName != nil { count += 1 }
+            if lobby.guestPartnerName != nil { count += 1 }
+        }
+        return count
     }
     
     // MARK: - AKSİYON BUTONU
@@ -451,25 +715,42 @@ struct SetupMatchView: View {
                             let name = authManager.currentUser?.fullName ?? "OYUNCU 1"
                             signalRService.createLobby(hostName: name, isDouble: viewModel.isDouble, hostPartnerName: viewModel.isDouble ? viewModel.player1PartnerName : nil, hostProfileImageUrl: authManager.currentUser?.profileImageUrl)
                         }) {
-                            buttonContent(title: "Lobi Oluştur", icon: "plus")
+                            buttonContent(title: viewModel.isDouble ? "4 Kişilik Lobi Oluştur" : "Lobi Oluştur", icon: "plus")
                         }
                     } else {
                         Button(action: {
                             guard !lobbyCodeInput.isEmpty else { return }
                             let name = authManager.currentUser?.fullName ?? "OYUNCU 2"
-                            signalRService.joinLobby(code: lobbyCodeInput, guestName: name, guestPartnerName: viewModel.isDouble ? viewModel.player2PartnerName : nil, guestProfileImageUrl: authManager.currentUser?.profileImageUrl)
+                            signalRService.joinLobbySlot(code: lobbyCodeInput, name: name, profileImageUrl: authManager.currentUser?.profileImageUrl)
                         }) {
                             buttonContent(title: "Lobiye Bağlan", icon: "link")
                         }
                     }
-                } else if let lobby = signalRService.lobbyState, lobbyRole == 0 {
-                    Button(action: {
-                        signalRService.startMatch(code: lobby.code)
-                    }) {
-                        buttonContent(title: "Canlı Maçı Başlat", icon: "play.fill")
+                } else if let lobby = signalRService.lobbyState {
+                    if lobbyRole == 0 {
+                        let canStart = (lobby.guestName != nil) || (lobby.playerAt(slot: 2) != nil)
+                        Button(action: {
+                            signalRService.startMatch(code: lobby.code)
+                        }) {
+                            buttonContent(title: "Canlı Maçı Başlat (\(totalPlayerCount(lobby))/\(lobby.isDouble ? 4 : 2) Oyuncu)", icon: "play.fill")
+                        }
+                        .disabled(!canStart)
+                        .opacity(!canStart ? 0.35 : 1.0)
+                    } else {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .zinc400))
+                                .scaleEffect(0.8)
+                            Text("KURUCUNUN MAÇI BAŞLATMASI BEKLENİYOR")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.zinc400)
+                                .tracking(1.0)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(Color.zinc900)
+                        .cornerRadius(6)
                     }
-                    .disabled(lobby.guestName == nil)
-                    .opacity(lobby.guestName == nil ? 0.35 : 1.0)
                 }
             }
             .padding(.horizontal, 20)

@@ -15,6 +15,33 @@ namespace TenisApi.Application.DTOs
         public bool UseMatchTiebreak { get; set; } = true;
     }
 
+    public class LobbyPlayerDto
+    {
+        [JsonPropertyName("connection_id")]
+        public string ConnectionId { get; set; } = string.Empty;
+
+        [JsonPropertyName("user_id")]
+        public string? UserId { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("profile_image_url")]
+        public string? ProfileImageUrl { get; set; }
+
+        [JsonPropertyName("team")]
+        public int Team { get; set; } = 1;
+
+        [JsonPropertyName("slot_index")]
+        public int SlotIndex { get; set; } = 0;
+
+        [JsonPropertyName("is_host")]
+        public bool IsHost { get; set; }
+
+        [JsonPropertyName("is_ready")]
+        public bool IsReady { get; set; } = true;
+    }
+
     public class LobbyStateDto
     {
         [JsonPropertyName("code")]
@@ -49,6 +76,12 @@ namespace TenisApi.Application.DTOs
 
         [JsonPropertyName("match_id")]
         public int? MatchId { get; set; }
+
+        [JsonPropertyName("players")]
+        public List<LobbyPlayerDto> Players { get; set; } = new();
+
+        [JsonPropertyName("max_players")]
+        public int MaxPlayers => IsDouble ? 4 : 2;
     }
 
     public class SetScoreDto
