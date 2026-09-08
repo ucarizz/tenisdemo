@@ -126,6 +126,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     @Published var remoteMatchState: LiveMatchState? = nil
     @Published var errorMessage: String? = nil
     @Published var notificationMessage: String? = nil
+    @Published var playerLeftMatchAlert: String? = nil
     @Published var activeMatchId: Int? = nil
     
     private init() {
@@ -193,13 +194,28 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
             }
         })
         
-        // Kurucu ayrıldı / Lobi kapandı yayını
-        connection?.on(method: "PlayerLeft", callback: {
+        // Kurucu ayrıldı / Lobi kapandı / Rakip maçtan ayrıldı yayını
+        connection?.on(method: "PlayerLeft", callback: { (reason: String) in
             DispatchQueue.main.async {
-                self.errorMessage = "Kurucu lobiden ayrıldı veya lobi kapandı."
+                self.errorMessage = reason
+                self.playerLeftMatchAlert = reason
                 self.lobbyState = nil
                 self.isMatchStarted = false
                 self.remoteMatchState = nil
+            }
+        })
+        
+        // Maç esnasında çiftler maçında bir oyuncu ayrıldı yayını
+        connection?.on(method: "PlayerLeftMatch", callback: { (playerName: String) in
+            DispatchQueue.main.async {
+                let msg = "\(playerName) maçtan ayrıldı."
+                self.notificationMessage = msg
+                self.playerLeftMatchAlert = msg
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                    if self.notificationMessage == msg {
+                        self.notificationMessage = nil
+                    }
+                }
             }
         })
         

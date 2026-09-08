@@ -67,6 +67,24 @@ struct MatchTrackerView: View {
                             .fill(Color.white.opacity(0.12))
                             .frame(height: 1)
                         
+                        // Maç İçi Ayrılma / Uyarı Bildirim Bandı
+                        if let banner = signalRService.notificationMessage {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.badgeAmber)
+                                Text(banner)
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                                Spacer()
+                            }
+                            .padding(10)
+                            .background(Color.badgeAmber.opacity(0.15))
+                            .cornerRadius(8)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.badgeAmber.opacity(0.4), lineWidth: 1))
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
                         // Kolon Başlıkları (Scoreboard Headers)
                         HStack(alignment: .center, spacing: 0) {
                             Text("OYUNCULAR")
@@ -304,14 +322,24 @@ struct MatchTrackerView: View {
         .onChange(of: signalRService.lobbyState) { newLobbyState in
             if viewModel.hasMatchStarted && newLobbyState == nil && !viewModel.state.isMatchOver {
                 showOpponentLeftAlert = true
-                viewModel.newMatch()
+            }
+        }
+        .onChange(of: signalRService.playerLeftMatchAlert) { alertMsg in
+            if alertMsg != nil && viewModel.hasMatchStarted && !viewModel.state.isMatchOver {
+                showOpponentLeftAlert = true
             }
         }
         .alert(isPresented: $showOpponentLeftAlert) {
             Alert(
-                title: Text("Maç İptal Edildi"),
-                message: Text("Rakip oyuncu maçtan veya lobiden ayrıldı."),
-                dismissButton: .default(Text("Tamam"))
+                title: Text("Oyuncu Ayrıldı"),
+                message: Text(signalRService.playerLeftMatchAlert ?? "Rakip oyuncu maçtan ayrıldı. Maç sonlandırıldı."),
+                dismissButton: .default(Text("Tamam")) {
+                    let shouldCancel = signalRService.lobbyState == nil
+                    signalRService.playerLeftMatchAlert = nil
+                    if shouldCancel {
+                        viewModel.newMatch()
+                    }
+                }
             )
         }
     }

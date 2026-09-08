@@ -141,25 +141,13 @@ namespace TenisApi.Hubs
             await Clients.OthersInGroup(code).SendAsync("ScoreUpdated", scoreState);
         }
 
-        // Lobiden güvenli şekilde ayrılır
+        // Lobiden veya maçtan güvenli şekilde ayrılır
         public async Task LeaveLobby(string code)
         {
             code = code.ToUpperInvariant().Trim();
             var (_, remainingLobby, leftPlayerName, _) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId, code);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, code);
-            
-            if (remainingLobby != null)
-            {
-                await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
-                if (!string.IsNullOrEmpty(leftPlayerName))
-                {
-                    await Clients.Group(code).SendAsync("PlayerLeftSlot", leftPlayerName);
-                }
-            }
-            else
-            {
-                await Clients.OthersInGroup(code).SendAsync("PlayerLeft");
-            }
+            await HandlePlayerDeparture(code, remainingLobby, leftPlayerName);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -167,20 +155,50 @@ namespace TenisApi.Hubs
             var (code, remainingLobby, leftPlayerName, _) = _lobbyManager.RemovePlayerByConnection(Context.ConnectionId);
             if (!string.IsNullOrEmpty(code))
             {
-                if (remainingLobby != null)
+                await HandlePlayerDeparture(code, remainingLobby, leftPlayerName);
+            }
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        private async Task HandlePlayerDeparture(string code, LobbyStateDto? remainingLobby, string? leftPlayerName)
+        {
+            string departureName = string.IsNullOrEmpty(leftPlayerName) ? "Bir oyuncu" : leftPlayerName;
+
+            if (remainingLobby != null)
+            {
+                // Eğer maç devam ediyorsa:
+                if (remainingLobby.IsMatchStarted)
                 {
-                    await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
-                    if (!string.IsNullOrEmpty(leftPlayerName))
+                    bool opponentRemains = remainingLobby.Players.Any(p => p.Team == 2);
+                    bool hostTeamRemains = remainingLobby.Players.Any(p => p.Team == 1);
+
+                    // Eğer bir takım tamamen boşaldıysa maç devam edemez
+                    if (!opponentRemains || !hostTeamRemains)
                     {
-                        await Clients.Group(code).SendAsync("PlayerLeftSlot", leftPlayerName);
+                        _lobbyManager.RemoveLobby(code);
+                        await Clients.Group(code).SendAsync("PlayerLeft", $"{departureName} maçtan ayrıldı. Maç sonlandırıldı.");
+                        return;
+                    }
+                    else
+                    {
+                        // Çiftler maçında 1 oyuncu ayrıldı ancak maçtaki diğer oyuncular devam ediyor
+                        await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
+                        await Clients.Group(code).SendAsync("PlayerLeftSlot", departureName);
+                        await Clients.Group(code).SendAsync("PlayerLeftMatch", departureName);
                     }
                 }
                 else
                 {
-                    await Clients.OthersInGroup(code).SendAsync("PlayerLeft");
+                    // Henüz lobi aşamasında biri ayrıldı
+                    await Clients.Group(code).SendAsync("LobbyUpdated", remainingLobby);
+                    await Clients.Group(code).SendAsync("PlayerLeftSlot", departureName);
                 }
             }
-            await base.OnDisconnectedAsync(exception);
+            else
+            {
+                // Kurucu ayrıldı veya tüm lobi kapandı
+                await Clients.OthersInGroup(code).SendAsync("PlayerLeft", $"{departureName} ayrıldı. Maç sonlandırıldı.");
+            }
         }
     }
 }

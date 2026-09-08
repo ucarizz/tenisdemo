@@ -91,6 +91,9 @@ struct SettingsView: View {
                     // Maçı İptal Et ve Yeni Kur
                     Button(action: {
                         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                            if let code = SignalRService.shared.lobbyState?.code {
+                                SignalRService.shared.leaveLobby(code: code)
+                            }
                             viewModel.newMatch()
                             showSettings = false
                         }
