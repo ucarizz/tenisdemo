@@ -82,6 +82,39 @@ namespace TenisApi.Hubs
             }
         }
 
+        private static readonly Random _random = new();
+
+        // Kura aşamasını başlatır
+        public async Task StartToss(string code)
+        {
+            code = code.ToUpperInvariant().Trim();
+            await Clients.Group(code).SendAsync("TossStarted");
+        }
+
+        // Raketi çevirir ve sonucu odadaki herkese eşitler
+        public async Task SpinRacket(string code)
+        {
+            code = code.ToUpperInvariant().Trim();
+            var lobby = _lobbyManager.GetLobby(code);
+            if (lobby != null)
+            {
+                bool isUp = _random.Next(2) == 0;
+                string result = isUp ? "UP" : "DOWN"; // DÜZ veya TERS
+                int winnerSlot = isUp ? 0 : 2;
+                string winnerName = isUp ? lobby.HostName : (lobby.GuestName ?? "RAKİP");
+
+                await Clients.Group(code).SendAsync("RacketSpun", result, winnerSlot, winnerName);
+            }
+        }
+
+        // Kura kazananının servis tercihini uygular ve maçı başlatır
+        public async Task SelectTossChoice(string code, string startingServer)
+        {
+            code = code.ToUpperInvariant().Trim();
+            await Clients.Group(code).SendAsync("TossChoiceSelected", startingServer);
+            await StartMatch(code);
+        }
+
         // Maçı başlatır ve iki tarafın da ekranını geçirir
         public async Task StartMatch(string code)
         {

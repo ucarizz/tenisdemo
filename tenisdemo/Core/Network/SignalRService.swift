@@ -115,6 +115,12 @@ struct LiveMatchState: Codable, Equatable {
     }
 }
 
+struct TossResult: Equatable {
+    var result: String // "UP" veya "DOWN"
+    var winnerSlot: Int // 0: Takım 1, 2: Takım 2
+    var winnerName: String
+}
+
 class SignalRService: ObservableObject, HubConnectionDelegate {
     static let shared = SignalRService()
     
@@ -128,6 +134,11 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     @Published var notificationMessage: String? = nil
     @Published var playerLeftMatchAlert: String? = nil
     @Published var activeMatchId: Int? = nil
+    
+    // Raket Çevirme (Kura) Durumu
+    @Published var isTossActive: Bool = false
+    @Published var tossResult: TossResult? = nil
+    @Published var initialServerChoice: String? = nil
     
     private init() {
         setupConnection()
@@ -223,6 +234,31 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         connection?.on(method: "Error", callback: { (errorMsg: String) in
             DispatchQueue.main.async {
                 self.errorMessage = errorMsg
+            }
+        })
+        
+        // Kura başladı yayını
+        connection?.on(method: "TossStarted", callback: {
+            DispatchQueue.main.async {
+                self.isTossActive = true
+                self.tossResult = nil
+                self.initialServerChoice = nil
+            }
+        })
+        
+        // Raket çevrildi ve sonuç geldi yayını
+        connection?.on(method: "RacketSpun", callback: { (result: String, winnerSlot: Int, winnerName: String) in
+            DispatchQueue.main.async {
+                self.isTossActive = true
+                self.tossResult = TossResult(result: result, winnerSlot: winnerSlot, winnerName: winnerName)
+            }
+        })
+        
+        // Kura tercihi seçildi ve maç başlatılıyor yayını
+        connection?.on(method: "TossChoiceSelected", callback: { (serverChoice: String) in
+            DispatchQueue.main.async {
+                self.initialServerChoice = serverChoice
+                self.isTossActive = false
             }
         })
         
@@ -347,6 +383,30 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
                 self.lobbyState = nil
                 self.isMatchStarted = false
                 self.remoteMatchState = nil
+            }
+        }
+    }
+    
+    func startToss(code: String) {
+        connection?.invoke(method: "startToss", arguments: [code]) { error in
+            if let error = error {
+                print("Kura başlatılamadı: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func spinRacket(code: String) {
+        connection?.invoke(method: "spinRacket", arguments: [code]) { error in
+            if let error = error {
+                print("Raket çevrilemedi: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func selectTossChoice(code: String, startingServer: String) {
+        connection?.invoke(method: "selectTossChoice", arguments: [code, startingServer]) { error in
+            if let error = error {
+                print("Kura seçimi iletilemedi: \(error.localizedDescription)")
             }
         }
     }

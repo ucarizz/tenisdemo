@@ -12,6 +12,7 @@ struct SetupMatchView: View {
     @State private var lobbyCodeInput = ""
     @State private var localError = ""
     @State private var copiedCodeFeedback = false
+    @State private var showRacketToss = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -108,6 +109,7 @@ struct SetupMatchView: View {
         .background(Color.zinc950.ignoresSafeArea())
         .onChange(of: signalRService.isMatchStarted) { started in
             if started, let lobby = signalRService.lobbyState {
+                showRacketToss = false
                 viewModel.player1Name = lobby.hostName
                 viewModel.player1PartnerName = lobby.hostPartnerName ?? ""
                 viewModel.player2Name = lobby.guestName ?? "RAKİP"
@@ -116,10 +118,23 @@ struct SetupMatchView: View {
                 viewModel.gamesPerSet = lobby.settings.gamesPerSet
                 viewModel.setsToWin = lobby.settings.setsToWin
                 viewModel.useMatchTiebreak = lobby.settings.useMatchTiebreak
+                if let choice = signalRService.initialServerChoice {
+                    viewModel.startingServer = (choice == "p1" || choice == "SİZ") ? .player1 : .player2
+                }
                 
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                     viewModel.startMatch()
                 }
+            }
+        }
+        .onChange(of: signalRService.isTossActive) { active in
+            if active {
+                showRacketToss = true
+            }
+        }
+        .onChange(of: signalRService.initialServerChoice) { choice in
+            if let c = choice {
+                viewModel.startingServer = (c == "p1" || c == "SİZ") ? .player1 : .player2
             }
         }
         .onChange(of: viewModel.gamesPerSet) { newValue in
@@ -167,6 +182,26 @@ struct SetupMatchView: View {
             if !viewModel.hasMatchStarted, let code = signalRService.lobbyState?.code {
                 signalRService.leaveLobby(code: code)
             }
+        }
+        .fullScreenCover(isPresented: $showRacketToss) {
+            RacketTossView(
+                viewModel: viewModel,
+                isLiveLobby: selectedSetupMode == 1,
+                onComplete: { startingServer in
+                    showRacketToss = false
+                    viewModel.startingServer = startingServer
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                        if selectedSetupMode == 0 {
+                            viewModel.startMatch()
+                        } else if let code = signalRService.lobbyState?.code {
+                            signalRService.selectTossChoice(code: code, startingServer: startingServer == .player1 ? "p1" : "p2")
+                        }
+                    }
+                },
+                onDismiss: {
+                    showRacketToss = false
+                }
+            )
         }
     }
     
@@ -745,9 +780,7 @@ struct SetupMatchView: View {
             Group {
                 if selectedSetupMode == 0 {
                     Button(action: {
-                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                            viewModel.startMatch()
-                        }
+                        showRacketToss = true
                     }) {
                         buttonContent(title: "Maçı Başlat", icon: "play.fill")
                     }
@@ -772,7 +805,7 @@ struct SetupMatchView: View {
                     if lobbyRole == 0 {
                         let canStart = (lobby.guestName != nil) || (lobby.playerAt(slot: 2) != nil)
                         Button(action: {
-                            signalRService.startMatch(code: lobby.code)
+                            signalRService.startToss(code: lobby.code)
                         }) {
                             buttonContent(title: "Canlı Maçı Başlat (\(totalPlayerCount(lobby))/\(lobby.isDouble ? 4 : 2) Oyuncu)", icon: "play.fill")
                         }
