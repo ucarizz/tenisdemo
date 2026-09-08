@@ -107,6 +107,13 @@ namespace TenisApi.Hubs
             }
         }
 
+        // Kazanan servis tercihi yaptığında (seçim kartına bastığında) anında diğer oyuncuya yansıtır
+        public async Task UpdateTossChoice(string code, string choice, string startingServer)
+        {
+            code = code.ToUpperInvariant().Trim();
+            await Clients.Group(code).SendAsync("TossChoiceUpdated", choice, startingServer);
+        }
+
         // Kura kazananının servis tercihini uygular ve maçı başlatır
         public async Task SelectTossChoice(string code, string startingServer)
         {

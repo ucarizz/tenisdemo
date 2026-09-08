@@ -139,6 +139,8 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     @Published var isTossActive: Bool = false
     @Published var tossResult: TossResult? = nil
     @Published var initialServerChoice: String? = nil
+    @Published var currentTossChoice: String? = nil // "SERVE" veya "RECEIVE"
+    @Published var mySlotIndex: Int = 0
     
     private init() {
         setupConnection()
@@ -243,6 +245,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
                 self.isTossActive = true
                 self.tossResult = nil
                 self.initialServerChoice = nil
+                self.currentTossChoice = nil
             }
         })
         
@@ -251,6 +254,14 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
             DispatchQueue.main.async {
                 self.isTossActive = true
                 self.tossResult = TossResult(result: result, winnerSlot: winnerSlot, winnerName: winnerName)
+            }
+        })
+        
+        // Kazanan servis tercihi yaptığında anında diğer oyuncuya yansıtma yayını
+        connection?.on(method: "TossChoiceUpdated", callback: { (choice: String, startingServer: String) in
+            DispatchQueue.main.async {
+                self.currentTossChoice = choice
+                self.initialServerChoice = startingServer
             }
         })
         
@@ -305,6 +316,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         isMatchStarted = false
         remoteMatchState = nil
         lobbyState = nil
+        mySlotIndex = 0
         
         connection?.invoke(method: "createLobby", arguments: [hostName, isDouble, hostPartnerName ?? "", hostProfileImageUrl ?? ""]) { error in
             if let error = error {
@@ -320,6 +332,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         isMatchStarted = false
         remoteMatchState = nil
         lobbyState = nil
+        mySlotIndex = 2
         
         connection?.invoke(method: "joinLobby", arguments: [code, guestName, guestPartnerName ?? "", guestProfileImageUrl ?? ""]) { error in
             if let error = error {
@@ -334,6 +347,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         errorMessage = nil
         isMatchStarted = false
         remoteMatchState = nil
+        mySlotIndex = (requestedSlotIndex >= 0 ? requestedSlotIndex : 2)
         
         connection?.invoke(method: "joinLobbySlot", arguments: [code, name, profileImageUrl ?? "", requestedSlotIndex]) { error in
             if let error = error {
@@ -345,6 +359,7 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
     }
     
     func switchSlot(code: String, targetSlotIndex: Int) {
+        mySlotIndex = targetSlotIndex
         connection?.invoke(method: "switchSlot", arguments: [code, targetSlotIndex]) { error in
             if let error = error {
                 print("Slot değiştirilemedi: \(error.localizedDescription)")
@@ -399,6 +414,14 @@ class SignalRService: ObservableObject, HubConnectionDelegate {
         connection?.invoke(method: "spinRacket", arguments: [code]) { error in
             if let error = error {
                 print("Raket çevrilemedi: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func updateTossChoice(code: String, choice: String, startingServer: String) {
+        connection?.invoke(method: "updateTossChoice", arguments: [code, choice, startingServer]) { error in
+            if let error = error {
+                print("Kura tercihi iletilemedi: \(error.localizedDescription)")
             }
         }
     }

@@ -187,6 +187,7 @@ struct SetupMatchView: View {
             RacketTossView(
                 viewModel: viewModel,
                 isLiveLobby: selectedSetupMode == 1,
+                isHost: lobbyRole == 0,
                 onComplete: { startingServer in
                     showRacketToss = false
                     viewModel.startingServer = startingServer
