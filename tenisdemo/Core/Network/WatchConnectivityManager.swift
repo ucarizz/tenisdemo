@@ -19,6 +19,7 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     @Published var isWatchPaired = false
     @Published var isWatchAppInstalled = false
     @Published var isReachable = false
+    @Published var watchStatusFeedback: String? = nil
     
     private override init() {
         super.init()
@@ -26,31 +27,84 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
             session.delegate = self
             session.activate()
         }
+        requestHealthKitAuthorizationIfNeeded()
     }
     
     func setup(viewModel: TennisMatchViewModel) {
         self.viewModel = viewModel
+        requestHealthKitAuthorizationIfNeeded()
         // İlk bağlantıda mevcut durumu gönder
         syncWithWatch()
+    }
+    
+    func requestHealthKitAuthorizationIfNeeded(completion: ((Bool) -> Void)? = nil) {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            completion?(false)
+            return
+        }
+        let healthStore = HKHealthStore()
+        let types: Set = [HKObjectType.workoutType()]
+        healthStore.requestAuthorization(toShare: types, read: types) { success, error in
+            if let error = error {
+                print("DEBUG [WatchConnectivity]: HealthKit auth error: \(error.localizedDescription)")
+            }
+            completion?(success)
+        }
     }
     
     // Telefondan maç başladığında Apple Watch uygulamasını kullanıcının bileğinde otomatik olarak ön plana açar
     func launchWatchAppOnWrist() {
         guard HKHealthStore.isHealthDataAvailable() else {
-            print("DEBUG [WatchConnectivity]: Health data not available on this device.")
+            let msg = "Bu cihazda HealthKit desteklenmiyor."
+            print("DEBUG [WatchConnectivity]: \(msg)")
+            DispatchQueue.main.async { self.watchStatusFeedback = msg }
             return
         }
         
-        let configuration = HKWorkoutConfiguration()
-        configuration.activityType = .tennis
-        configuration.locationType = .outdoor
+        if WCSession.isSupported() {
+            if !session.isPaired {
+                let msg = "Eşleşmiş bir Apple Watch bulunamadı."
+                print("DEBUG [WatchConnectivity]: \(msg)")
+                DispatchQueue.main.async { self.watchStatusFeedback = msg }
+                return
+            }
+            
+            if !session.isWatchAppInstalled {
+                let msg = "CourtMate Apple Watch'ta henüz yüklü değil. Lütfen iPhone'daki 'Watch' uygulamasından saatinize yükleyin."
+                print("DEBUG [WatchConnectivity]: \(msg)")
+                DispatchQueue.main.async { self.watchStatusFeedback = msg }
+                return
+            }
+        }
         
         let healthStore = HKHealthStore()
-        healthStore.startWatchApp(with: configuration) { success, error in
-            if success {
-                print("DEBUG [WatchConnectivity]: Apple Watch app successfully launched on wrist via HealthKit workout!")
-            } else {
-                print("DEBUG [WatchConnectivity]: Failed to launch watch app: \(String(describing: error))")
+        let types: Set = [HKObjectType.workoutType()]
+        
+        healthStore.requestAuthorization(toShare: types, read: types) { [weak self] authSuccess, authError in
+            let configuration = HKWorkoutConfiguration()
+            configuration.activityType = .tennis
+            configuration.locationType = .outdoor
+            
+            healthStore.startWatchApp(with: configuration) { success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        let msg = "Apple Watch uygulaması bilekte başarıyla açıldı."
+                        print("DEBUG [WatchConnectivity]: \(msg)")
+                        self?.watchStatusFeedback = msg
+                        if success {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                if self?.watchStatusFeedback == msg {
+                                    self?.watchStatusFeedback = nil
+                                }
+                            }
+                        }
+                    } else {
+                        let errStr = error?.localizedDescription ?? "Bilinmeyen hata"
+                        let msg = "Apple Watch uygulaması açılamadı: \(errStr)"
+                        print("DEBUG [WatchConnectivity]: \(msg)")
+                        self?.watchStatusFeedback = msg
+                    }
+                }
             }
         }
     }

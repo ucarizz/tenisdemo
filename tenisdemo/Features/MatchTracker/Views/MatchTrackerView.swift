@@ -12,6 +12,7 @@ struct MatchTrackerView: View {
     @StateObject private var viewModel = TennisMatchViewModel()
     @State private var showSettings = false
     @StateObject private var signalRService = SignalRService.shared
+    @ObservedObject private var watchManager = WatchConnectivityManager.shared
     @State private var showOpponentLeftAlert = false
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -29,6 +30,42 @@ struct MatchTrackerView: View {
                     .transition(.asymmetric(insertion: .opacity, removal: .opacity))
             } else {
                 VStack(spacing: 0) {
+                    if let feedback = watchManager.watchStatusFeedback {
+                        HStack(spacing: 10) {
+                            Image(systemName: feedback.contains("başarıyla") ? "applewatch.radiowaves.left.and.right" : "exclamationmark.applewatch")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(feedback.contains("başarıyla") ? .tennisVolt : .badgeAmber)
+                            
+                            Text(feedback)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.white)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                withAnimation {
+                                    watchManager.watchStatusFeedback = nil
+                                }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.zinc500)
+                            }
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Color.zinc900.opacity(0.95))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(feedback.contains("başarıyla") ? Color.tennisVolt.opacity(0.4) : Color.badgeAmber.opacity(0.4), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    
                     // 1. Editorial Match Header (Wimbledon / Apple Sports bulletin)
                     VStack(spacing: 12) {
                         HStack(alignment: .center) {
