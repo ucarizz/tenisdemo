@@ -133,12 +133,6 @@ struct RacketTossView: View {
                 hapticLight.impactOccurred()
             }
         }
-        .onChange(of: signalRService.initialServerChoice) { choice in
-            if isLiveLobby, let c = choice {
-                let s: Player = (c == "p1" || c == "SİZ") ? .player1 : .player2
-                onComplete(s)
-            }
-        }
     }
     
     // MARK: - Header
@@ -179,7 +173,11 @@ struct RacketTossView: View {
                 Button(action: {
                     // Kurayı atla, P1 servisle başla
                     hapticLight.impactOccurred()
-                    onComplete(.player1)
+                    if isLiveLobby, let code = signalRService.lobbyState?.code {
+                        signalRService.selectTossChoice(code: code, startingServer: "p1")
+                    } else {
+                        onComplete(.player1)
+                    }
                 }) {
                     Text("KURAYI ATLA")
                         .font(.system(size: 11, weight: .bold))
@@ -667,17 +665,17 @@ struct RacketTossView: View {
     // MARK: - Aksiyon Buton Alanı
     private var actionButtonSection: some View {
         Group {
-            if isLiveLobby && !isMeWinner {
-                // Rakip cihazı: Kazananın maçı başlatması bekleniyor
+            if isLiveLobby && !isMeWinner && !isHost {
+                // Rakip cihazı (Kurucu da değilse): Kazananın maçı başlatması bekleniyor
                 HStack(spacing: 8) {
                     if tossChoice != nil {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .tennisVolt))
                             .scaleEffect(0.8)
-                        Text("MAÇ BAŞLATILIYOR...")
-                            .font(.system(size: 12, weight: .bold))
+                        Text("KAZANANIN MAÇI BAŞLATMASI BEKLENİYOR...")
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
-                            .tracking(1.0)
+                            .tracking(0.5)
                     } else {
                         Text("KAZANANIN SEÇİMİ BEKLENİYOR")
                             .font(.system(size: 11, weight: .bold))
