@@ -92,23 +92,47 @@ struct SwingAnalysisView: View {
                         }
                         Spacer()
                     } else {
-                        // Summary Metric Cards (Linear / Vercel style)
-                        HStack(spacing: 8) {
-                            SummaryStatBox(
-                                title: "ORT. HIZ",
-                                value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.averageSpeed)
-                            )
-                            SummaryStatBox(
-                                title: "MAKS. HIZ",
-                                value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.maxSpeed)
-                            )
-                            SummaryStatBox(
-                                title: "TOPLAM",
-                                value: "\(viewModel.records.count)"
-                            )
+                        // Summary Metric Bar (Wimbledon Court-Line Table)
+                        VStack(spacing: 0) {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
+                            
+                            HStack(spacing: 0) {
+                                SummaryStatBox(
+                                    title: "ORT. HIZ",
+                                    value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.averageSpeed)
+                                )
+                                
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.12))
+                                    .frame(width: 1, height: 36)
+                                
+                                SummaryStatBox(
+                                    title: "MAKS. HIZ",
+                                    value: viewModel.records.isEmpty ? "—" : String(format: "%.0f km/h", viewModel.maxSpeed),
+                                    accentColor: .tennisVolt
+                                )
+                                .padding(.leading, 12)
+                                
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.12))
+                                    .frame(width: 1, height: 36)
+                                
+                                SummaryStatBox(
+                                    title: "TOPLAM",
+                                    value: "\(viewModel.records.count)"
+                                )
+                                .padding(.leading, 12)
+                            }
+                            .padding(.vertical, 8)
+                            
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 12)
+                        .padding(.top, 8)
                         
                         // Swing Records List
                         if viewModel.records.isEmpty {
@@ -126,54 +150,40 @@ struct SwingAnalysisView: View {
                             Spacer()
                         } else {
                             ScrollView {
-                                LazyVStack(spacing: 6) {
+                                LazyVStack(spacing: 0) {
                                     ForEach(viewModel.records) { record in
-                                        HStack(spacing: 12) {
-                                            // Swing Type Badge
-                                            Text(record.swingType.uppercased())
-                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                                .foregroundColor(.zinc200)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color.zinc850)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .stroke(Color.zinc700, lineWidth: 1)
-                                                )
-                                            
-                                            // Date
-                                            Text(formatDate(record.recordedAt))
-                                                .font(.system(size: 12, design: .monospaced))
-                                                .foregroundColor(.zinc500)
-                                            
-                                            Spacer()
-                                            
-                                            // Metrics
-                                            HStack(spacing: 10) {
-                                                Text(String(format: "%.0f km/h", record.speedKmh))
-                                                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                                    .foregroundColor(.zinc50)
+                                        VStack(spacing: 0) {
+                                            HStack(spacing: 12) {
+                                                // Swing Type
+                                                Text(record.swingType.uppercased())
+                                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                                    .foregroundColor(.zinc200)
+                                                    .tracking(0.5)
                                                 
-                                                Text(String(format: "%.1f G", record.accelerationG))
-                                                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                                // Date
+                                                Text(formatDate(record.recordedAt))
+                                                    .font(.system(size: 11, design: .monospaced))
                                                     .foregroundColor(.zinc500)
-                                                    .padding(.horizontal, 5)
-                                                    .padding(.vertical, 2)
-                                                    .background(Color.zinc850)
-                                                    .overlay(
-                                                        RoundedRectangle(cornerRadius: 3)
-                                                            .stroke(Color.zinc800, lineWidth: 1)
-                                                    )
+                                                
+                                                Spacer()
+                                                
+                                                // Metrics
+                                                HStack(spacing: 12) {
+                                                    Text(String(format: "%.0f km/h", record.speedKmh))
+                                                        .font(.system(size: 15, weight: .bold, design: .monospaced))
+                                                        .foregroundColor(.zinc100)
+                                                    
+                                                    Text(String(format: "%.1f G", record.accelerationG))
+                                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                                        .foregroundColor(.zinc500)
+                                                }
                                             }
+                                            .padding(.vertical, 11)
+                                            
+                                            Rectangle()
+                                                .fill(Color.white.opacity(0.08))
+                                                .frame(height: 1)
                                         }
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 10)
-                                        .background(Color.zinc900)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                                .stroke(Color.zinc800, lineWidth: 1)
-                                        )
-                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                     }
                                 }
                                 .padding(.horizontal, 16)
@@ -228,30 +238,23 @@ struct SwingAnalysisView: View {
     }
 }
 
-// MARK: - Minimal Summary Metric Box
+// MARK: - Minimal Summary Metric Box (Cardless)
 struct SummaryStatBox: View {
     let title: String
     let value: String
+    var accentColor: Color? = nil
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(title)
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
                 .foregroundColor(.zinc500)
-                .tracking(0.5)
+                .tracking(1.0)
             
             Text(value)
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
-                .foregroundColor(.zinc50)
+                .font(.system(size: 18, weight: .bold, design: .monospaced))
+                .foregroundColor(accentColor ?? .zinc100)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color.zinc900)
-        .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .stroke(Color.zinc800, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 }

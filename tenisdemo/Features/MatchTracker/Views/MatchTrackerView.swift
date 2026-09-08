@@ -18,7 +18,7 @@ struct MatchTrackerView: View {
     
     var body: some View {
         ZStack {
-            // Neutral Solid Canvas
+            // Flat Seamless Canvas
             Color.zinc950.ignoresSafeArea()
             
             if !viewModel.hasMatchStarted {
@@ -28,199 +28,222 @@ struct MatchTrackerView: View {
                 MatchSummaryView(viewModel: viewModel)
                     .transition(.asymmetric(insertion: .opacity, removal: .opacity))
             } else {
-                VStack(spacing: 12) {
-                    // Top Bar: Set Scores and Status Badges
-                    HStack(spacing: 8) {
-                        if viewModel.state.setScores.isEmpty {
+                VStack(spacing: 0) {
+                    // 1. Editorial Match Header (Wimbledon / Apple Sports bulletin)
+                    VStack(spacing: 12) {
+                        HStack(alignment: .center) {
                             HStack(spacing: 6) {
                                 Circle()
-                                    .fill(Color.statusGreen)
+                                    .fill(Color.tennisVolt)
                                     .frame(width: 6, height: 6)
-                                Text("CANLI MAÇ")
-                                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                    .foregroundColor(.zinc400)
+                                Text(signalRService.lobbyState != nil ? "CANLI MAÇ" : "KULÜP MAÇI")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .tracking(2.0)
+                                    .foregroundColor(.tennisVolt)
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.zinc900)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.zinc800, lineWidth: 1)
-                            )
-                        } else {
-                            HStack(spacing: 6) {
-                                ForEach(viewModel.state.setScores) { setScore in
-                                    Text("\(setScore.p1Games)-\(setScore.p2Games)")
-                                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                                        .foregroundColor(.zinc100)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.zinc900)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(Color.zinc800, lineWidth: 1)
-                                        )
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 8) {
+                                Text(viewModel.isDouble ? "ÇİFTLER" : "TEKLER")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .tracking(1.5)
+                                    .foregroundColor(.zinc400)
+                                
+                                if viewModel.state.isMatchTiebreak {
+                                    Text("• SÜPER TB (10)")
+                                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(.badgeAmber)
+                                } else if viewModel.state.isTiebreak {
+                                    Text("• TIEBREAK")
+                                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                        .foregroundColor(.tennisVolt)
                                 }
                             }
                         }
                         
-                        Spacer()
+                        // Kort Çizgisi Ayracı
+                        Rectangle()
+                            .fill(Color.white.opacity(0.12))
+                            .frame(height: 1)
                         
-                        // Rule Status Badges
-                        if viewModel.state.isMatchTiebreak {
-                            Text("SÜPER TB (10)")
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundColor(.zinc100)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.zinc850)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc700, lineWidth: 1)
-                                )
-                        } else if viewModel.state.isTiebreak {
-                            Text("TIEBREAK")
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundColor(.zinc100)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.zinc850)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc700, lineWidth: 1)
-                                )
+                        // Kolon Başlıkları (Scoreboard Headers)
+                        HStack(alignment: .center, spacing: 0) {
+                            Text("OYUNCULAR")
+                                .font(.system(size: 10, weight: .semibold))
+                                .tracking(1.5)
+                                .foregroundColor(.zinc500)
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 0) {
+                                Text("SET")
+                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .tracking(1.0)
+                                    .foregroundColor(.zinc500)
+                                    .frame(width: 44, alignment: .trailing)
+                                
+                                Text("GAME")
+                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .tracking(1.0)
+                                    .foregroundColor(.zinc500)
+                                    .frame(width: 50, alignment: .trailing)
+                                
+                                Text("PUAN")
+                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .tracking(1.0)
+                                    .foregroundColor(.zinc500)
+                                    .frame(width: 80, alignment: .trailing)
+                            }
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 4)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 6)
                     
-                    // Main Scoreboard: Select layout based on width class (iPhone vs iPad)
+                    // Kort Çizgisi: Başlık ile Skor Tahtası Arası
+                    Rectangle()
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 1)
+                        .padding(.horizontal, 20)
+                    
+                    // 2. Scoreboard Main Board (Editorial Court Strip)
                     ZStack {
-                        Group {
-                            if horizontalSizeClass == .regular {
-                                // iPad Layout: Side-by-side cards
-                                HStack(spacing: 12) {
-                                    ScorePlayerCard(
-                                        player: .player1,
-                                        name: viewModel.isDouble 
-                                            ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                                            : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                                        points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                                        games: "\(viewModel.state.p1Games)",
-                                        sets: "\(viewModel.state.p1Sets)",
-                                        isServing: viewModel.state.server == .player1,
-                                        isMatchOver: viewModel.state.isMatchOver,
-                                        onTap: { viewModel.scorePoint(for: .player1) },
-                                        onTapServer: { viewModel.toggleStartingServer() }
-                                    )
+                        VStack(spacing: 0) {
+                            // Player 1 Row
+                            EditorialPlayerScoreRow(
+                                player: .player1,
+                                name: viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name,
+                                partnerName: viewModel.isDouble ? (viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName) : nil,
+                                points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
+                                games: "\(viewModel.state.p1Games)",
+                                sets: "\(viewModel.state.p1Sets)",
+                                isServing: viewModel.state.server == .player1,
+                                onTapScore: { viewModel.scorePoint(for: .player1) },
+                                onTapServer: { viewModel.toggleStartingServer() }
+                            )
+                            
+                            // Kort Çizgisi: İki oyuncu arasındaki belirgin kort çizgisi
+                            Rectangle()
+                                .fill(Color.white.opacity(0.16))
+                                .frame(height: 1)
+                                .padding(.horizontal, 20)
+                            
+                            // Player 2 Row
+                            EditorialPlayerScoreRow(
+                                player: .player2,
+                                name: viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name,
+                                partnerName: viewModel.isDouble ? (viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName) : nil,
+                                points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
+                                games: "\(viewModel.state.p2Games)",
+                                sets: "\(viewModel.state.p2Sets)",
+                                isServing: viewModel.state.server == .player2,
+                                onTapScore: { viewModel.scorePoint(for: .player2) },
+                                onTapServer: { viewModel.toggleStartingServer() }
+                            )
+                            
+                            // Kort Çizgisi: Alt Çizgi
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
+                                .padding(.horizontal, 20)
+                            
+                            // Set Geçmişi Şeridi (Minimalist Kort Çizgili Set Bülteni)
+                            if !viewModel.state.setScores.isEmpty {
+                                HStack(spacing: 16) {
+                                    Text("BİTEN SETLER")
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .tracking(1.2)
+                                        .foregroundColor(.zinc500)
                                     
-                                    ScorePlayerCard(
-                                        player: .player2,
-                                        name: viewModel.isDouble 
-                                            ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                                            : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                                        points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                                        games: "\(viewModel.state.p2Games)",
-                                        sets: "\(viewModel.state.p2Sets)",
-                                        isServing: viewModel.state.server == .player2,
-                                        isMatchOver: viewModel.state.isMatchOver,
-                                        onTap: { viewModel.scorePoint(for: .player2) },
-                                        onTapServer: { viewModel.toggleStartingServer() }
-                                    )
-                                }
-                                .padding(.horizontal, 16)
-                            } else {
-                                // iPhone Layout: Vertically stacked cards
-                                VStack(spacing: 10) {
-                                    ScorePlayerCard(
-                                        player: .player1,
-                                        name: viewModel.isDouble 
-                                            ? "\(viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name) & \(viewModel.player1PartnerName.isEmpty ? "ORTAK 1" : viewModel.player1PartnerName)" 
-                                            : (viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name),
-                                        points: viewModel.formatPoints(viewModel.state.p1Points, isTiebreak: viewModel.state.isTiebreak),
-                                        games: "\(viewModel.state.p1Games)",
-                                        sets: "\(viewModel.state.p1Sets)",
-                                        isServing: viewModel.state.server == .player1,
-                                        isMatchOver: viewModel.state.isMatchOver,
-                                        onTap: { viewModel.scorePoint(for: .player1) },
-                                        onTapServer: { viewModel.toggleStartingServer() }
-                                    )
+                                    ForEach(Array(viewModel.state.setScores.enumerated()), id: \.offset) { index, score in
+                                        HStack(spacing: 4) {
+                                            Text("S\(index + 1):")
+                                                .font(.system(size: 11, design: .monospaced))
+                                                .foregroundColor(.zinc500)
+                                            Text("\(score.p1Games)-\(score.p2Games)")
+                                                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                                .foregroundColor(score.p1Games > score.p2Games ? .courtGreen : .zinc300)
+                                        }
+                                    }
                                     
-                                    ScorePlayerCard(
-                                        player: .player2,
-                                        name: viewModel.isDouble 
-                                            ? "\(viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name) & \(viewModel.player2PartnerName.isEmpty ? "ORTAK 2" : viewModel.player2PartnerName)" 
-                                            : (viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name),
-                                        points: viewModel.formatPoints(viewModel.state.p2Points, isTiebreak: viewModel.state.isTiebreak),
-                                        games: "\(viewModel.state.p2Games)",
-                                        sets: "\(viewModel.state.p2Sets)",
-                                        isServing: viewModel.state.server == .player2,
-                                        isMatchOver: viewModel.state.isMatchOver,
-                                        onTap: { viewModel.scorePoint(for: .player2) },
-                                        onTapServer: { viewModel.toggleStartingServer() }
-                                    )
+                                    Spacer()
                                 }
-                                .padding(.horizontal, 16)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 14)
+                                
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.08))
+                                    .frame(height: 1)
+                                    .padding(.horizontal, 20)
                             }
                         }
-                        .opacity(viewModel.state.isGameBreak ? 0.25 : 1.0)
+                        .opacity(viewModel.state.isGameBreak ? 0.15 : 1.0)
                         .allowsHitTesting(!viewModel.state.isGameBreak)
                         
-                        // Game Arası / Su Molası Kartı
+                        // Game Arası / Su Molası Editorial Overlay
                         if viewModel.state.isGameBreak {
-                            GameBreakCardView(viewModel: viewModel)
+                            GameBreakEditorialView(viewModel: viewModel)
                                 .transition(.opacity)
                         }
                     }
                     
-                    // Bottom Bar Controls
-                    HStack(spacing: 12) {
-                        // Undo Button
-                        Button(action: {
-                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                                viewModel.undo()
-                            }
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.uturn.backward")
-                                    .font(.system(size: 12, weight: .semibold))
-                                Text("Geri Al")
-                                    .font(.system(size: 13, weight: .medium))
-                            }
-                            .foregroundColor(viewModel.history.isEmpty ? .zinc600 : .zinc200)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(Color.zinc900)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.zinc800, lineWidth: 1)
-                            )
-                        }
-                        .disabled(viewModel.history.isEmpty)
+                    // 3. Ferah Dikey Boşluk (Editorial Whitespace)
+                    Spacer()
+                    
+                    // 4. Alt Kort Çizgisi & Kontroller
+                    VStack(spacing: 0) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.12))
+                            .frame(height: 1)
                         
-                        Spacer()
-                        
-                        // Settings Button
-                        Button(action: {
-                            showSettings = true
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "slider.horizontal.3")
-                                    .font(.system(size: 12, weight: .medium))
-                                Text("Kurallar")
-                                    .font(.system(size: 13, weight: .medium))
+                        HStack(spacing: 16) {
+                            // Geri Al Butonu
+                            Button(action: {
+                                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                    viewModel.undo()
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.uturn.backward")
+                                        .font(.system(size: 12, weight: .semibold))
+                                    Text("GERİ AL")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .tracking(1.2)
+                                }
+                                .foregroundColor(viewModel.history.isEmpty ? .zinc600 : .zinc200)
+                                .padding(.vertical, 14)
                             }
-                            .foregroundColor(.zinc400)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(Color.zinc900)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.zinc800, lineWidth: 1)
-                            )
+                            .disabled(viewModel.history.isEmpty)
+                            .buttonStyle(.plain)
+                            
+                            Spacer()
+                            
+                            // Sayı Ekle İpucu (Editorial)
+                            Text("Sayı eklemek için oyuncuya dokunun")
+                                .font(.system(size: 11))
+                                .foregroundColor(.zinc600)
+                            
+                            Spacer()
+                            
+                            // Kurallar Butonu
+                            Button(action: {
+                                showSettings = true
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "slider.horizontal.3")
+                                        .font(.system(size: 12, weight: .medium))
+                                    Text("KURALLAR")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .tracking(1.2)
+                                }
+                                .foregroundColor(.zinc400)
+                                .padding(.vertical, 14)
+                            }
+                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 16)
                     .padding(.bottom, 6)
                 }
                 .sheet(isPresented: $showSettings) {
@@ -294,118 +317,92 @@ struct MatchTrackerView: View {
     }
 }
 
-// MARK: - Linear Minimal Score Player Card
-struct ScorePlayerCard: View {
+// MARK: - Editorial Player Score Row (Wimbledon Scoreboard Strip)
+struct EditorialPlayerScoreRow: View {
     let player: Player
     let name: String
+    let partnerName: String?
     let points: String
     let games: String
     let sets: String
     let isServing: Bool
-    let isMatchOver: Bool
-    let onTap: () -> Void
+    let onTapScore: () -> Void
     let onTapServer: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Header Bar: Player Name, Serving Indicator & Set Counter
-                HStack(alignment: .center) {
-                    // Servis İkonu / Butonu
+        Button(action: {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.prepare()
+            generator.impactOccurred()
+            onTapScore()
+        }) {
+            HStack(alignment: .center, spacing: 0) {
+                // Servis Noktası (●) & Oyuncu Adı
+                HStack(spacing: 12) {
+                    // Yalnızca tek bir volt sarısı/lime nokta (●)
                     Button(action: onTapServer) {
-                        HStack(spacing: 6) {
+                        ZStack {
                             Circle()
-                                .fill(isServing ? Color.zinc100 : Color.zinc700)
-                                .frame(width: 6, height: 6)
-                            
-                            if isServing {
-                                Text("SERVİS")
-                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.zinc100)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.zinc800)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(Color.zinc700, lineWidth: 1)
-                                    )
-                            }
+                                .fill(isServing ? Color.tennisVolt : Color.clear)
+                                .frame(width: 8, height: 8)
+                                .shadow(color: isServing ? Color.tennisVolt.opacity(0.8) : Color.clear, radius: 4)
                         }
+                        .frame(width: 22, height: 22)
                     }
                     .buttonStyle(.plain)
                     
-                    Text(name)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.zinc200)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    
-                    // Set Skoru
-                    HStack(spacing: 4) {
-                        Text("SET")
-                            .font(.system(size: 10, weight: .medium, design: .monospaced))
-                            .foregroundColor(.zinc500)
-                        Text(sets)
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .foregroundColor(.zinc100)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.zinc800)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .stroke(Color.zinc700, lineWidth: 1)
-                            )
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(name.uppercased())
+                            .font(.system(size: 19, weight: .bold))
+                            .tracking(0.8)
+                            .foregroundColor(.zinc50)
+                            .lineLimit(1)
+                        
+                        if let partner = partnerName, !partner.isEmpty {
+                            Text("& \(partner.uppercased())")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.zinc500)
+                                .lineLimit(1)
+                        }
                     }
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
                 
-                Divider()
-                    .background(Color.zinc800)
+                Spacer()
                 
-                // Point Number (High Information Density, Flat Monochrome)
-                HStack {
-                    Spacer()
-                    Text(points)
-                        .font(.system(size: 64, weight: .bold, design: .monospaced))
-                        .foregroundColor(.zinc50)
-                        .contentTransition(.numericText())
-                    Spacer()
-                }
-                .padding(.vertical, 14)
-                
-                Divider()
-                    .background(Color.zinc800)
-                
-                // Footer: Game Count
-                HStack {
-                    Text("GAME")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundColor(.zinc500)
-                    Spacer()
+                // Skor Sütunları: SET, GAME ve Devasa PUAN
+                HStack(alignment: .center, spacing: 0) {
+                    // Set Sayısı
+                    Text(sets)
+                        .font(.system(size: 20, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.zinc400)
+                        .frame(width: 44, alignment: .trailing)
+                    
+                    // Game Sayısı
                     Text(games)
-                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                        .font(.system(size: 24, weight: .bold, design: .monospaced))
                         .foregroundColor(.zinc100)
+                        .frame(width: 50, alignment: .trailing)
+                    
+                    // PUAN: Ekranın en büyük görsel öğesi
+                    Text(points)
+                        .font(.system(size: 54, weight: .black, design: .monospaced))
+                        .tracking(1.5)
+                        .foregroundColor(isServing ? .tennisVolt : .white)
+                        .frame(width: 80, alignment: .trailing)
+                        .contentTransition(.numericText())
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
             }
-            .background(Color.zinc900)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(isServing ? Color.zinc600 : Color.zinc800, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
+            .background(Color.clear)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(isMatchOver)
     }
 }
 
-// MARK: - Linear Minimal Game Break Card
-struct GameBreakCardView: View {
+// MARK: - Editorial Minimal Game Break View (Court Overlay)
+struct GameBreakEditorialView: View {
     @ObservedObject var viewModel: TennisMatchViewModel
     
     var winnerName: String {
@@ -426,82 +423,74 @@ struct GameBreakCardView: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Header Tag
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(Color.statusOrange)
-                    .frame(width: 6, height: 6)
-                Text("SU MOLASI")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundColor(.zinc300)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Color.zinc850)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.zinc700, lineWidth: 1)
-            )
+        VStack(spacing: 20) {
+            // Başlık
+            Text("SU MOLASI • OYUN ARASI")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(2.0)
+                .foregroundColor(.tennisVolt)
             
-            // Winner & Set Score
-            VStack(spacing: 4) {
-                Text("GAME: \(winnerName.uppercased())")
-                    .font(.system(size: 15, weight: .semibold))
+            // Kort Çizgisi
+            Rectangle()
+                .fill(Color.white.opacity(0.12))
+                .frame(height: 1)
+            
+            // Kazanan & Set Skoru
+            VStack(spacing: 8) {
+                Text("KAZANAN: \(winnerName.uppercased())")
+                    .font(.system(size: 16, weight: .bold))
+                    .tracking(1.0)
                     .foregroundColor(.zinc100)
                 
                 Text("Set Skoru: \(viewModel.state.p1Games) - \(viewModel.state.p2Games)")
-                    .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundColor(.zinc50)
+                    .font(.system(size: 22, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white)
             }
             
-            // Next Serve Row
-            HStack(spacing: 6) {
-                Text("Sıradaki Servis:")
-                    .font(.system(size: 12))
+            // Sıradaki Servis: Tek volt nokta
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color.tennisVolt)
+                    .frame(width: 7, height: 7)
+                Text("SIRADAKİ SERVİS:")
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.zinc500)
-                Text(nextServerName)
-                    .font(.system(size: 12, weight: .semibold))
+                Text(nextServerName.uppercased())
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.zinc200)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.zinc850)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.zinc800, lineWidth: 1)
-            )
             
-            // Primary Action Button (Vercel Crisp White Button)
+            // Kort Çizgisi
+            Rectangle()
+                .fill(Color.white.opacity(0.12))
+                .frame(height: 1)
+            
+            // Aksiyon Butonu
             Button(action: {
                 viewModel.startNextGame()
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "play.fill")
-                        .font(.system(size: 12))
-                    Text("Yeni Game'i Başlat")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12, weight: .bold))
+                    Text("YENİ GAME'İ BAŞLAT")
+                        .font(.system(size: 13, weight: .bold))
+                        .tracking(1.2)
                 }
-                .foregroundColor(.zinc950)
+                .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
-                .frame(height: 40)
-                .background(Color.zinc50)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(Color.zinc300, lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .frame(height: 44)
+                .background(Color.tennisVolt)
             }
             .buttonStyle(.plain)
         }
-        .padding(20)
-        .background(Color.zinc900)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 20)
+        .background(Color.zinc950)
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color.zinc700, lineWidth: 1)
+            Rectangle()
+                .stroke(Color.white.opacity(0.15), lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
     }
 }
 

@@ -40,8 +40,8 @@ namespace TenisApi.Infrastructure.Services
                 return;
             }
 
-            var fromAddress = smtpSettings.GetValue<string>("FromAddress") ?? "onboarding@resend.dev";
-            var fromName = smtpSettings.GetValue<string>("FromName") ?? "Tenis Ligi";
+            var fromAddress = smtpSettings.GetValue<string>("FromAddress") ?? "noreply@courtmate.com.tr";
+            var fromName = smtpSettings.GetValue<string>("FromName") ?? "CourtMate";
 
             try
             {

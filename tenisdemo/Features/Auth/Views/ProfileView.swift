@@ -72,7 +72,7 @@ struct ProfileView: View {
                             }
                             
                             if let user = authManager.currentUser {
-                                VStack(spacing: 2) {
+                                VStack(spacing: 3) {
                                     Text(user.fullName)
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(.zinc100)
@@ -80,6 +80,13 @@ struct ProfileView: View {
                                     Text(user.email)
                                         .font(.system(size: 13))
                                         .foregroundColor(.zinc500)
+                                    
+                                    HStack(spacing: 6) {
+                                        SportBadge(text: "NTRP 4.0", color: .badgeBlue)
+                                        SportBadge(text: "LİG ÜYESİ", color: .courtGreen)
+                                        SportBadge(text: "SAĞ EL", color: .zinc400)
+                                    }
+                                    .padding(.top, 4)
                                 }
                             }
                             
@@ -91,29 +98,47 @@ struct ProfileView: View {
                         }
                         .padding(.top, 16)
                         
-                        // İstatistikler Kartı
-                        VStack(alignment: .leading, spacing: 10) {
+                        // İstatistikler (Wimbledon Court-Line Table)
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("SEZON İSTATİSTİKLERİ")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .font(.system(size: 10, weight: .bold, design: .monospaced))
                                 .foregroundColor(.zinc500)
+                                .tracking(1.0)
                             
-                            HStack(spacing: 8) {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
+                            
+                            HStack(spacing: 0) {
                                 StatBox(title: "MAÇLAR", value: "—")
+                                
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.12))
+                                    .frame(width: 1, height: 36)
+                                
                                 StatBox(title: "GALİBİYET", value: "—")
+                                
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.12))
+                                    .frame(width: 1, height: 36)
+                                
                                 StatBox(title: "KAZANMA %", value: "—")
                             }
+                            .padding(.vertical, 8)
+                            
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
                         }
-                        .padding(14)
-                        .background(Color.zinc900)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .stroke(Color.zinc800, lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                         .padding(.horizontal, 16)
+                        .padding(.top, 8)
                         
-                        // Menü Butonları
-                        VStack(spacing: 8) {
+                        // Menü Satırları (Kort Çizgili Liste)
+                        VStack(spacing: 0) {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
+                            
                             // Hukuki Metinler ve KVKK Butonu
                             Button(action: {
                                 showKvkkSheet = true
@@ -121,23 +146,21 @@ struct ProfileView: View {
                                 HStack {
                                     Image(systemName: "doc.text")
                                         .font(.system(size: 13))
+                                        .foregroundColor(.zinc400)
                                     Text("Hukuki Metinler & KVKK")
                                         .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.zinc200)
                                     Spacer()
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 11))
                                         .foregroundColor(.zinc600)
                                 }
-                                .foregroundColor(.zinc200)
-                                .padding(.horizontal, 14)
-                                .frame(height: 42)
-                                .background(Color.zinc900)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc800, lineWidth: 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .padding(.vertical, 14)
                             }
+                            
+                            Rectangle()
+                                .fill(Color.white.opacity(0.08))
+                                .frame(height: 1)
                             
                             // Çıkış Yap Butonu
                             Button(action: {
@@ -146,20 +169,18 @@ struct ProfileView: View {
                                 HStack {
                                     Image(systemName: "arrow.right.square")
                                         .font(.system(size: 13))
+                                        .foregroundColor(.zinc400)
                                     Text("Oturumu Kapat")
                                         .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.zinc200)
                                     Spacer()
                                 }
-                                .foregroundColor(.zinc300)
-                                .padding(.horizontal, 14)
-                                .frame(height: 42)
-                                .background(Color.zinc900)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc800, lineWidth: 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .padding(.vertical, 14)
                             }
+                            
+                            Rectangle()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(height: 1)
                             
                             // Hesabımı Sil Butonu
                             Button(action: {
@@ -176,13 +197,12 @@ struct ProfileView: View {
                                 }
                                 .foregroundColor(.statusRed.opacity(0.8))
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 38)
+                                .padding(.vertical, 16)
                             }
                             .disabled(isDeleting)
-                            .padding(.top, 4)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 8)
+                        .padding(.top, 12)
                         
                         if let deleteError = deleteError {
                             Text(deleteError)
@@ -234,23 +254,19 @@ struct ProfileView: View {
 struct StatBox: View {
     let title: String
     let value: String
+    var accentColor: Color? = nil
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 3) {
             Text(value)
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
-                .foregroundColor(.zinc100)
+                .font(.system(size: 18, weight: .bold, design: .monospaced))
+                .foregroundColor(accentColor ?? .zinc100)
             Text(title)
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
                 .foregroundColor(.zinc500)
+                .tracking(1.0)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(Color.zinc850)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.zinc800, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .padding(.vertical, 4)
     }
 }

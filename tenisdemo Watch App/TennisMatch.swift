@@ -43,7 +43,7 @@ struct MatchState: Codable, Equatable {
     var lastGameWinner: Player? = nil
 }
 
-class TennisMatchViewModel: ObservableObject {
+class TennisMatchViewModel: NSObject, ObservableObject, WKExtendedRuntimeSessionDelegate {
     @Published var state = MatchState()
     @Published var history: [MatchState] = []
     @Published var startingServer: Player = .player1
@@ -59,9 +59,17 @@ class TennisMatchViewModel: ObservableObject {
     @Published var useMatchTiebreak: Bool = true     // 1-1 (veya berabere) set durumunda 3. set yerine 10 puanlık Tiebreak
     @Published var hasMatchStarted: Bool = false    // Maç başladı mı? (Kurulum ekranı kontrolü)
     
+    // Maç sırasında Apple Watch ekranının kararıp kilitlenmesini önleyen oturum
+    private var runtimeSession: WKExtendedRuntimeSession?
+    
+    override init() {
+        super.init()
+    }
+    
     func startMatch() {
         reset()
         hasMatchStarted = true
+        startRuntimeSession()
         
         let p1 = player1Name.isEmpty ? "SİZ" : player1Name
         let p2 = player2Name.isEmpty ? "RAKİP" : player2Name
@@ -71,6 +79,47 @@ class TennisMatchViewModel: ObservableObject {
     func newMatch() {
         reset()
         hasMatchStarted = false
+        stopRuntimeSession()
+    }
+    
+    // MARK: - Ekran Kilitlenmesini Önleme (WKExtendedRuntimeSession)
+    func startRuntimeSession() {
+        if let session = runtimeSession, session.state == .running || session.state == .scheduled {
+            return
+        }
+        runtimeSession?.invalidate()
+        runtimeSession = WKExtendedRuntimeSession()
+        runtimeSession?.delegate = self
+        runtimeSession?.start()
+        print("DEBUG [TennisMatch]: WKExtendedRuntimeSession başlatıldı - Ekran kilitlenmesi önlendi.")
+    }
+    
+    func stopRuntimeSession() {
+        guard let session = runtimeSession else { return }
+        session.invalidate()
+        runtimeSession = nil
+        print("DEBUG [TennisMatch]: WKExtendedRuntimeSession durduruldu.")
+    }
+    
+    // MARK: - WKExtendedRuntimeSessionDelegate
+    func extendedRuntimeSession(_ extendedRuntimeSession: WKExtendedRuntimeSession, didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason, error: Error?) {
+        print("DEBUG [TennisMatch]: Extended runtime session invalidated. Reason: \(reason.rawValue), Error: \(String(describing: error))")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.runtimeSession = nil
+            // Maç aktifken oturum zaman aşımına uğrarsa otomatik yenile
+            if (self.hasMatchStarted || WatchConnectivityManager.shared.isCompanionActive) && !self.state.isMatchOver && reason == .expired {
+                self.startRuntimeSession()
+            }
+        }
+    }
+    
+    func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        print("DEBUG [TennisMatch]: Extended runtime session başarıyla aktif oldu.")
+    }
+    
+    func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        print("DEBUG [TennisMatch]: Extended runtime session süresi dolmak üzere.")
     }
     
     func scorePoint(for player: Player) {
@@ -87,9 +136,10 @@ class TennisMatchViewModel: ObservableObject {
         
         playHapticFeedback()
         
-        // Maç bittiyse otomatik olarak sunucuya kaydet
+        // Maç bittiyse otomatik olarak sunucuya kaydet ve oturumu durdur
         if state.isMatchOver {
             syncMatchResult()
+            stopRuntimeSession()
         }
     }
     
@@ -305,6 +355,7 @@ class TennisMatchViewModel: ObservableObject {
         history.removeAll()
         state = MatchState()
         state.server = startingServer
+        stopRuntimeSession()
         WKInterfaceDevice.current().play(.retry)
     }
     

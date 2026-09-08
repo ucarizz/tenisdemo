@@ -20,174 +20,191 @@ struct MatchSummaryView: View {
             
             VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        // Minimal Result Banner
-                        VStack(spacing: 6) {
-                            HStack(spacing: 6) {
+                    VStack(spacing: 24) {
+                        // 1. Editorial Header
+                        VStack(spacing: 8) {
+                            HStack(spacing: 8) {
                                 Circle()
-                                    .fill(viewModel.state.winner == .player1 ? Color.statusGreen : Color.statusOrange)
-                                    .frame(width: 6, height: 6)
-                                Text(viewModel.state.winner == .player1 ? "MAÇ KAZANILDI" : "MAÇ KAYBEDİLDİ")
-                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.zinc300)
+                                    .fill(viewModel.state.winner == .player1 ? Color.courtGreen : Color.zinc500)
+                                    .frame(width: 7, height: 7)
+                                Text(viewModel.state.winner == .player1 ? "RESMİ MAÇ BÜLTENİ • GALİBİYET" : "RESMİ MAÇ BÜLTENİ • MAĞLUBİYET")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .tracking(2.0)
+                                    .foregroundColor(viewModel.state.winner == .player1 ? .courtGreen : .zinc400)
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.zinc900)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .stroke(Color.zinc800, lineWidth: 1)
-                            )
                             
-                            Text(viewModel.state.winner == .player1 ? "Tebrikler, galip geldiniz." : "Rakip oyuncu maçı kazandı.")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.zinc400)
+                            Text(viewModel.state.winner == .player1 ? "TEBRİKLER, MAÇI KAZANDINIZ" : "RAKİP OYUNCU KAZANDI")
+                                .font(.system(size: 20, weight: .bold))
+                                .tracking(0.5)
+                                .foregroundColor(.white)
                         }
-                        .padding(.top, 16)
+                        .padding(.top, 20)
                         
-                        // Set Skor Kartı
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("SET SKORLARI")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.zinc500)
-                                .padding(.horizontal, 4)
-                            
-                            VStack(spacing: 6) {
-                                ForEach(Array(viewModel.state.setScores.enumerated()), id: \.offset) { index, setScore in
-                                    HStack {
-                                        Text("\(index + 1). Set")
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(.zinc400)
-                                        
-                                        Spacer()
-                                        
-                                        HStack(spacing: 8) {
-                                            Text("\(setScore.p1Games)")
-                                                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                                                .foregroundColor(setScore.p1Games > setScore.p2Games ? .zinc50 : .zinc400)
-                                            
-                                            Text("-")
-                                                .font(.system(size: 12, design: .monospaced))
-                                                .foregroundColor(.zinc600)
-                                            
-                                            Text("\(setScore.p2Games)")
-                                                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                                                .foregroundColor(setScore.p2Games > setScore.p1Games ? .zinc50 : .zinc400)
-                                        }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
-                                        .background(Color.zinc850)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .stroke(Color.zinc800, lineWidth: 1)
-                                        )
+                        // Kort Çizgisi
+                        Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
+                        
+                        // 2. Wimbledon Scoreboard Table (Court lines only, zero cards)
+                        VStack(spacing: 0) {
+                            // Column Headers
+                            HStack {
+                                Text("OYUNCU")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(1.5)
+                                    .foregroundColor(.zinc500)
+                                Spacer()
+                                HStack(spacing: 16) {
+                                    ForEach(0..<viewModel.state.setScores.count, id: \.self) { idx in
+                                        Text("S\(idx + 1)")
+                                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.zinc500)
+                                            .frame(width: 32, alignment: .trailing)
                                     }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 10)
-                                    .background(Color.zinc900)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                            .stroke(Color.zinc800, lineWidth: 1)
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                 }
                             }
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 8)
+                            
+                            Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
+                            
+                            // Player 1 Row
+                            HStack {
+                                HStack(spacing: 8) {
+                                    if viewModel.state.winner == .player1 {
+                                        Circle().fill(Color.courtGreen).frame(width: 6, height: 6)
+                                    }
+                                    Text((viewModel.player1Name.isEmpty ? "SİZ" : viewModel.player1Name).uppercased())
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(viewModel.state.winner == .player1 ? .white : .zinc400)
+                                }
+                                Spacer()
+                                HStack(spacing: 16) {
+                                    ForEach(viewModel.state.setScores) { score in
+                                        Text("\(score.p1Games)")
+                                            .font(.system(size: 20, weight: .bold, design: .monospaced))
+                                            .foregroundColor(score.p1Games > score.p2Games ? .courtGreen : .zinc400)
+                                            .frame(width: 32, alignment: .trailing)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            
+                            Rectangle().fill(Color.white.opacity(0.16)).frame(height: 1).padding(.horizontal, 20)
+                            
+                            // Player 2 Row
+                            HStack {
+                                HStack(spacing: 8) {
+                                    if viewModel.state.winner == .player2 {
+                                        Circle().fill(Color.courtGreen).frame(width: 6, height: 6)
+                                    }
+                                    Text((viewModel.player2Name.isEmpty ? "RAKİP" : viewModel.player2Name).uppercased())
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(viewModel.state.winner == .player2 ? .white : .zinc400)
+                                }
+                                Spacer()
+                                HStack(spacing: 16) {
+                                    ForEach(viewModel.state.setScores) { score in
+                                        Text("\(score.p2Games)")
+                                            .font(.system(size: 20, weight: .bold, design: .monospaced))
+                                            .foregroundColor(score.p2Games > score.p1Games ? .courtGreen : .zinc400)
+                                            .frame(width: 32, alignment: .trailing)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            
+                            Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 16)
                         
-                        // İstatistik Kartı
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("İSTATİSTİKLER")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.zinc500)
-                                .padding(.horizontal, 4)
+                        // 3. İstatistikler (Court lines only)
+                        VStack(spacing: 0) {
+                            HStack {
+                                Text("MAÇ İSTATİSTİKLERİ")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(1.5)
+                                    .foregroundColor(.zinc500)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 8)
+                            
+                            Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
                             
                             let totalGamesP1 = viewModel.state.setScores.reduce(0) { $0 + $1.p1Games }
                             let totalGamesP2 = viewModel.state.setScores.reduce(0) { $0 + $1.p2Games }
                             
-                            VStack(spacing: 6) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Toplam Alınan Game")
-                                            .font(.system(size: 11))
-                                            .foregroundColor(.zinc500)
-                                        Text("Siz: \(totalGamesP1)  /  Rakip: \(totalGamesP2)")
-                                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                            .foregroundColor(.zinc100)
-                                    }
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(Color.zinc900)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc800, lineWidth: 1)
-                                )
-                                
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Toplam Koşu Mesafesi")
-                                            .font(.system(size: 11))
-                                            .foregroundColor(.zinc500)
-                                        Text(formatDistance(MatchLocationManager.shared.calculateTotalDistance()))
-                                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                            .foregroundColor(.zinc100)
-                                    }
-                                    Spacer()
-                                    
-                                    Image(systemName: "figure.run")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.zinc400)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(Color.zinc900)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc800, lineWidth: 1)
-                                )
+                            HStack {
+                                Text("TOPLAM ALINAN GAME")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.zinc400)
+                                Spacer()
+                                Text("SİZ: \(totalGamesP1)  /  RAKİP: \(totalGamesP2)")
+                                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
                             }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 14)
+                            
+                            Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1).padding(.horizontal, 20)
+                            
+                            HStack {
+                                Text("KORT KOŞU MESAFESİ")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.zinc400)
+                                Spacer()
+                                Text(formatDistance(MatchLocationManager.shared.calculateTotalDistance()))
+                                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 14)
+                            
+                            Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 16)
                         
-                        // Isı Haritası Kartı
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("KORT KONUM ANALİZİ")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.zinc500)
-                                .padding(.horizontal, 4)
+                        // 4. Kort Konum Analizi
+                        VStack(spacing: 10) {
+                            HStack {
+                                Text("KORT KONUM ANALİZİ")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(1.5)
+                                    .foregroundColor(.zinc500)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 20)
                             
                             MatchHeatmapView(locations: MatchLocationManager.shared.locations)
+                                .padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 24)
                     }
                 }
                 
-                // Aksiyon Butonları (Linear / Vercel style)
-                VStack(spacing: 8) {
+                // Aksiyon Butonları (Editorial Wimbledon style)
+                VStack(spacing: 10) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 1)
+                    
                     Button(action: {
                         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                             viewModel.reset()
                         }
                     }) {
-                        HStack(spacing: 6) {
+                        HStack(spacing: 8) {
                             Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 12))
-                            Text("Aynı Kurallarla Yeniden Oyna")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 12, weight: .bold))
+                            Text("AYNI KURALLARLA YENİDEN OYNA")
+                                .font(.system(size: 13, weight: .bold))
+                                .tracking(1.2)
                         }
-                        .foregroundColor(.zinc950)
+                        .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 42)
-                        .background(Color.zinc50)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.zinc300, lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .frame(height: 46)
+                        .background(Color.tennisVolt)
                     }
+                    .buttonStyle(.plain)
                     
                     HStack(spacing: 8) {
                         Button(action: {

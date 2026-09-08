@@ -93,8 +93,8 @@ services:
       - SmtpSettings__Username=resend
       - SmtpSettings__Password=${SMTP_PASSWORD}
       - SmtpSettings__EnableSsl=true
-      - SmtpSettings__FromAddress=onboarding@resend.dev
-      - SmtpSettings__FromName=Tenis Ligi
+      - SmtpSettings__FromAddress=noreply@courtmate.com.tr
+      - SmtpSettings__FromName=CourtMate
     depends_on:
       - tenis_db
       - graylog

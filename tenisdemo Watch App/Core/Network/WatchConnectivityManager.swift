@@ -58,6 +58,11 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
             if let hasMatchStarted = payload["hasMatchStarted"] as? Bool {
                 viewModel.hasMatchStarted = hasMatchStarted
                 self.isCompanionActive = hasMatchStarted
+                if hasMatchStarted && !viewModel.state.isMatchOver {
+                    viewModel.startRuntimeSession()
+                } else if !hasMatchStarted {
+                    viewModel.stopRuntimeSession()
+                }
             }
             if let player1Name = payload["player1Name"] as? String {
                 viewModel.player1Name = player1Name
@@ -91,6 +96,11 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 let decoder = JSONDecoder()
                 if let decodedState = try? decoder.decode(MatchState.self, from: stateData) {
                     viewModel.state = decodedState
+                    if decodedState.isMatchOver {
+                        viewModel.stopRuntimeSession()
+                    } else if viewModel.hasMatchStarted || self.isCompanionActive {
+                        viewModel.startRuntimeSession()
+                    }
                     print("DEBUG [WatchConnectivity]: Decoded match state: \(decodedState.p1Points)-\(decodedState.p2Points)")
                 }
             }
@@ -122,6 +132,7 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     
     func sendResetAction() {
         sendMessageToCompanion(["action": "reset"])
+        viewModel?.stopRuntimeSession()
     }
     
     func sendStartNextGameAction() {
@@ -131,6 +142,7 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     func sendNewMatchAction() {
         sendMessageToCompanion(["action": "newMatch"])
         self.isCompanionActive = false
+        viewModel?.stopRuntimeSession()
     }
     
     func sendSwingRecord(speedKmh: Double, accelerationG: Double, swingType: String) {

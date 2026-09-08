@@ -2,14 +2,15 @@
 //  DesignSystem.swift
 //  tenisdemo
 //
-//  Created for Linear / Vercel Minimal Aesthetic
+//  Created for Modern Sports Analytics & Linear / Vercel Minimal Aesthetic
 //
 
 import SwiftUI
 import UIKit
 
-// MARK: - Zinc / Slate Color Palette
+// MARK: - Zinc / Slate Color Palette & Sports Analytics Accents
 extension Color {
+    // Nötr Taban (Arka Plan & Kartlar)
     static let zinc950 = Color(red: 9/255, green: 9/255, blue: 11/255)   // #09090b - Primary canvas background
     static let zinc900 = Color(red: 24/255, green: 24/255, blue: 27/255) // #18181b - Surface / card background
     static let zinc850 = Color(red: 32/255, green: 32/255, blue: 36/255) // #202024 - Elevated surface / active state
@@ -23,10 +24,22 @@ extension Color {
     static let zinc100 = Color(red: 244/255, green: 244/255, blue: 245/255) // #f4f4f5 - High-emphasis foreground
     static let zinc50  = Color(red: 250/255, green: 250/255, blue: 250/255) // #fafafa - Pure contrast white
 
-    // Restrained Functional Accents (Strictly for status dots & live badges)
-    static let statusGreen = Color(red: 34/255, green: 197/255, blue: 94/255)  // #22c55e - Completed / Success
-    static let statusOrange = Color(red: 249/255, green: 115/255, blue: 22/255) // #f97316 - Pending / In Progress
-    static let statusRed = Color(red: 239/255, green: 68/255, blue: 68/255)    // #ef4444 - Alert / Destructive
+    // MARK: - Noktasal Aksan Renkleri
+    // 1. Birincil Enerji / Canlı Durum (#CCFF00 / Lime-400) - Ana CTA, Canlı Rozetler, Servis Vurgusu
+    static let tennisVolt = Color(red: 204/255, green: 255/255, blue: 0/255)
+    
+    // 2. Başarı / Kort Tonu (#15803D / Emerald-500/700) - Galibiyetler, Tamamlanmış Setler, Onay
+    static let courtGreen = Color(red: 21/255, green: 128/255, blue: 61/255)
+    
+    // 3. Sosyal / Seviye Mini Rozetleri (Soft renkli metin, koyu/transparan arka plan)
+    static let badgeBlue = Color(red: 56/255, green: 189/255, blue: 248/255)   // NTRP seviyesi / Bilgi
+    static let badgeAmber = Color(red: 251/255, green: 191/255, blue: 36/255)  // Bekleyen / Dikkat
+    static let badgeRed = Color(red: 248/255, green: 113/255, blue: 113/255)   // Hata / Uyarı
+
+    // Fonksiyonel Uyumluluk
+    static let statusGreen = courtGreen
+    static let statusOrange = badgeAmber
+    static let statusRed = badgeRed
 }
 
 extension UIColor {
@@ -35,6 +48,36 @@ extension UIColor {
     static let zinc800 = UIColor(red: 39/255, green: 39/255, blue: 42/255, alpha: 1.0)
     static let zinc500 = UIColor(red: 113/255, green: 113/255, blue: 122/255, alpha: 1.0)
     static let zinc50  = UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 1.0)
+    static let tennisVolt = UIColor(red: 204/255, green: 255/255, blue: 0/255, alpha: 1.0)
+    static let courtGreen = UIColor(red: 21/255, green: 128/255, blue: 61/255, alpha: 1.0)
+}
+
+// MARK: - Mini Soft Rozet Bileşeni (NTRP / Maç Tipi / Canlı Durum)
+struct SportBadge: View {
+    let text: String
+    var color: Color = .tennisVolt
+    var isLive: Bool = false
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            if isLive {
+                Circle()
+                    .fill(color)
+                    .frame(width: 5, height: 5)
+            }
+            Text(text)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(color)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2.5)
+        .background(color.opacity(0.10))
+        .cornerRadius(4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(color.opacity(0.35), lineWidth: 1)
+        )
+    }
 }
 
 // MARK: - View Modifiers for Linear/Vercel Components

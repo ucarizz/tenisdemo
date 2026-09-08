@@ -51,44 +51,51 @@ struct LeagueListView: View {
                         .foregroundColor(.zinc500)
                 } else {
                     List(viewModel.matches) { match in
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 5) {
                             HStack {
                                 Text(match.player1Name)
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(.zinc100)
-                                Spacer()
+                                    .lineLimit(1)
+                                
                                 Text("vs")
-                                    .font(.system(size: 9))
+                                    .font(.system(size: 9, weight: .bold, design: .monospaced))
                                     .foregroundColor(.zinc500)
-                                Spacer()
+                                
                                 Text(match.player2Name)
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(.zinc100)
+                                    .lineLimit(1)
                             }
                             
                             HStack {
                                 Text(match.matchDate)
-                                    .font(.system(size: 9))
+                                    .font(.system(size: 9, design: .monospaced))
                                     .foregroundColor(.zinc500)
+                                
                                 Spacer()
+                                
                                 if let score = match.score {
                                     Text(score)
-                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                        .foregroundColor(.zinc100)
+                                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                        .foregroundColor(match.isCompleted ? .courtGreen : .zinc100)
+                                } else {
+                                    HStack(spacing: 3) {
+                                        Circle()
+                                            .fill(match.isCompleted ? Color.courtGreen : Color.badgeAmber)
+                                            .frame(width: 4, height: 4)
+                                        Text(match.isCompleted ? "BİTTİ" : "BEKLİYOR")
+                                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                            .foregroundColor(match.isCompleted ? .courtGreen : .badgeAmber)
+                                    }
                                 }
                             }
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 6)
                         .listRowBackground(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.zinc900)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.zinc800, lineWidth: 1)
-                                )
+                            Color.white.opacity(0.04)
                         )
                     }
-                    .listStyle(.carousel)
                 }
             }
         }

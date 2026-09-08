@@ -139,10 +139,10 @@ namespace TenisApi.Application.Services
             await _context.SaveChangesAsync();
 
             // E-posta gönderimi
-            var subject = "Tenis Ligi Giriş Kodu";
+            var subject = "CourtMate Giriş Kodu";
             var body = $@"
                 <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
-                    <h2 style='color: #8be01a;'>Tenis Ligi Giriş</h2>
+                    <h2 style='color: #8be01a;'>CourtMate Giriş</h2>
                     <p>Uygulamaya giriş yapmak veya kayıt olmak için kullanabileceğiniz 6 haneli doğrulama kodunuz:</p>
                     <div style='font-size: 24px; font-weight: bold; background-color: #f4f4f4; padding: 15px; border-radius: 8px; display: inline-block; letter-spacing: 2px; margin: 10px 0;'>
                         {code}

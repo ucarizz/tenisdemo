@@ -55,7 +55,7 @@ struct LeagueListView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 8) {
+                        LazyVStack(spacing: 0) {
                             if viewModel.matches.isEmpty {
                                 Text("Kayıtlı maç bulunamadı.")
                                     .font(.system(size: 13))
@@ -67,11 +67,15 @@ struct LeagueListView: View {
                                         LeagueMatchRow(match: match)
                                     }
                                     .buttonStyle(.plain)
+                                    
+                                    Rectangle()
+                                        .fill(Color.white.opacity(0.12))
+                                        .frame(height: 1)
+                                        .padding(.horizontal, 20)
                                 }
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
+                        .padding(.top, 8)
                         .padding(.bottom, 24)
                     }
                     .refreshable {
@@ -79,7 +83,7 @@ struct LeagueListView: View {
                     }
                 }
             }
-            .navigationTitle("Fikstür")
+            .navigationTitle("Fikstür Bülteni")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.zinc950, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
@@ -94,47 +98,46 @@ struct LeagueMatchRow: View {
     let match: LeagueMatch
     
     var body: some View {
-        VStack(spacing: 10) {
-            // Header: Date & Status Badge
+        VStack(spacing: 12) {
+            // Header: Date, Format, Status (Single Dot)
             HStack {
-                Text(match.matchDate)
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundColor(.zinc500)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(match.isCompleted ? Color.courtGreen : Color.badgeAmber)
+                        .frame(width: 6, height: 6)
+                    
+                    Text(match.isCompleted ? "TAMAMLANDI" : "BEKLENİYOR")
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(1.5)
+                        .foregroundColor(match.isCompleted ? .courtGreen : .badgeAmber)
+                }
+                
+                Text("•")
+                    .foregroundColor(.zinc600)
+                    .font(.system(size: 10))
+                
+                Text(match.isDouble ? "ÇİFTLER" : "TEKLER")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.0)
+                    .foregroundColor(.zinc400)
                 
                 Spacer()
                 
-                // Status Badge (Dense Minimal)
-                HStack(spacing: 5) {
-                    Circle()
-                        .fill(match.isCompleted ? Color.statusGreen : Color.statusOrange)
-                        .frame(width: 5, height: 5)
-                    
-                    Text(match.isCompleted ? "TAMAMLANDI" : "BEKLENİYOR")
-                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                        .foregroundColor(match.isCompleted ? .zinc300 : .zinc400)
-                }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(Color.zinc850)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.zinc800, lineWidth: 1)
-                )
+                Text(match.matchDate)
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundColor(.zinc500)
             }
             
-            Divider()
-                .background(Color.zinc800)
-            
             // Match Players & Score
-            HStack(spacing: 8) {
+            HStack(spacing: 16) {
                 // Oyuncu 1
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(match.player1Name)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.zinc100)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(match.player1Name.uppercased())
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
                         .lineLimit(1)
                     if match.isDouble, let partner = match.player1PartnerName {
-                        Text("& \(partner)")
+                        Text("& \(partner.uppercased())")
                             .font(.system(size: 11))
                             .foregroundColor(.zinc500)
                             .lineLimit(1)
@@ -142,39 +145,25 @@ struct LeagueMatchRow: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                // Skor veya vs
-                if let score = match.score {
+                // Skor veya vs (Editorial)
+                if let score = match.score, !score.isEmpty {
                     Text(score)
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
-                        .foregroundColor(.zinc50)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.zinc850)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.zinc700, lineWidth: 1)
-                        )
+                        .font(.system(size: 15, weight: .bold, design: .monospaced))
+                        .foregroundColor(match.isCompleted ? .courtGreen : .white)
                 } else {
-                    Text("vs")
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    Text("VS")
+                        .font(.system(size: 11, weight: .black, design: .monospaced))
                         .foregroundColor(.zinc600)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.zinc850)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.zinc800, lineWidth: 1)
-                        )
                 }
                 
                 // Oyuncu 2
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(match.player2Name)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.zinc100)
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(match.player2Name.uppercased())
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
                         .lineLimit(1)
                     if match.isDouble, let partner = match.player2PartnerName {
-                        Text("& \(partner)")
+                        Text("& \(partner.uppercased())")
                             .font(.system(size: 11))
                             .foregroundColor(.zinc500)
                             .lineLimit(1)
@@ -183,13 +172,9 @@ struct LeagueMatchRow: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
-        .padding(12)
-        .background(Color.zinc900)
-        .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .stroke(Color.zinc800, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .contentShape(Rectangle())
     }
 }
 
